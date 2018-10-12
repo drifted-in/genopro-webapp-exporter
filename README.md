@@ -16,7 +16,7 @@ For my use case I'd rather share my data in the form of a tiny web app, which wo
 
 So I finally created a custom exporter. See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
-![Web Application Preview](https://drifted.in/other/genopro-webapp-exporter/web-app.png)
+![](http://drifted.in/other/genopro-webapp-exporter/web-app.png)
 
 ## Do not panic
 
@@ -31,9 +31,9 @@ This export is written in Java. To execute it you need Java Virtual Machine. Ins
 
 ### Exporter
 
-You can download the pre-built exporter at https://drifted.in/other/genopro-webapp-exporter/app.zip.
+You can download the pre-built exporter at http://drifted.in/other/genopro-webapp-exporter/app.zip.
 
-For custom builds just clone the project, open it in your favorite IDE and execute `mvn assembly:single` goal.
+For custom builds just clone the project, open it in your favorite IDE and build it.
 
 ### Font
 
@@ -47,7 +47,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
     2. Click the Select this font button at the top right corner.
     3. Click the black bar at the bottom of the page (expand that minimized window).
     4. Click the download icon.
-       ![Download Icon](https://drifted.in/other/genopro-webapp-exporter/download-font.png)
+       ![](http://drifted.in/other/genopro-webapp-exporter/download-font.png)
 
 2. Install the font
     1. Once the archive is downloaded, it has to be unzipped. There are multiple fonts of various styles
@@ -58,7 +58,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
     1. In GenoPro open your document.
     2. Go to File|Properties and select Font tab.
     3. Select Open Sans font.
-       ![Selecting GenoPro font](https://drifted.in/other/genopro-webapp-exporter/genopro-font.png)
+       ![](http://drifted.in/other/genopro-webapp-exporter/genopro-font.png)
     4. Save the document.
 
 ## Data preparation
@@ -81,7 +81,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
 ## Final steps
 
-1. Copy the content of `resources` folder into the output folder:
+1. Download additional [resources](http://drifted.in/other/genopro-webapp-exporter/resources.zip) and unzip it into the output folder:
     - `res/style.css` - styles for entire web app
     - `res/svg-pan-zoom.min.js` - 3rd party library for panning and zooming SVG files
     - `res/jspanel.min.js` - 3rd party library for dialogs
