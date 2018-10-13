@@ -21,11 +21,10 @@ import in.drifted.tools.genopro.webapp.model.RenderOptions;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -39,8 +38,7 @@ public class WebAppExporter {
 
         try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
 
-            Path scriptTemplatePath = Paths.get(WebAppExporter.class.getResource(RESOURCE_PATH + "/template.js").toURI());
-            String scriptTemplate = new String(Files.readAllBytes(scriptTemplatePath), StandardCharsets.UTF_8);
+            String scriptTemplate = getResourceAsString(RESOURCE_PATH + "/template.js");
 
             scriptTemplate = scriptTemplate.replace("${searchPlaceholder}", resourceBundle.getString("searchPlaceholder"));
             scriptTemplate = scriptTemplate.replace("${searchResults}", resourceBundle.getString("searchResults"));
@@ -68,16 +66,31 @@ public class WebAppExporter {
                 }
             }
 
-            Path htmlTemplatePath = Paths.get(WebAppExporter.class.getResource(RESOURCE_PATH + "/template.html").toURI());
-            String htmlTemplate = new String(Files.readAllBytes(htmlTemplatePath), StandardCharsets.UTF_8);
+            String htmlTemplate = getResourceAsString(RESOURCE_PATH + "/template.html");
 
             htmlTemplate = htmlTemplate.replace("${content}", svgContentBuilder.toString());
             htmlTemplate = htmlTemplate.replace("${script}", scriptTemplate.replaceAll("\\s+", " "));
 
             writer.write(htmlTemplate);
+        }
+    }
 
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
+    private static String getResourceAsString(String resourcePath) throws IOException {
+
+        try (
+                InputStream inputStream = WebAppExporter.class.getResourceAsStream(resourcePath);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            int pos;
+            byte[] data = new byte[16 * 1024];
+
+            while ((pos = inputStream.read(data, 0, data.length)) != -1) {
+                outputStream.write(data, 0, pos);
+            }
+
+            outputStream.flush();
+
+            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
         }
     }
 }
