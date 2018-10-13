@@ -54,8 +54,8 @@ function init(e) {
 
     document.getElementsByName("search")[0].placeholder = "${searchPlaceholder}";
 
-    if (attribution) {
-        document.getElementById("attribution").innerHTML = attribution;
+    if (typeof attributionBody !== "undefined") {
+        document.getElementById("attribution").innerHTML = attributionBody;
     }
 }
 
