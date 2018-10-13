@@ -73,11 +73,13 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
        these individuals would be filtered out from the output.
 
 ## Export
-1. Open console.
+1. Create output folder, e.g. `C:\family-tree-app`.
 
-2. Type `java -jar genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree-app"` and press enter.
+2. Open console (on Windows `cmd.exe`).
 
-3. All generated files can be found in the output folder.
+3. Type `java -jar genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree-app"` and press enter.
+
+4. All generated files can be found in the output folder.
 
 ## Final steps
 
@@ -93,13 +95,13 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
 2. Alter attribution:
    Attribution is displayed in bottom right corner. It can contain any HTML code.
-   It just need to be put to the attribution variable inside `attribution.js` file:
+   It just need to be put to the `attributionBody` variable inside `attribution.js` file:
 
-   `const attribution = "Copyright © 2018 Jan Tošovský";`
+   `var attributionBody = "Copyright © 2018 Jan Tošovský";`
 
    or more complex:
 
-   `const attribution = "<span xmlns:cc='http://creativecommons.org/ns#'><a rel='cc:attributionURL' property='cc:attributionName' href='https://github.com/jan-tosovsky-cz/rodokmen-tosovskych'>Rodokmen Tošovských</a> by Jan Tošovský is licensed under a <a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0/'>CC-BY-SA</a> license</span>";`
+   `var attributionBody = "<span xmlns:cc='http://creativecommons.org/ns#'><a rel='cc:attributionURL' property='cc:attributionName' href='https://github.com/jan-tosovsky-cz/rodokmen-tosovskych'>Rodokmen Tošovských</a> by Jan Tošovský is licensed under a <a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0/'>CC-BY-SA</a> license</span>";`
 
 3. Alter analytics:
    If you are interested how many users visited your app, you can put your analytics code into `analytics.js` file.
