@@ -27,11 +27,13 @@ document.getElementsByName("search")[0].addEventListener("keydown", function (e)
 
 var individuals = document.getElementsByClassName("individual-active-area");
 for (var i = 0; i < individuals.length; i++) {
+    individuals[i].addEventListener("touchstart", select);
     individuals[i].addEventListener("mousedown", select);
 }
 
 var hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
 for (var i = 0; i < hyperlinks.length; i++) {
+    hyperlinks[i].addEventListener("touchstart", scrollIntoView);
     hyperlinks[i].addEventListener("mousedown", scrollIntoView);
 }
 
@@ -83,6 +85,7 @@ function switchGenoMap() {
 }
 
 function scrollIntoView(e) {
+    e.preventDefault();
     var id = e.target.parentElement.getAttribute("data-target-id");
     scrollIntoViewById(id);
 }
@@ -166,6 +169,7 @@ function getTargetPosition() {
 }
 
 function select(e) {
+    e.preventDefault();
     selectById(e.target.parentElement.id);
 }
 
@@ -229,6 +233,7 @@ function createIndividualTable() {
     iMap.forEach(function (value, key, map) {
         var tableBodyRow = document.createElement('tr');
         tableBody.appendChild(tableBodyRow);
+        tableBodyRow.addEventListener("touchstart", selectRow);
         tableBodyRow.addEventListener("mousedown", selectRow);
 
         if (matches(value, keywords)) {
@@ -274,6 +279,7 @@ function createIndividualTable() {
 
 function selectRow(e) {
 
+    e.preventDefault();
     e.target.parentNode.classList.add("selected");
 
     if (selectedRow !== undefined && selectedRow !== this) {
