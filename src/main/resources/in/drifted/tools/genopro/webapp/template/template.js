@@ -18,7 +18,7 @@ function triggerSearch(e) {
 
 document.getElementsByName("search")[0].addEventListener("keydown", function (e) {
     e = e || window.event;
-    if (e.keyCode == 13) {
+    if (e.keyCode === 13) {
         var elem = e.srcElement || e.target;
         keywords = elem.value.trim().toLowerCase().split(" ");
         showDialog();
@@ -70,7 +70,6 @@ function onGenoMapSelectChange(e) {
 function switchGenoMap() {
 
     if (svgPanZoomInstance) {
-        svgPanZoomInstance.destroy();
         genoMapSvg.style.display = "none";
     }
 
@@ -80,7 +79,54 @@ function switchGenoMap() {
         zoomScaleSensitivity: 0.25,
         minZoom: 0.1,
         maxZoom: 20,
-        dblClickZoomEnabled: false
+        dblClickZoomEnabled: false,
+        customEventsHandler: {
+            haltEventListeners: ["touchstart", "touchend", "touchmove", "touchleave", "touchcancel"],
+            init: function(options) {
+
+                var instance = options.instance;
+                var initialScale = 1;
+                var pannedX = 0;
+                var pannedY = 0;
+
+                /* Listen only for pointer and touch events */
+                this.hammer = Hammer(options.svgElement, {
+                    inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+                });
+
+                /* Enable pinch */
+                this.hammer.get("pinch").set({enable: true});
+
+                /* Handle pan */
+                this.hammer.on("panstart panmove", function(e){
+
+                    if (e.type === "panstart") {
+                        pannedX = 0;
+                        pannedY = 0;
+                    }
+
+                    instance.panBy({x: e.deltaX - pannedX, y: e.deltaY - pannedY});
+                    pannedX = e.deltaX;
+                    pannedY = e.deltaY;
+                });
+
+                /* Handle pinch */
+                this.hammer.on("pinchstart pinchmove", function(e){
+
+                    if (e.type === "pinchstart") {
+                        initialScale = instance.getZoom();
+                        instance.zoom(initialScale * e.scale);
+                    }
+
+                    instance.zoom(initialScale * e.scale);
+                });
+
+                /* Prevent moving the page on some devices when panning over SVG */
+                options.svgElement.addEventListener("touchmove", function(e) {
+                    e.preventDefault();
+                });
+            }
+        }
     });
 }
 
@@ -92,7 +138,7 @@ function scrollIntoView(e) {
 
 function scrollIntoViewById(id) {
 
-    if (iMap.get(id)[0] != genoMapId) {
+    if (iMap.get(id)[0] !== genoMapId) {
 
         genoMapId = iMap.get(id)[0];
         genoMapSelect.value = genoMapId;
@@ -146,13 +192,13 @@ function getTargetPosition() {
 
         var max = Math.max(top, right, bottom, left);
 
-        if (max == top) {
+        if (max === top) {
             x = documentElement.offsetWidth / 2;
             y = top / 2;
-        } else if (max == left) {
+        } else if (max === left) {
             x = left / 2;
             y = documentElement.offsetHeight / 2;
-        } else if (max == bottom) {
+        } else if (max === bottom) {
             x = documentElement.offsetWidth / 2;
             y = documentElement.offsetHeight - bottom / 2;
         } else {
@@ -240,7 +286,7 @@ function createIndividualTable() {
             for (var i = 0; i < headers.length; i++) {
                 var tableBodyCell = document.createElement('td');
                 if (value[i].length > 0) {
-                    if (i == 0) {
+                    if (i === 0) {
                         tableBodyCell.id = key;
                         tableBodyCell.textContent = genoMapMap.get(value[i]);
 
@@ -248,12 +294,11 @@ function createIndividualTable() {
                         /* direct copies */
                         tableBodyCell.textContent = value[i];
 
-                    } else if (i == 6) {
+                    } else if (i === 6) {
                         /* multiple values */
                         var mateIds = value[i].split(",");
                         var matesArray = new Array();
                         for (var m = 0; m < mateIds.length; m++) {
-                            console.log();
                             var individualInfo = map.get(mateIds[m]);
                             matesArray.push(getFullName(individualInfo));
                         }
@@ -295,7 +340,7 @@ function getFullName(individualInfo) {
     var nameArray = new Array();
 
     for (var i = 1; i <= 3; i++) {
-        if (individualInfo[i].length != -1) {
+        if (individualInfo[i].length !== -1) {
             nameArray.push(individualInfo[i]);
         }
     }
@@ -311,7 +356,7 @@ function matches(value, keywords) {
         var found = false;
         for (var i = 1; i < 5; i++) {
             var normalizedValue = value[i].toLowerCase();
-            if (normalizedValue.indexOf(keywords[k]) != -1) {
+            if (normalizedValue.indexOf(keywords[k]) !== -1) {
                 found = true;
                 break;
             }
