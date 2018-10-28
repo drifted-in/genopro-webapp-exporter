@@ -17,9 +17,11 @@ For my use case I'd rather share my data in the form of a tiny web app, which wo
 
 So I finally created a custom exporter. See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="300">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="300">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="300">
+<p float="left">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+</p>
 
 ## Do not panic
 
