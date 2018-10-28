@@ -5,37 +5,41 @@
     <meta charset="UTF-8">
     <meta name="generator" content="GenoPro® WebApp exporter" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
-    <link rel="stylesheet" type="text/css" href="res/jspanel.min.css" />
     <link rel="stylesheet" type="text/css" href="res/style.css" />
     <script src="res/hammer.min.js"></script>
     <script src="res/svg-pan-zoom.min.js"></script>
-    <script src="res/resizable-table.js"></script>
     <script src="individuals.js"></script>
     <script src="genomaps.js"></script>
     <script src="attribution.js"></script>
+    <title>${title}</title>
 </head>
 
-<body style="margin: 0; line-height:0">
-    <div id="container" style="width: 100vw; height: 100vh; background-color: white;">
+<body>
+    <div id="container">
         <div id="content">
             ${content}
         </div>
         <div class="search">
-            <input type="text" name="search">
-            <button id="search">
+            <input id="keywords" type="text" name="keywords">
+            <button id="searchButton">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
                     <circle cx="10" cy="10" r="6" stroke="white" fill="none" stroke-width="3" />
                     <path d="M14.24 14.24l5 5" stroke="white" stroke-width="3" />
                 </svg>
             </button>
+            <button id="clearSearchButton" style="display: none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                    <path d="M4 4L20 20M4 20L20 4" stroke="white" fill="none" stroke-width="3" />
+                </svg>
+            </button>
         </div>
+        <div id="results"></div>
         <div class="genomap-list">
             <select id="genomap-list"></select>
         </div>
         <div id="attribution"></div>
     </div>
 
-    <script src="res/jspanel.min.js"></script>
     <script>
         ${script}
     </script>

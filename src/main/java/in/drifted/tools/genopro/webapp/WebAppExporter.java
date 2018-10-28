@@ -15,6 +15,7 @@
  */
 package in.drifted.tools.genopro.webapp;
 
+import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.webapp.model.RenderOptions;
@@ -32,7 +33,7 @@ public class WebAppExporter {
 
     private static final String RESOURCE_PATH = "/in/drifted/tools/genopro/webapp/template";
 
-    public static void export(Path reportPath, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
+    public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
 
         ResourceBundle resourceBundle = renderOptions.getResourceBundle();
 
@@ -68,6 +69,7 @@ public class WebAppExporter {
 
             String htmlTemplate = getResourceAsString(RESOURCE_PATH + "/template.html");
 
+            htmlTemplate = htmlTemplate.replace("${title}", documentInfo.getTitle());
             htmlTemplate = htmlTemplate.replace("${content}", svgContentBuilder.toString());
             htmlTemplate = htmlTemplate.replace("${script}", scriptTemplate.replaceAll("\\s+", " "));
 

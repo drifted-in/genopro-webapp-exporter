@@ -20,6 +20,7 @@ import in.drifted.tools.genopro.DataUtil;
 import in.drifted.tools.genopro.model.AgeFormatter;
 import in.drifted.tools.genopro.model.BasicAgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
+import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.webapp.model.RenderOptions;
 import java.awt.Canvas;
@@ -123,11 +124,12 @@ public class App {
             Path reportPath = outputFolderFolder.resolve("index.html");
 
             Document document = DataParser.getDocument(inputPath);
+            DocumentInfo documentInfo = DataParser.getDocumentInfo(document);
             List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document);
 
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
-            WebAppExporter.export(reportPath, genoMapDataList, renderOptions);
+            WebAppExporter.export(reportPath, documentInfo, genoMapDataList, renderOptions);
 
         } else {
 

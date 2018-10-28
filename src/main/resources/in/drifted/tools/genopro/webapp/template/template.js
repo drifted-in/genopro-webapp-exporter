@@ -2,44 +2,33 @@
 var svgPanZoomInstance;
 var genoMapSvg;
 var genoMapId;
-var selectedRow;
-var keywords;
-var genoMapSelect;
+var genoMapSelectedIndividualId = null;
+var keywords = [];
+var searchResultsSelectedEntryDetail = null;
+var searchResultsSelectedIndividualId = null;
+var pinnedEntry = null;
+var dragging = false;
 
 document.addEventListener("DOMContentLoaded", init);
-
-document.getElementById("search").addEventListener("click", triggerSearch);
-
-function triggerSearch(e) {
-    var input = document.getElementsByName("search")[0];
-    keywords = input.value.trim().toLowerCase().split(" ");
-    showDialog();
-}
-
-document.getElementsByName("search")[0].addEventListener("keydown", function (e) {
-    e = e || window.event;
-    if (e.keyCode === 13) {
-        var elem = e.srcElement || e.target;
-        keywords = elem.value.trim().toLowerCase().split(" ");
-        showDialog();
-    }
-});
+document.getElementById("keywords").addEventListener("keyup", triggerSearch);
+document.getElementById("searchButton").addEventListener("click", triggerSearch);
+document.getElementById("clearSearchButton").addEventListener("click", hideResults);
 
 var individuals = document.getElementsByClassName("individual-active-area");
 for (var i = 0; i < individuals.length; i++) {
-    individuals[i].addEventListener("touchstart", select);
+    individuals[i].addEventListener("touchend", select);
     individuals[i].addEventListener("mousedown", select);
 }
 
 var hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
 for (var i = 0; i < hyperlinks.length; i++) {
-    hyperlinks[i].addEventListener("touchstart", scrollIntoView);
+    hyperlinks[i].addEventListener("touchend", scrollIntoView);
     hyperlinks[i].addEventListener("mousedown", scrollIntoView);
 }
 
 function init(e) {
 
-    genoMapSelect = document.getElementById("genomap-list");
+    var genoMapSelect = document.getElementById("genomap-list");
 
     genoMapMap.forEach(function (value, key, map) {
         var genoMapSelectItem = document.createElement("option");
@@ -54,11 +43,13 @@ function init(e) {
 
     genoMapSelect.addEventListener("change", onGenoMapSelectChange);
 
-    document.getElementsByName("search")[0].placeholder = "${searchPlaceholder}";
+    document.getElementById("keywords").placeholder = "${searchPlaceholder}";
 
     if (typeof attributionBody !== "undefined") {
         document.getElementById("attribution").innerHTML = attributionBody;
     }
+
+    triggerSearch();
 }
 
 function onGenoMapSelectChange(e) {
@@ -70,6 +61,13 @@ function onGenoMapSelectChange(e) {
 function switchGenoMap() {
 
     if (svgPanZoomInstance) {
+        /* removing the selection */
+        var nodes = genoMapSvg.getElementsByClassName("handle");
+
+        while (nodes[0]) {
+            nodes[0].parentNode.removeChild(nodes[0]);
+        }
+
         genoMapSvg.style.display = "none";
     }
 
@@ -77,8 +75,8 @@ function switchGenoMap() {
     genoMapSvg.style.display = "block";
     svgPanZoomInstance = svgPanZoom(genoMapSvg, {
         zoomScaleSensitivity: 0.25,
-        minZoom: 0.1,
-        maxZoom: 20,
+        minZoom: 0.01,
+        maxZoom: 100,
         dblClickZoomEnabled: false,
         customEventsHandler: {
             haltEventListeners: ["touchstart", "touchend", "touchmove", "touchleave", "touchcancel"],
@@ -130,8 +128,25 @@ function switchGenoMap() {
     });
 }
 
+function triggerSearch(e) {
+
+    var rawKeywords = document.getElementById("keywords").value.trim();
+    if (rawKeywords.length > 0) {
+        var newKeywords = rawKeywords.toLowerCase().split(/\s+/);
+        if (!isSame(keywords, newKeywords)) {
+            keywords = newKeywords;
+            showResults();
+        }
+    } else {
+        keywords = [];
+        hideResults();
+    }
+}
+
 function scrollIntoView(e) {
+
     e.preventDefault();
+
     var id = e.target.parentElement.getAttribute("data-target-id");
     scrollIntoViewById(id);
 }
@@ -141,7 +156,8 @@ function scrollIntoViewById(id) {
     if (iMap.get(id)[0] !== genoMapId) {
 
         genoMapId = iMap.get(id)[0];
-        genoMapSelect.value = genoMapId;
+        document.getElementById("genomap-list").value = genoMapId;
+
         switchGenoMap();
 
         var currentPosition = getCurrentPosition(id);
@@ -160,66 +176,16 @@ function scrollIntoViewById(id) {
     selectById(id);
 }
 
-function getCurrentPosition(id) {
-
-    var boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
-    var boundingRect = boundingBoxElement.getBoundingClientRect();
-    var x = boundingRect.left + boundingRect.width / 2;
-    var y = boundingRect.top + boundingRect.height / 2;
-
-    var parentBoundingRect = genoMapSvg.getBoundingClientRect();
-    var parentX = parentBoundingRect.left;
-    var parentY = parentBoundingRect.top;
-
-    x -= parentX;
-    y -= parentY;
-
-    return { x: x, y: y };
-}
-
-function getTargetPosition() {
-
-    var documentElement = document.documentElement;
-
-    if (jsPanel.getPanels().length > 0) {
-
-        var panel = jsPanel.getPanels()[0];
-
-        var top = panel.offsetTop;
-        var right = documentElement.offsetWidth - (panel.offsetLeft + panel.offsetWidth);
-        var bottom = documentElement.offsetHeight - (panel.offsetTop + panel.offsetHeight);
-        var left = panel.offsetLeft;
-
-        var max = Math.max(top, right, bottom, left);
-
-        if (max === top) {
-            x = documentElement.offsetWidth / 2;
-            y = top / 2;
-        } else if (max === left) {
-            x = left / 2;
-            y = documentElement.offsetHeight / 2;
-        } else if (max === bottom) {
-            x = documentElement.offsetWidth / 2;
-            y = documentElement.offsetHeight - bottom / 2;
-        } else {
-            x = documentElement.offsetWidth - right / 2;
-            y = documentElement.offsetHeight / 2;
-        }
-
-    } else {
-        x = documentElement.offsetWidth / 2;
-        y = documentElement.offsetHeight / 2;
-    }
-
-    return { x: x, y: y };
-}
-
 function select(e) {
+
     e.preventDefault();
+
     selectById(e.target.parentElement.id);
 }
 
 function selectById(id) {
+
+    genoMapSelectedIndividualId = id;
 
     /* remove previous handles */
     var nodes = genoMapSvg.getElementsByClassName("handle");
@@ -257,82 +223,107 @@ function createHandle(parent, x, y) {
     parent.appendChild(handle);
 }
 
-function createIndividualTable() {
+function showDetail(e) {
 
-    table = document.createElement('table');
-    var tableHeader = document.createElement('thead');
-    table.appendChild(tableHeader);
-    var tableHeaderRow = document.createElement('tr');
-    tableHeader.appendChild(tableHeaderRow);
-    var headers = ["${genoMap}", "${firstName}", "${middleName}", "${lastName}", "${birth}", "${death}", "${mate}", "${father}", "${mother}"];
-    for (var i = 0; i < headers.length; i++) {
-        var tableHeaderCell = document.createElement('th');
-        tableHeaderCell.textContent = headers[i];
-        tableHeaderRow.appendChild(tableHeaderCell);
-    }
-    /* last row */
-    tableHeaderRow.appendChild(document.createElement('th'));
+    if (!dragging) {
 
-    var tableBody = document.createElement('tbody');
-    table.appendChild(tableBody);
+        e.preventDefault();
 
-    iMap.forEach(function (value, key, map) {
-        var tableBodyRow = document.createElement('tr');
-        tableBody.appendChild(tableBodyRow);
-        tableBodyRow.addEventListener("touchstart", selectRow);
-        tableBodyRow.addEventListener("mousedown", selectRow);
+        document.getElementById("keywords").blur();
 
-        if (matches(value, keywords)) {
-            for (var i = 0; i < headers.length; i++) {
-                var tableBodyCell = document.createElement('td');
-                if (value[i].length > 0) {
-                    if (i === 0) {
-                        tableBodyCell.id = key;
-                        tableBodyCell.textContent = genoMapMap.get(value[i]);
+        var entry = e.target.closest(".entry");
 
-                    } else if (i < 6) {
-                        /* direct copies */
-                        tableBodyCell.textContent = value[i];
-
-                    } else if (i === 6) {
-                        /* multiple values */
-                        var mateIds = value[i].split(",");
-                        var matesArray = new Array();
-                        for (var m = 0; m < mateIds.length; m++) {
-                            var individualInfo = map.get(mateIds[m]);
-                            matesArray.push(getFullName(individualInfo));
-                        }
-                        tableBodyCell.textContent = "[" + matesArray.length + "] " + matesArray.join(", ");
-
-                    } else {
-                        /* single value */
-                        if (i < headers.length) {
-                            var individualInfo = map.get(value[i]);
-                            tableBodyCell.textContent = getFullName(individualInfo);
-                        }
-                    }
-                }
-                tableBodyRow.appendChild(tableBodyCell);
-            }
-            tableBodyRow.appendChild(document.createElement('td'));
+        if (pinnedEntry !== null) {
+            searchResultsSelectedEntryDetail = pinnedEntry.getElementsByClassName("detail")[0];
         }
-    });
 
-    new ResizableTable(table, 1000, [150, 80, 40, 100, 80, 80, 120, 120, 120], document);
-    this.content.append(table);
+        if (searchResultsSelectedEntryDetail !== null) {
+            searchResultsSelectedEntryDetail.classList.remove("expanded");
+            if (searchResultsSelectedEntryDetail.hasChildNodes()) {
+                while (searchResultsSelectedEntryDetail.firstChild) {
+                    searchResultsSelectedEntryDetail.removeChild(searchResultsSelectedEntryDetail.firstChild);
+                }
+            }
+        }
+
+        if (entry.id !== searchResultsSelectedIndividualId) {
+
+            searchResultsSelectedIndividualId = entry.id;
+            searchResultsSelectedEntryDetail = entry.getElementsByClassName("detail")[0];
+            searchResultsSelectedEntryDetail.classList.add("expanded");
+
+            var father = document.createElement("div");
+            father.classList.add("father");
+
+            var fatherId = iMap.get(searchResultsSelectedIndividualId.substring(1))[7];
+            if (fatherId.length > 0) {
+                father.textContent = getFullName(iMap.get(fatherId));
+            }
+
+            searchResultsSelectedEntryDetail.appendChild(father);
+
+            var mother = document.createElement("div");
+            mother.classList.add("mother");
+
+            var motherId = iMap.get(searchResultsSelectedIndividualId.substring(1))[8];
+            if (motherId.length > 0) {
+                mother.textContent = getFullName(iMap.get(motherId));
+            }
+
+            searchResultsSelectedEntryDetail.appendChild(mother);
+
+            var mate = document.createElement("div");
+            mate.classList.add("mate");
+
+            var delimitedMateIds = iMap.get(searchResultsSelectedIndividualId.substring(1))[6];
+
+            if (delimitedMateIds.length > 0) {
+
+                var matesArray = new Array();
+                var mateIds = delimitedMateIds.split(",");
+
+                for (var m = 0; m < mateIds.length; m++) {
+                    var individualInfo = iMap.get(mateIds[m]);
+                    matesArray.push(getFullName(individualInfo));
+                }
+                mate.textContent = matesArray.join(", ");
+            }
+
+            searchResultsSelectedEntryDetail.appendChild(mate);
+
+        } else {
+            searchResultsSelectedIndividualId = null;
+        }
+
+        scrollIntoViewById(entry.id.substring(1));
+    }
 }
 
-function selectRow(e) {
+function getCurrentPosition(id) {
 
-    e.preventDefault();
-    e.target.parentNode.classList.add("selected");
+    var boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
+    var boundingRect = boundingBoxElement.getBoundingClientRect();
+    var x = boundingRect.left + boundingRect.width / 2;
+    var y = boundingRect.top + boundingRect.height / 2;
 
-    if (selectedRow !== undefined && selectedRow !== this) {
-        selectedRow.classList.remove("selected");
-    }
-    selectedRow = this;
+    var parentBoundingRect = genoMapSvg.getBoundingClientRect();
+    var parentX = parentBoundingRect.left;
+    var parentY = parentBoundingRect.top;
 
-    scrollIntoViewById(this.cells[0].id);
+    x -= parentX;
+    y -= parentY;
+
+    return { x: x, y: y };
+}
+
+function getTargetPosition() {
+
+    var results = document.getElementById("results");
+
+    return {
+        x: (document.documentElement.offsetWidth + results.offsetWidth) / 2,
+        y: document.documentElement.offsetHeight / 2
+    };
 }
 
 function getFullName(individualInfo) {
@@ -346,6 +337,196 @@ function getFullName(individualInfo) {
     }
 
     return nameArray.join(" ");
+}
+
+function showResults() {
+
+    var results = document.getElementById("results");
+    results.style.display = "block";
+
+    /* centering */
+    if (searchResultsSelectedIndividualId !== null) {
+        scrollIntoViewById(searchResultsSelectedIndividualId.substring(1));
+    } else if (genoMapSelectedIndividualId !== null) {
+        scrollIntoViewById(genoMapSelectedIndividualId);
+    }
+
+    if (results.hasChildNodes()) {
+        while (results.firstChild) {
+            results.removeChild(results.firstChild);
+        }
+    }
+
+    var clearSearchButton = document.getElementById("clearSearchButton");
+    if (clearSearchButton.style.display === "none") {
+        var searchButton = document.getElementById("searchButton");
+        searchButton.style.display = "none";
+        clearSearchButton.style.display = "block";
+    }
+
+    iMap.forEach(function (value, key, map) {
+
+        if (matches(value, keywords)) {
+
+            var entry = document.createElement('div');
+            entry.classList.add("entry");
+            entry.id = "s" + key;
+            results.appendChild(entry);
+
+            var hitArea = document.createElement('div');
+            hitArea.classList.add("hitarea");
+
+            hitArea.addEventListener("touchstart", resetDragging);
+            hitArea.addEventListener("touchmove", setDragging);
+            hitArea.addEventListener("touchend", pinEntry);
+            hitArea.addEventListener("mousedown", pinEntry);
+
+            entry.appendChild(hitArea);
+
+            var info = document.createElement('div');
+            info.classList.add("info");
+
+            info.addEventListener("touchstart", resetDragging);
+            info.addEventListener("touchmove", setDragging);
+            info.addEventListener("touchend", showDetail);
+            info.addEventListener("mousedown", showDetail);
+
+            entry.appendChild(info);
+
+            var topRow = document.createElement('div');
+            topRow.classList.add("top");
+            info.appendChild(topRow);
+
+            var name = document.createElement('div');
+            var names = [];
+            if (value[1].length > 0) {
+                names.push(value[1]);
+            }
+            if (value[2].length > 0) {
+                names.push(value[2]);
+            }
+            name.textContent = names.join(" ").trim();
+            name.classList.add("name");
+            topRow.appendChild(name);
+
+            var lastname = document.createElement('div');
+            lastname.textContent = value[3];
+            lastname.classList.add("lastname");
+            topRow.appendChild(lastname);
+
+            var birthDate = document.createElement('div');
+            birthDate.textContent = value[4];
+            birthDate.classList.add("birthdate");
+            topRow.appendChild(birthDate);
+
+            var detail = document.createElement('div');
+            detail.classList.add("detail");
+            if ((value[6] + value[7] + value[8]).length > 0) {
+                detail.classList.add("expandable");
+            }
+            info.appendChild(detail);
+
+            var bottomRow = document.createElement('div');
+            bottomRow.classList.add("bottom");
+            info.appendChild(bottomRow);
+
+            var genoMapName = document.createElement('div');
+            genoMapName.classList.add("genomapname");
+            genoMapName.textContent = genoMapMap.get(value[0]);
+            bottomRow.appendChild(genoMapName);
+        }
+    });
+}
+
+function hideResults() {
+
+    var searchButton = document.getElementById("searchButton");
+    var clearSearchButton = document.getElementById("clearSearchButton");
+
+    searchButton.style.display = "block";
+    clearSearchButton.style.display = "none";
+
+    if (pinnedEntry !== null) {
+        pinnedEntry.parentElement.removeChild(pinnedEntry);
+    }
+
+    document.getElementById("keywords").value = "";
+    document.getElementById("results").style.display = "none";
+
+    if (searchResultsSelectedIndividualId !== null) {
+        scrollIntoViewById(searchResultsSelectedIndividualId.substring(1));
+    } else if (genoMapSelectedIndividualId !== null) {
+        scrollIntoViewById(genoMapSelectedIndividualId);
+    }
+}
+
+function pinEntry(e) {
+
+    if (!dragging) {
+        e.preventDefault();
+
+        document.getElementById("keywords").blur();
+        document.getElementById("results").style.display = "none";
+
+        var entry = e.target.closest(".entry");
+
+        if (entry.id !== searchResultsSelectedIndividualId) {
+            if (searchResultsSelectedEntryDetail !== null) {
+                searchResultsSelectedEntryDetail.classList.remove("expanded");
+                if (searchResultsSelectedEntryDetail.hasChildNodes()) {
+                    while (searchResultsSelectedEntryDetail.firstChild) {
+                        searchResultsSelectedEntryDetail.removeChild(searchResultsSelectedEntryDetail.firstChild);
+                    }
+                }
+            }
+        }
+
+        pinnedEntry = entry.cloneNode(true);
+
+        pinnedEntry.classList.add("pinned");
+        document.getElementById("container").appendChild(pinnedEntry);
+
+        var hitArea = pinnedEntry.getElementsByClassName("hitarea")[0];
+        hitArea.addEventListener("touchend", unpinEntry);
+        hitArea.addEventListener("mousedown", unpinEntry);
+
+        var info = pinnedEntry.getElementsByClassName("info")[0];
+        info.addEventListener("touchend", showDetail);
+        info.addEventListener("mousedown", showDetail);
+
+        scrollIntoViewById(hitArea.parentElement.id.substring(1));
+    }
+}
+
+function unpinEntry(e) {
+
+    e.preventDefault();
+
+    searchResultsSelectedIndividualId = pinnedEntry.id;
+    searchResultsSelectedEntryDetail = pinnedEntry.getElementsByClassName("detail")[0];
+    document.getElementById("container").removeChild(pinnedEntry);
+    /* it is not deleted directly because of global variable */
+    pinnedEntry = null;
+    document.getElementById("results").style.display = "block";
+
+    var entry = document.getElementById(searchResultsSelectedIndividualId);
+    var detail = entry.getElementsByClassName("detail")[0];
+    detail.parentElement.replaceChild(searchResultsSelectedEntryDetail, detail);
+
+    if (!searchResultsSelectedEntryDetail.classList.contains("expanded")) {
+        searchResultsSelectedIndividualId = null;
+    }
+
+    /* centering */
+    scrollIntoViewById(genoMapSelectedIndividualId);
+}
+
+function setDragging(e) {
+    dragging = true;
+}
+
+function resetDragging(e) {
+    dragging = false;
 }
 
 function matches(value, keywords) {
@@ -367,22 +548,8 @@ function matches(value, keywords) {
     return result;
 }
 
-function showDialog() {
-    /* close existing dialog if present */
-    for (var i = 0; i < jsPanel.getPanels().length; i++) {
-        jsPanel.getPanels()[i].close();
-    }
-    jsPanel.create({
-        theme: 'dodgerblue',
-        headerTitle: '${searchResults}',
-        position: 'center-top 0 30',
-        contentSize: '900 500',
-        contentOverflow: 'auto',
-        content: createIndividualTable,
-        headerControls: {
-            smallify: "remove",
-            minimize: "remove",
-            maximize: "remove"
-        },
+function isSame(array1, array2) {
+    return (typeof array1 !== "undefined" && array1.length === array2.length) && array1.every(function(element, index) {
+        return element === array2[index];
     });
 }
