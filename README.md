@@ -9,14 +9,19 @@ If you need to share your family trees with someone else, you can:
 
 For my use case I'd rather share my data in the form of a tiny web app, which would offer:
 - panning and zooming of visual family trees
-- navigating between tree fragment sheets (GenoMaps) via hyperlinks
-- displaying search results in a table with basic personal details
-- highlighting the person in the family tree if selected in search result table
+- selecting tree fragment sheets (GenoMaps) from the list
+- instant searching
+- showing basic/extended info for the selected person
+- highlighting the person in the family tree
 - anonymizing data related to living individuals
 
 So I finally created a custom exporter. See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
-![](http://drifted.in/other/genopro-webapp-exporter/web-app.png)
+<p float="left">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+</p>
 
 ## Do not panic
 
@@ -86,9 +91,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 1. Download additional [resources](http://drifted.in/other/genopro-webapp-exporter/resources.zip) and unzip it into the output folder:
     - `res/style.css` - styles for entire web app
     - `res/svg-pan-zoom.min.js` - 3rd party library for panning and zooming SVG files
-    - `res/jspanel.min.js` - 3rd party library for dialogs
-    - `res/jspanel.min.css` - 3rd party styles for dialogs
-    - `res/resizable-table.js` - library making table columns resizable
+    - `res/hammer.min.js` - 3rd party library for mobile touch events
     - `res/OpenSans-Regular-webfont.woff` - Open Sans font in the compact form for online use
     - `attribution.js` - optional attribution
     - `analytics.js` - optional analytics
