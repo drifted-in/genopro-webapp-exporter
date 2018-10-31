@@ -111,7 +111,7 @@ public class App {
                 mainLineHeightInPixels = Integer.parseInt(passedValuesMap.get(PARAM_MAIN_LINE_HEIGHT_IN_PIXELS));
             }
 
-            DateFormatter dateFormatter = new DateFormatter(datePattern, new HashMap<>());
+            DateFormatter dateFormatter = new DateFormatter(datePattern, locale, new HashMap<>());
             AgeFormatter ageFormatter = new BasicAgeFormatter(resourceBundle);
 
             FontMetrics mainFontMetrics = new Canvas().getFontMetrics(new Font(fontFamily, Font.PLAIN, mainFontSizeInPixels));
