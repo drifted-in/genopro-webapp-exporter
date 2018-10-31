@@ -40,8 +40,6 @@ function init(e) {
             genoMaps[i].style.display = "none";
         }
 
-        genoMapId = genoMapMap.keys().next().value;
-
         switchGenoMap(function() {
             svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
         });
@@ -97,9 +95,22 @@ function switchGenoMap(callback) {
                 callback();
             }
         };
+        
+        if (genoMapId === null) {
+           
+            genoMapId = genoMapMap.keys().next().value;
+            genoMapSvg = document.getElementById(genoMapId);
+            genoMapSvg.style.display = "block";
 
-        httpRequest.open("GET", genoMapId + ".svg");
-        httpRequest.send();
+            initSvgListeners();
+            initSvgPanZoom();
+
+            callback();
+
+        } else {
+            httpRequest.open("GET", genoMapId + ".svg");
+            httpRequest.send();
+        }
 
     } else {
         if (svgPanZoomInstance) {
