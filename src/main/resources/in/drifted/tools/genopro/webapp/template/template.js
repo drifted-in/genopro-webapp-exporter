@@ -1,78 +1,145 @@
 /* Copyright (c) 2018 Jan Tošovský */
 var svgPanZoomInstance;
-var genoMapSvg;
-var genoMapId;
+var genoMapSvg = null;
+var genoMapId = null;
 var genoMapSelectedIndividualId = null;
 var keywords = [];
 var searchResultsSelectedEntryDetail = null;
 var searchResultsSelectedIndividualId = null;
 var pinnedEntry = null;
 var dragging = false;
+var dynamic = "${dynamic}";
 
 document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("keyup", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
 document.getElementById("clearSearchButton").addEventListener("click", hideResults);
 
-var individuals = document.getElementsByClassName("individual-active-area");
-for (var i = 0; i < individuals.length; i++) {
-    individuals[i].addEventListener("touchend", select);
-    individuals[i].addEventListener("mousedown", select);
-}
-
-var hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
-for (var i = 0; i < hyperlinks.length; i++) {
-    hyperlinks[i].addEventListener("touchend", scrollIntoView);
-    hyperlinks[i].addEventListener("mousedown", scrollIntoView);
-}
-
 function init(e) {
 
-    var genoMapSelect = document.getElementById("genomap-list");
+    if (dynamic && (location.protocol.indexOf("http") === -1)) {
 
-    genoMapMap.forEach(function (value, key, map) {
-        var genoMapSelectItem = document.createElement("option");
-        genoMapSelectItem.value = key;
-        genoMapSelectItem.text = value;
-        genoMapSelect.appendChild(genoMapSelectItem);
-    });
+        document.getElementById("search").style.display = "none";
+        document.getElementById("genomap-list").style.display = "none";
+        document.getElementById("content").innerHTML = "${alertDynamicOnFileSystem}";
 
-    genoMapId = genoMapMap.keys().next().value;
-    switchGenoMap();
-    svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
+    } else {
 
-    genoMapSelect.addEventListener("change", onGenoMapSelectChange);
+        var genoMapSelect = document.getElementById("genomap-list");
 
-    document.getElementById("keywords").placeholder = "${searchPlaceholder}";
+        genoMapMap.forEach(function (value, key, map) {
+            var genoMapSelectItem = document.createElement("option");
+            genoMapSelectItem.value = key;
+            genoMapSelectItem.text = value;
+            genoMapSelect.appendChild(genoMapSelectItem);
+        });
 
-    if (typeof attributionBody !== "undefined") {
-        document.getElementById("attribution").innerHTML = attributionBody;
+        var genoMaps = document.getElementById("content").getElementsByTagName("svg");
+
+        for (var i = 0; i < genoMaps.length; i++) {
+            genoMaps[i].style.display = "none";
+        }
+
+        genoMapId = genoMapMap.keys().next().value;
+
+        switchGenoMap(function() {
+            svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
+        });
+
+        genoMapSelect.addEventListener("change", onGenoMapSelectChange);
+
+        document.getElementById("keywords").placeholder = "${searchPlaceholder}";
+
+        if (typeof attributionBody !== "undefined") {
+            document.getElementById("attribution").innerHTML = attributionBody;
+        }
+
+        triggerSearch();
     }
-
-    triggerSearch();
 }
 
 function onGenoMapSelectChange(e) {
+
     genoMapId = e.target.value;
-    switchGenoMap();
-    svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
+
+    switchGenoMap(function() {
+        svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
+    });
 }
 
-function switchGenoMap() {
+function switchGenoMap(callback) {
 
-    if (svgPanZoomInstance) {
-        /* removing the selection */
-        var nodes = genoMapSvg.getElementsByClassName("handle");
+    if (dynamic) {
 
-        while (nodes[0]) {
-            nodes[0].parentNode.removeChild(nodes[0]);
+        var httpRequest = new XMLHttpRequest();
+
+        httpRequest.onreadystatechange = function() {
+            if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
+
+                var svg = httpRequest.responseXML.documentElement;
+
+                var content = document.getElementById("content");
+
+                var nodes = content.getElementsByTagName("svg");
+
+                while (nodes[0]) {
+                    nodes[0].parentNode.removeChild(nodes[0]);
+                }
+
+                genoMapSvg = content.appendChild(svg);
+                genoMapSvg.style.display = "block";
+
+                genoMapSelectedIndividualId = null;
+
+                initSvgListeners();
+                initSvgPanZoom();
+
+                callback();
+            }
+        };
+
+        httpRequest.open("GET", genoMapId + ".svg");
+        httpRequest.send();
+
+    } else {
+        if (svgPanZoomInstance) {
+            /* removing the selection */
+            var nodes = genoMapSvg.getElementsByClassName("handle");
+
+            while (nodes[0]) {
+                nodes[0].parentNode.removeChild(nodes[0]);
+            }
+
+            genoMapSvg.style.display = "none";
         }
 
-        genoMapSvg.style.display = "none";
+        genoMapSvg = document.getElementById(genoMapId);
+        genoMapSvg.style.display = "block";
+
+        initSvgListeners();
+        initSvgPanZoom();
+
+        callback();
+    }
+}
+
+function initSvgListeners() {
+
+    var individuals = document.getElementsByClassName("individual-active-area");
+    for (var i = 0; i < individuals.length; i++) {
+        individuals[i].addEventListener("touchend", select);
+        individuals[i].addEventListener("mousedown", select);
     }
 
-    genoMapSvg = document.getElementById(genoMapId);
-    genoMapSvg.style.display = "block";
+    var hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
+    for (var i = 0; i < hyperlinks.length; i++) {
+        hyperlinks[i].addEventListener("touchend", scrollIntoView);
+        hyperlinks[i].addEventListener("mousedown", scrollIntoView);
+    }
+}
+
+function initSvgPanZoom() {
+
     svgPanZoomInstance = svgPanZoom(genoMapSvg, {
         zoomScaleSensitivity: 0.25,
         minZoom: 0.01,
@@ -158,22 +225,26 @@ function scrollIntoViewById(id) {
         genoMapId = iMap.get(id)[0];
         document.getElementById("genomap-list").value = genoMapId;
 
-        switchGenoMap();
+        switchGenoMap(function() {
 
-        var currentPosition = getCurrentPosition(id);
-        var targetPosition = getTargetPosition();
+            var currentPosition = getCurrentPosition(id);
+            var targetPosition = getTargetPosition();
 
-        svgPanZoomInstance.panBy({ x: targetPosition.x - currentPosition.x, y: targetPosition.y - currentPosition.y });
-        svgPanZoomInstance.zoomAtPointBy(1 / svgPanZoomInstance.getSizes().realZoom, targetPosition);
+            svgPanZoomInstance.panBy({ x: targetPosition.x - currentPosition.x, y: targetPosition.y - currentPosition.y });
+            svgPanZoomInstance.zoomAtPointBy(1 / svgPanZoomInstance.getSizes().realZoom, targetPosition);
+
+            selectById(id);
+        });
 
     } else {
+
         var currentPosition = getCurrentPosition(id);
         var targetPosition = getTargetPosition();
 
         svgPanZoomInstance.panBy({ x: targetPosition.x - currentPosition.x, y: targetPosition.y - currentPosition.y });
-    }
 
-    selectById(id);
+        selectById(id);
+    }
 }
 
 function select(e) {
@@ -458,6 +529,8 @@ function hideResults() {
     } else if (genoMapSelectedIndividualId !== null) {
         scrollIntoViewById(genoMapSelectedIndividualId);
     }
+    
+    searchResultsSelectedIndividualId = null;
 }
 
 function pinEntry(e) {

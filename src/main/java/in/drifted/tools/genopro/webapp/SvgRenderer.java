@@ -66,7 +66,6 @@ public class SvgRenderer {
             int width = bottomRight.getX() - topLeft.getX();
             int height = topLeft.getY() - bottomRight.getY();
             writer.writeAttribute("viewBox", "0 0 " + width + " " + height);
-            writer.writeAttribute("style", "display: none;");
 
             for (Family family : genoMapData.getFamilyCollection()) {
                 renderFamilyRelations(writer, family, shiftX, shiftY, renderOptions);

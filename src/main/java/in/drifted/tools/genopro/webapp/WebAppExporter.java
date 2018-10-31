@@ -23,58 +23,112 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 public class WebAppExporter {
 
     private static final String RESOURCE_PATH = "/in/drifted/tools/genopro/webapp/template";
+    private static final String HTML_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/template.html";
+    private static final String SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/template.js";
+    private static final String[] SCRIPT_TEMPLATE_PLACEHOLDERS = {
+        "searchPlaceholder", "searchResults", "genoMap", "firstName", "middleName", "lastName",
+        "birth", "death", "mate", "father", "mother", "alertDynamicOnFileSystem"
+    };
 
     public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
 
-        ResourceBundle resourceBundle = renderOptions.getResourceBundle();
+        for (GenoMapData genoMapData : genoMapDataList) {
 
-        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
+            GenoMap genoMap = genoMapData.getGenoMap();
 
-            String scriptTemplate = getResourceAsString(RESOURCE_PATH + "/template.js");
-
-            scriptTemplate = scriptTemplate.replace("${searchPlaceholder}", resourceBundle.getString("searchPlaceholder"));
-            scriptTemplate = scriptTemplate.replace("${searchResults}", resourceBundle.getString("searchResults"));
-            scriptTemplate = scriptTemplate.replace("${genoMap}", resourceBundle.getString("genoMap"));
-            scriptTemplate = scriptTemplate.replace("${firstName}", resourceBundle.getString("firstName"));
-            scriptTemplate = scriptTemplate.replace("${middleName}", resourceBundle.getString("middleName"));
-            scriptTemplate = scriptTemplate.replace("${lastName}", resourceBundle.getString("lastName"));
-            scriptTemplate = scriptTemplate.replace("${birth}", resourceBundle.getString("birth"));
-            scriptTemplate = scriptTemplate.replace("${death}", resourceBundle.getString("death"));
-            scriptTemplate = scriptTemplate.replace("${mate}", resourceBundle.getString("mate"));
-            scriptTemplate = scriptTemplate.replace("${father}", resourceBundle.getString("father"));
-            scriptTemplate = scriptTemplate.replace("${mother}", resourceBundle.getString("mother"));
-
-            StringBuilder svgContentBuilder = new StringBuilder();
-
-            for (GenoMapData genoMapData : genoMapDataList) {
-
-                GenoMap genoMap = genoMapData.getGenoMap();
-
-                if (genoMap.getTitle() != null) {
-
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            if (genoMap.getTitle() != null) {
+                try (OutputStream outputStream = Files.newOutputStream(reportPath.getParent().resolve(genoMap.getId() + ".svg"))) {
                     SvgRenderer.render(genoMapData, outputStream, renderOptions);
-                    svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
                 }
             }
-
-            String htmlTemplate = getResourceAsString(RESOURCE_PATH + "/template.html");
-
-            htmlTemplate = htmlTemplate.replace("${title}", documentInfo.getTitle());
-            htmlTemplate = htmlTemplate.replace("${content}", svgContentBuilder.toString());
-            htmlTemplate = htmlTemplate.replace("${script}", scriptTemplate.replaceAll("\\s+", " "));
-
-            writer.write(htmlTemplate);
         }
+
+        String content;
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, renderOptions);
+            content = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        }
+
+        String script = getScript(SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle());
+        script = script.replace("\"${dynamic}\"", "true");
+
+        Map<String, String> placeholderMap = new HashMap<>();
+        placeholderMap.put("title", documentInfo.getTitle());
+        placeholderMap.put("content", content);
+        placeholderMap.put("script", script.replaceAll("\\s+", " "));
+
+        String html = getHtml(HTML_TEMPLATE_RESOURCE_PATH, placeholderMap);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
+            writer.write(html);
+        }
+    }
+
+    public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
+
+        StringBuilder svgContentBuilder = new StringBuilder();
+
+        for (GenoMapData genoMapData : genoMapDataList) {
+
+            GenoMap genoMap = genoMapData.getGenoMap();
+
+            if (genoMap.getTitle() != null) {
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                SvgRenderer.render(genoMapData, outputStream, renderOptions);
+                svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
+            }
+        }
+
+        String script = getScript(SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle());
+        script = script.replace("\"${dynamic}\"", "false");
+
+        Map<String, String> placeholderMap = new HashMap<>();
+        placeholderMap.put("title", documentInfo.getTitle());
+        placeholderMap.put("content", svgContentBuilder.toString());
+        placeholderMap.put("script", script.replaceAll("\\s+", " "));
+
+        String html = getHtml(HTML_TEMPLATE_RESOURCE_PATH, placeholderMap);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
+            writer.write(html);
+        }
+    }
+
+    private static String getHtml(String resourcePath, Map<String, String> placeholderMap) throws IOException {
+
+        String html = getResourceAsString(resourcePath);
+
+        for (Entry<String, String> entry : placeholderMap.entrySet()) {
+            html = html.replace("${" + entry.getKey() + "}", entry.getValue());
+        }
+
+        return html;
+    }
+
+    private static String getScript(String resourcePath, ResourceBundle resourceBundle) throws IOException {
+
+        String script = getResourceAsString(resourcePath);
+
+        for (String placeholder : SCRIPT_TEMPLATE_PLACEHOLDERS) {
+            script = script.replace("${" + placeholder + "}", resourceBundle.getString(placeholder));
+        }
+
+        return script;
     }
 
     private static String getResourceAsString(String resourcePath) throws IOException {
