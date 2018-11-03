@@ -40,6 +40,8 @@ public class App {
 
     private static final String PARAM_INPUT_PATH = "-in";
     private static final String PARAM_OUTPUT_FOLDER_PATH = "-out";
+    private static final String PARAM_RELATIVE_APP_URL = "-relativeAppUrl";
+    private static final String PARAM_MODE = "-mode";
     private static final String PARAM_LANGUAGE = "-lang";
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
@@ -47,6 +49,7 @@ public class App {
     private static final String PARAM_AGE_FONT_SIZE_IN_PIXELS = "-ageFontSizePx";
     private static final String PARAM_MAIN_LINE_HEIGHT_IN_PIXELS = "-mainLineHeightPx";
 
+    private static final String DEFAULT_MODE = "dynamic";
     private static final String DEFAULT_LANGUAGE = "en";
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
@@ -67,7 +70,10 @@ public class App {
             }
         }
 
-        if (passedValuesMap.containsKey(PARAM_INPUT_PATH) && passedValuesMap.containsKey(PARAM_OUTPUT_FOLDER_PATH)) {
+        String mode = (passedValuesMap.containsKey(PARAM_MODE) ? passedValuesMap.get(PARAM_MODE) : DEFAULT_MODE);
+        boolean dynamic = mode.equals("dynamic");
+
+        if (passedValuesMap.containsKey(PARAM_INPUT_PATH) && passedValuesMap.containsKey(PARAM_OUTPUT_FOLDER_PATH) && (!dynamic || (dynamic && passedValuesMap.containsKey(PARAM_RELATIVE_APP_URL)))) {
 
             Path inputPath = Paths.get(passedValuesMap.get(PARAM_INPUT_PATH));
             Path outputFolderFolder = Paths.get(passedValuesMap.get(PARAM_OUTPUT_FOLDER_PATH));
@@ -129,16 +135,28 @@ public class App {
 
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
-            WebAppExporter.export(reportPath, documentInfo, genoMapDataList, renderOptions);
+
+            Map<String, String> optionMap = new HashMap<>();
+
+            if (dynamic) {
+                optionMap.put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
+                WebAppExporter.export(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap);
+
+            } else {
+                WebAppExporter.exportAsStaticPage(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap);
+            }
 
         } else {
 
             System.out.println("Specify at least: \n"
                     + "         - input GenoPro file path (-in:)\n"
-                    + "         - output folder (-out:)\n\n"
+                    + "         - output folder (-out:)\n"
+                    + "         - relative app URL (-relativeAppUrl:)\n\n"
                     + "Usage: java -jar genopro-webapp-exporter.jar \n"
                     + "         -in:C:\\family-tree.gno \n"
                     + "         -out:C:\\family-tree \n"
+                    + "         -relativeAppUrl:/family-tree \n"
+                    + "        [-mode:dynamic] \n"
                     + "        [-lang:en] \n"
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"

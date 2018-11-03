@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,99 +38,146 @@ import java.util.ResourceBundle;
 public class WebAppExporter {
 
     private static final String RESOURCE_PATH = "/in/drifted/tools/genopro/webapp/template";
-    private static final String HTML_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/template.html";
-    private static final String SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/template.js";
-    private static final String[] SCRIPT_TEMPLATE_PLACEHOLDERS = {
+
+    private static final String MAIN_HTML_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/index.html";
+    private static final String MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/main.js";
+    private static final String SERVICE_WORKER_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/service-worker.js";
+    private static final String MANIFEST_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/manifest.json";
+    private static final String[] MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS = {
         "searchPlaceholder", "searchResults", "genoMap", "firstName", "middleName", "lastName",
         "birth", "death", "mate", "father", "mother", "alertDynamicOnFileSystem"
     };
 
-    public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
+    public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap) throws IOException {
+
+        generateGenoMaps(reportPath.getParent(), genoMapDataList, renderOptions);
+        generateMainHtml(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap, true);
+        generateServiceWorker(reportPath.getParent().resolve("service-worker.js"), genoMapDataList, optionMap);
+        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, optionMap);
+    }
+
+    public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap) throws IOException {
+
+        generateMainHtml(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap, false);
+        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, optionMap);
+    }
+
+    private static void generateGenoMaps(Path folderPath, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
 
         for (GenoMapData genoMapData : genoMapDataList) {
 
             GenoMap genoMap = genoMapData.getGenoMap();
 
             if (genoMap.getTitle() != null) {
-                try (OutputStream outputStream = Files.newOutputStream(reportPath.getParent().resolve(genoMap.getId() + ".svg"))) {
+                try (OutputStream outputStream = Files.newOutputStream(folderPath.resolve(genoMap.getId() + ".svg"))) {
                     SvgRenderer.render(genoMapData, outputStream, renderOptions);
                 }
             }
         }
+    }
+
+    private static void generateMainHtml(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap, boolean dynamic) throws IOException {
 
         String content;
 
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, renderOptions);
-            content = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        if (dynamic) {
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, renderOptions);
+                content = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+            }
+
+        } else {
+
+            StringBuilder svgContentBuilder = new StringBuilder();
+
+            for (GenoMapData genoMapData : genoMapDataList) {
+
+                GenoMap genoMap = genoMapData.getGenoMap();
+
+                if (genoMap.getTitle() != null) {
+
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    SvgRenderer.render(genoMapData, outputStream, renderOptions);
+                    svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
+                }
+            }
+
+            content = svgContentBuilder.toString();
         }
 
-        String script = getScript(SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle());
-        script = script.replace("\"${dynamic}\"", "true");
+        String mainScript = getMainScript(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle(), dynamic);
 
         Map<String, String> placeholderMap = new HashMap<>();
+
         placeholderMap.put("title", documentInfo.getTitle());
         placeholderMap.put("content", content);
-        placeholderMap.put("script", script.replaceAll("\\s+", " "));
+        placeholderMap.put("script", mainScript.replaceAll("\\s+", " "));
+        placeholderMap.put("dynamic", dynamic ? "true" : "false");
 
-        String html = getHtml(HTML_TEMPLATE_RESOURCE_PATH, placeholderMap);
-
-        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
-            writer.write(html);
-        }
-    }
-
-    public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
-
-        StringBuilder svgContentBuilder = new StringBuilder();
-
-        for (GenoMapData genoMapData : genoMapDataList) {
-
-            GenoMap genoMap = genoMapData.getGenoMap();
-
-            if (genoMap.getTitle() != null) {
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                SvgRenderer.render(genoMapData, outputStream, renderOptions);
-                svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
-            }
+        if (optionMap.containsKey("relativeAppUrl")) {
+            placeholderMap.put("relativeAppUrl", optionMap.get("relativeAppUrl"));
         }
 
-        String script = getScript(SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle());
-        script = script.replace("\"${dynamic}\"", "false");
-
-        Map<String, String> placeholderMap = new HashMap<>();
-        placeholderMap.put("title", documentInfo.getTitle());
-        placeholderMap.put("content", svgContentBuilder.toString());
-        placeholderMap.put("script", script.replaceAll("\\s+", " "));
-
-        String html = getHtml(HTML_TEMPLATE_RESOURCE_PATH, placeholderMap);
-
-        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
-            writer.write(html);
-        }
-    }
-
-    private static String getHtml(String resourcePath, Map<String, String> placeholderMap) throws IOException {
-
-        String html = getResourceAsString(resourcePath);
+        String mainHtml = getResourceAsString(MAIN_HTML_TEMPLATE_RESOURCE_PATH);
 
         for (Entry<String, String> entry : placeholderMap.entrySet()) {
-            html = html.replace("${" + entry.getKey() + "}", entry.getValue());
+            mainHtml = mainHtml.replace("${" + entry.getKey() + "}", entry.getValue());
         }
 
-        return html;
+        try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
+            writer.write(mainHtml);
+        }
     }
 
-    private static String getScript(String resourcePath, ResourceBundle resourceBundle) throws IOException {
+    private static void generateServiceWorker(Path serviceWorkerPath, List<GenoMapData> genoMapDataList, Map<String, String> optionMap) throws IOException {
 
-        String script = getResourceAsString(resourcePath);
+        try (BufferedWriter writer = Files.newBufferedWriter(serviceWorkerPath)) {
 
-        for (String placeholder : SCRIPT_TEMPLATE_PLACEHOLDERS) {
-            script = script.replace("${" + placeholder + "}", resourceBundle.getString(placeholder));
+            String serviceWorker = getResourceAsString(SERVICE_WORKER_TEMPLATE_RESOURCE_PATH);
+            serviceWorker = serviceWorker.replace("${relativeAppUrl}", optionMap.get("relativeAppUrl"));
+            serviceWorker = serviceWorker.replace("${currentCacheId}", LocalDateTime.now().toString());
+
+            List<String> genoMapPathList = new ArrayList<>();
+
+            for (GenoMapData genoMapData : genoMapDataList) {
+                genoMapPathList.add("relativeAppUrl + \"/" + genoMapData.getGenoMap().getId() + ".svg\"");
+            }
+
+            serviceWorker = serviceWorker.replace("\"${genoMapPathList}\"", String.join(",\n", genoMapPathList));
+
+            writer.write(serviceWorker);
+        }
+    }
+
+    private static void generateManifest(Path manifestPath, DocumentInfo documentInfo, Map<String, String> optionMap) throws IOException {
+
+        String relativeAppUrl = "";
+
+        if (optionMap.containsKey("relativeAppUrl")) {
+            relativeAppUrl = optionMap.get("relativeAppUrl");
         }
 
-        return script;
+        try (BufferedWriter writer = Files.newBufferedWriter(manifestPath)) {
+
+            String manifest = getResourceAsString(MANIFEST_TEMPLATE_RESOURCE_PATH);
+            manifest = manifest.replace("${title}", documentInfo.getTitle());
+            manifest = manifest.replace("${relativeAppUrl}", relativeAppUrl);
+
+            writer.write(manifest);
+        }
+    }
+
+    private static String getMainScript(String resourcePath, ResourceBundle resourceBundle, boolean dynamic) throws IOException {
+
+        String mainScript = getResourceAsString(resourcePath);
+
+        for (String placeholder : MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS) {
+            mainScript = mainScript.replace("${" + placeholder + "}", resourceBundle.getString(placeholder));
+        }
+
+        mainScript = mainScript.replace("\"${dynamic}\"", dynamic ? "true" : "false");
+
+        return mainScript;
     }
 
     private static String getResourceAsString(String resourcePath) throws IOException {

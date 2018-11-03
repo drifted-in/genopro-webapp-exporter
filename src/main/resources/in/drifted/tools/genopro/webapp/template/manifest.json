@@ -1,0 +1,20 @@
+{
+    "short_name": "${title}",
+    "name": "${title}",
+    "icons": [
+        {
+            "src": "favicon/android-chrome-192x192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "favicon/android-chrome-512x512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "${relativeAppUrl}/index.html?source=pwa",
+    "background_color": "dodgerblue",
+    "display": "standalone",
+    "theme_color": "dodgerblue"
+}

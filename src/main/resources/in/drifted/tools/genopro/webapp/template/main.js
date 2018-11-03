@@ -95,9 +95,9 @@ function switchGenoMap(callback) {
                 callback();
             }
         };
-        
+
         if (genoMapId === null) {
-           
+
             genoMapId = genoMapMap.keys().next().value;
             genoMapSvg = document.getElementById(genoMapId);
             genoMapSvg.style.display = "block";
@@ -122,6 +122,10 @@ function switchGenoMap(callback) {
             }
 
             genoMapSvg.style.display = "none";
+        }
+
+        if (genoMapId === null) {
+            genoMapId = genoMapMap.keys().next().value;
         }
 
         genoMapSvg = document.getElementById(genoMapId);
@@ -540,7 +544,7 @@ function hideResults() {
     } else if (genoMapSelectedIndividualId !== null) {
         scrollIntoViewById(genoMapSelectedIndividualId);
     }
-    
+
     searchResultsSelectedIndividualId = null;
 }
 
