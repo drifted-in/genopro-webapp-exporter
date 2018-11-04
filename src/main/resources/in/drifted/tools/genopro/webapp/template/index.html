@@ -52,7 +52,7 @@
     <script>
         var dynamic = ${dynamic};
 
-        if (dynamic && (location.protocol.indexOf("http") === -1)) {
+        if (dynamic && (location.protocol.indexOf("http") !== -1)) {
             if ("serviceWorker" in navigator) {
                 navigator.serviceWorker.register("${relativeAppUrl}/service-worker.js");
             }
