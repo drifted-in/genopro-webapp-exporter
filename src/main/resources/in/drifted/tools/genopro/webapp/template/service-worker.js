@@ -11,7 +11,6 @@ self.addEventListener("install", function(event) {
                 relativeAppUrl + "/index.html",
                 relativeAppUrl + "/individuals.js",
                 relativeAppUrl + "/manifest.json",
-                relativeAppUrl + "/service-worker-registrar.js",
                 relativeAppUrl + "/res/hammer.min.js",
                 relativeAppUrl + "/res/OpenSans-Regular-webfont.woff",
                 relativeAppUrl + "/res/style.css",
