@@ -11,7 +11,7 @@ var dragging = false;
 var dynamic = "${dynamic}";
 
 document.addEventListener("DOMContentLoaded", init);
-document.getElementById("keywords").addEventListener("keyup", triggerSearch);
+document.getElementById("keywords").addEventListener("input", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
 document.getElementById("clearSearchButton").addEventListener("click", hideResults);
 
