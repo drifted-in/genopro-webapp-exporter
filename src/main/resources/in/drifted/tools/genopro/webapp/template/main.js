@@ -9,6 +9,7 @@ var searchResultsSelectedIndividualId = null;
 var pinnedEntry = null;
 var dragging = false;
 var dynamic = "${dynamic}";
+var rowsProcessed = 0;
 
 document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("input", triggerSearch);
@@ -213,14 +214,18 @@ function initSvgPanZoom() {
 function triggerSearch(e) {
 
     var rawKeywords = document.getElementById("keywords").value.trim();
+
     if (rawKeywords.length > 0) {
         var newKeywords = rawKeywords.toLowerCase().split(/\s+/);
         if (!isSame(keywords, newKeywords)) {
             keywords = newKeywords;
+            rowsProcessed = 0;
             showResults();
         }
+
     } else {
         keywords = [];
+        rowsProcessed = 0;
         hideResults();
     }
 }
@@ -430,6 +435,12 @@ function showResults() {
     var results = document.getElementById("results");
     results.style.display = "block";
 
+    results.addEventListener("scroll", function() {
+        if (results.scrollTop + results.clientHeight >= results.scrollHeight) {
+            addMoreSearchResultEntries(results);
+        }
+    });
+
     /* centering */
     if (searchResultsSelectedIndividualId !== null) {
         scrollIntoViewById(searchResultsSelectedIndividualId.substring(1));
@@ -450,78 +461,104 @@ function showResults() {
         clearSearchButton.style.display = "block";
     }
 
-    iMap.forEach(function (value, key, map) {
+    addMoreSearchResultEntries(results);
+}
 
-        if (matches(value, keywords)) {
+function addMoreSearchResultEntries(resultsElement) {
 
-            var entry = document.createElement('div');
-            entry.classList.add("entry");
-            entry.id = "s" + key;
-            results.appendChild(entry);
+    var row = 0;
+    var addedEntries = 0;
 
-            var hitArea = document.createElement('div');
-            hitArea.classList.add("hitarea");
+    for (let [key, value] of iMap) {
 
-            hitArea.addEventListener("touchstart", resetDragging);
-            hitArea.addEventListener("touchmove", setDragging);
-            hitArea.addEventListener("touchend", pinEntry);
-            hitArea.addEventListener("mousedown", pinEntry);
+        row++;
 
-            entry.appendChild(hitArea);
+        if (row > rowsProcessed) {
 
-            var info = document.createElement('div');
-            info.classList.add("info");
+            if (matches(value, keywords)) {
 
-            info.addEventListener("touchstart", resetDragging);
-            info.addEventListener("touchmove", setDragging);
-            info.addEventListener("touchend", showDetail);
-            info.addEventListener("mousedown", showDetail);
+                createSearchResultEntry(resultsElement, key, value);
 
-            entry.appendChild(info);
+                addedEntries++;
 
-            var topRow = document.createElement('div');
-            topRow.classList.add("top");
-            info.appendChild(topRow);
-
-            var name = document.createElement('div');
-            var names = [];
-            if (value[1].length > 0) {
-                names.push(value[1]);
+                if (addedEntries > 25) {
+                    break;
+                }
             }
-            if (value[2].length > 0) {
-                names.push(value[2]);
-            }
-            name.textContent = names.join(" ").trim();
-            name.classList.add("name");
-            topRow.appendChild(name);
-
-            var lastname = document.createElement('div');
-            lastname.textContent = value[3];
-            lastname.classList.add("lastname");
-            topRow.appendChild(lastname);
-
-            var birthDate = document.createElement('div');
-            birthDate.textContent = value[4];
-            birthDate.classList.add("birthdate");
-            topRow.appendChild(birthDate);
-
-            var detail = document.createElement('div');
-            detail.classList.add("detail");
-            if ((value[6] + value[7] + value[8]).length > 0) {
-                detail.classList.add("expandable");
-            }
-            info.appendChild(detail);
-
-            var bottomRow = document.createElement('div');
-            bottomRow.classList.add("bottom");
-            info.appendChild(bottomRow);
-
-            var genoMapName = document.createElement('div');
-            genoMapName.classList.add("genomapname");
-            genoMapName.textContent = genoMapMap.get(value[0]);
-            bottomRow.appendChild(genoMapName);
         }
-    });
+    }
+
+    rowsProcessed = row;
+}
+
+function createSearchResultEntry(resultsElement, id, value) {
+
+    var entry = document.createElement('div');
+    entry.classList.add("entry");
+    entry.id = "s" + id;
+    resultsElement.appendChild(entry);
+
+    var hitArea = document.createElement('div');
+    hitArea.classList.add("hitarea");
+
+    hitArea.addEventListener("touchstart", resetDragging);
+    hitArea.addEventListener("touchmove", setDragging);
+    hitArea.addEventListener("touchend", pinEntry);
+    hitArea.addEventListener("mousedown", pinEntry);
+
+    entry.appendChild(hitArea);
+
+    var info = document.createElement('div');
+    info.classList.add("info");
+
+    info.addEventListener("touchstart", resetDragging);
+    info.addEventListener("touchmove", setDragging);
+    info.addEventListener("touchend", showDetail);
+    info.addEventListener("mousedown", showDetail);
+
+    entry.appendChild(info);
+
+    var topRow = document.createElement('div');
+    topRow.classList.add("top");
+    info.appendChild(topRow);
+
+    var name = document.createElement('div');
+    var names = [];
+    if (value[1].length > 0) {
+        names.push(value[1]);
+    }
+    if (value[2].length > 0) {
+        names.push(value[2]);
+    }
+    name.textContent = names.join(" ").trim();
+    name.classList.add("name");
+    topRow.appendChild(name);
+
+    var lastname = document.createElement('div');
+    lastname.textContent = value[3];
+    lastname.classList.add("lastname");
+    topRow.appendChild(lastname);
+
+    var birthDate = document.createElement('div');
+    birthDate.textContent = value[4];
+    birthDate.classList.add("birthdate");
+    topRow.appendChild(birthDate);
+
+    var detail = document.createElement('div');
+    detail.classList.add("detail");
+    if ((value[6] + value[7] + value[8]).length > 0) {
+        detail.classList.add("expandable");
+    }
+    info.appendChild(detail);
+
+    var bottomRow = document.createElement('div');
+    bottomRow.classList.add("bottom");
+    info.appendChild(bottomRow);
+
+    var genoMapName = document.createElement('div');
+    genoMapName.classList.add("genomapname");
+    genoMapName.textContent = genoMapMap.get(value[0]);
+    bottomRow.appendChild(genoMapName);
 }
 
 function hideResults() {
