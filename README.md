@@ -61,7 +61,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
 3. Apply the font
     1. In GenoPro open your document.
-    2. Go to File|Properties and select Font tab.
+    2. Go to File | Properties and select Font tab.
     3. Select Open Sans font.
        ![](http://drifted.in/other/genopro-webapp-exporter/genopro-font.png)
     4. Save the document.
@@ -69,34 +69,42 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 ## Data preparation
 
 1. Select GenoMaps for export
-    1. Go to File|Properties.
-    2. Enter Report Title for any GenoMap which has to be exported. Keep in mind it has to be unique.
-    3. Use Alt+Up/Down keys to change the GenMaps order if needed.
+    1. Go to File | Properties.
+    2. In the GenoMaps tab enter Report Title for any GenoMap which has to be exported.
+       Keep in mind it has to be unique. Use Alt+Up/Down keys to change the GenMaps order if needed.
+    3. In the Document tab enter Title.
 
 2. Review data
     1. Ensure deceased individuals have Deceased flag checked. As anonymization is enabled by default,
        these individuals would be filtered out from the output.
 
-## Export
-1. Create output folder, e.g. `C:\family-tree-app`.
+## Output folder preparation
 
-2. Open console (on Windows `cmd.exe`).
+1. Create output folder, e.g. `C:\family-tree`.
 
-3. Type `java -jar genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree-app"` and press enter.
+2. Download additional [resources](http://drifted.in/other/genopro-webapp-exporter/resources.zip) and unzip it into the output folder:
 
-4. All generated files can be found in the output folder.
+   App icons for various devices:
+    - `favicon/android-chrome-192x192.png`
+    - `favicon/android-chrome-512x512.png`
+    - `favicon/apple-touch-icon.png`
+    - `favicon/favicon-16x16.png`
+    - `favicon/favicon-32x32.png`
+    - `favicon/favicon.ico`
 
-## Final steps
+   Third party libraries:
+    - `res/hammer.min.js` (mobile touch events)
+    - `res/svg-pan-zoom.min.js` (panning and zooming SVG files)
 
-1. Download additional [resources](http://drifted.in/other/genopro-webapp-exporter/resources.zip) and unzip it into the output folder:
-    - `res/style.css` - styles for entire web app
-    - `res/svg-pan-zoom.min.js` - 3rd party library for panning and zooming SVG files
-    - `res/hammer.min.js` - 3rd party library for mobile touch events
-    - `res/OpenSans-Regular-webfont.woff` - Open Sans font in the compact form for online use
+   Web font:
+    - `res/OpenSans-Regular-webfont.woff`
+
+   Auxiliary scripts:
     - `attribution.js` - optional attribution
     - `analytics.js` - optional analytics
 
-2. Alter attribution:
+3. Alter attribution:
+
    Attribution is displayed in bottom right corner. It can contain any HTML code.
    It just need to be put to the `attributionBody` variable inside `attribution.js` file:
 
@@ -107,8 +115,22 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
    `var attributionBody = "<span xmlns:cc='http://creativecommons.org/ns#'><a rel='cc:attributionURL' property='cc:attributionName' href='https://github.com/jan-tosovsky-cz/rodokmen-tosovskych'>Rodokmen Tošovských</a> by Jan Tošovský is licensed under a <a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0/'>CC-BY-SA</a> license</span>";`
 
 3. Alter analytics:
+
    If you are interested how many users visited your app, you can put your analytics code into `analytics.js` file.
 
-4. Test the web application locally.
+## Export
 
-5. Copy the web application to the server.
+1. Open console (on Windows `cmd.exe`).
+
+2. Generate static app which can be tested directly on your local computer:
+
+   Type `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static` and press enter.
+
+3. Once everything looks good, generate dynamic pages:
+
+   Type `java -jar genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -relativeAppUrl:/family-tree` and press enter.
+
+   The last parameter represents the URL fragment relative to the server origin and must match the target app location.
+   If your app URL is e.g. https://www.server.com/doe/family-tree/index.html, the `relativeAppUrl` is `/doe/family-tree`.
+
+4. Copy the web application to the server.
