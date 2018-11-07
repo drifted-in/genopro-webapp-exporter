@@ -17,28 +17,40 @@ package in.drifted.tools.genopro.webapp.model;
 
 import in.drifted.tools.genopro.model.AgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
+import java.awt.Canvas;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 
-public class RenderOptions {
+public class GeneratingOptions {
+
+    public static final int MAIN_FONT_SIZE_IN_PIXELS = 11;
+    public static final int AGE_FONT_SIZE_IN_PIXELS = 9;
+    public static final int MAIN_LINE_HEIGHT_IN_PIXELS = 14;
 
     private final Locale locale;
     private final ResourceBundle resourceBundle;
+    private final String fontFamily;
     private final DateFormatter dateFormatter;
     private final AgeFormatter ageFormatter;
     private final FontMetrics mainFontMetrics;
     private final FontMetrics ageFontMetrics;
-    private final int mainLineHeightInPixels;
+    private final Map<String, String> additionalOptionsMap;
 
-    public RenderOptions(Locale locale, ResourceBundle resourceBundle, DateFormatter dateFormatter, AgeFormatter ageFormatter, FontMetrics mainFontMetrics, FontMetrics ageFontMetrics, int mainLineHeightInPixels) {
-        this.resourceBundle = resourceBundle;
+    public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily, DateFormatter dateFormatter, AgeFormatter ageFormatter, Map<String, String> additionalOptionsMap) {
+
+        Canvas canvas = new Canvas();
+
         this.locale = locale;
+        this.resourceBundle = resourceBundle;
+        this.fontFamily = fontFamily;
         this.dateFormatter = dateFormatter;
         this.ageFormatter = ageFormatter;
-        this.mainFontMetrics = mainFontMetrics;
-        this.ageFontMetrics = ageFontMetrics;
-        this.mainLineHeightInPixels = mainLineHeightInPixels;
+        this.mainFontMetrics = canvas.getFontMetrics(new Font(fontFamily, Font.PLAIN, MAIN_FONT_SIZE_IN_PIXELS));
+        this.ageFontMetrics = canvas.getFontMetrics(new Font(fontFamily, Font.PLAIN, AGE_FONT_SIZE_IN_PIXELS));
+        this.additionalOptionsMap = additionalOptionsMap;
     }
 
     public Locale getLocale() {
@@ -47,6 +59,10 @@ public class RenderOptions {
 
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
+    }
+
+    public String getFontFamily() {
+        return fontFamily;
     }
 
     public DateFormatter getDateFormatter() {
@@ -65,8 +81,8 @@ public class RenderOptions {
         return ageFontMetrics;
     }
 
-    public int getMainLineHeightInPixels() {
-        return mainLineHeightInPixels;
+    public Map<String, String> getAdditionalOptionsMap() {
+        return additionalOptionsMap;
     }
 
 }

@@ -29,7 +29,7 @@ import in.drifted.tools.genopro.model.Name;
 import in.drifted.tools.genopro.model.PedigreeLink;
 import in.drifted.tools.genopro.model.Position;
 import in.drifted.tools.genopro.model.Rect;
-import in.drifted.tools.genopro.webapp.model.RenderOptions;
+import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
 import in.drifted.tools.genopro.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -41,7 +41,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 public class SvgRenderer {
 
-    public static void render(GenoMapData genoMapData, OutputStream outputStream, RenderOptions renderOptions) throws IOException {
+    public static void render(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions) throws IOException {
 
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
@@ -62,18 +62,18 @@ public class SvgRenderer {
             Position topLeft = genoMap.getBoundaryRect().getTopLeft();
             Position bottomRight = genoMap.getBoundaryRect().getBottomRight();
             int shiftX = topLeft.getX();
-            int shiftY = topLeft.getY() + renderOptions.getMainLineHeightInPixels() / 2;
+            int shiftY = topLeft.getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
             int width = bottomRight.getX() - topLeft.getX();
             int height = topLeft.getY() - bottomRight.getY();
             writer.writeAttribute("viewBox", "0 0 " + width + " " + height);
 
             for (Family family : genoMapData.getFamilyCollection()) {
-                renderFamilyRelations(writer, family, shiftX, shiftY, renderOptions);
+                renderFamilyRelations(writer, family, shiftX, shiftY, generatingOptions);
             }
 
             for (Individual individual : genoMapData.getIndividualCollection()) {
                 if (!individual.isAnonymized()) {
-                    renderIndividual(writer, individual, shiftX, shiftY, renderOptions);
+                    renderIndividual(writer, individual, shiftX, shiftY, generatingOptions);
                 }
             }
 
@@ -86,7 +86,7 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderFamilyRelations(XMLStreamWriter writer, Family family, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderFamilyRelations(XMLStreamWriter writer, Family family, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Position position = family.getPosition();
         BoundaryRect topBoundaryRect = family.getTopBoundaryRect();
@@ -110,22 +110,22 @@ public class SvgRenderer {
 
                 String label = family.getLabel();
 
-                int labelWidthInPixels = renderOptions.getMainFontMetrics().stringWidth(label);
+                int labelWidthInPixels = generatingOptions.getMainFontMetrics().stringWidth(label);
                 double centerX = topRect.getX() - shiftX + topRect.getWidth() / 2.0;
-                int fontSize = renderOptions.getMainFontMetrics().getFont().getSize();
-                double textPadding = (renderOptions.getMainLineHeightInPixels() - fontSize) / 2.0;
+                int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
+                double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
                 writer.writeStartElement("rect");
                 writer.writeAttribute("x", String.valueOf(centerX - labelWidthInPixels / 2.0));
-                writer.writeAttribute("y", String.valueOf(y - 1.3 * renderOptions.getMainLineHeightInPixels()));
+                writer.writeAttribute("y", String.valueOf(y - 1.3 * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("width", String.valueOf(labelWidthInPixels));
-                writer.writeAttribute("height", String.valueOf(renderOptions.getMainLineHeightInPixels()));
+                writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("class", "family-label");
                 writer.writeEndElement();
 
                 writer.writeStartElement("text");
                 writer.writeAttribute("x", String.valueOf(centerX));
-                writer.writeAttribute("y", String.valueOf(y - 0.3 * renderOptions.getMainLineHeightInPixels() - textPadding));
+                writer.writeAttribute("y", String.valueOf(y - 0.3 * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - textPadding));
                 writer.writeAttribute("class", "family-label");
                 writer.writeCharacters(label);
                 writer.writeEndElement();
@@ -238,7 +238,7 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividual(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderIndividual(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         writer.writeStartElement("g");
         writer.writeAttribute("id", individual.getId());
@@ -249,25 +249,25 @@ public class SvgRenderer {
             writer.writeAttribute("data-target-id", hyperlink.getId());
         }
 
-        renderIndividualDates(writer, individual, shiftX, shiftY, renderOptions);
-        renderIndividualSymbol(writer, individual, shiftX, shiftY, renderOptions);
-        renderIndividualAge(writer, individual, shiftX, shiftY, renderOptions);
+        renderIndividualDates(writer, individual, shiftX, shiftY, generatingOptions);
+        renderIndividualSymbol(writer, individual, shiftX, shiftY, generatingOptions);
+        renderIndividualAge(writer, individual, shiftX, shiftY, generatingOptions);
 
         if (hyperlink != null) {
-            renderActiveArea(writer, individual, shiftX, shiftY, renderOptions);
-            renderIndividualLabel(writer, individual, shiftX, shiftY, renderOptions);
+            renderActiveArea(writer, individual, shiftX, shiftY, generatingOptions);
+            renderIndividualLabel(writer, individual, shiftX, shiftY, generatingOptions);
 
         } else {
-            renderIndividualLabel(writer, individual, shiftX, shiftY, renderOptions);
-            renderActiveArea(writer, individual, shiftX, shiftY, renderOptions);
+            renderIndividualLabel(writer, individual, shiftX, shiftY, generatingOptions);
+            renderActiveArea(writer, individual, shiftX, shiftY, generatingOptions);
         }
 
         writer.writeEndElement();
     }
 
-    private static void renderIndividualDates(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderIndividualDates(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        DateFormatter dateFormatter = renderOptions.getDateFormatter();
+        DateFormatter dateFormatter = generatingOptions.getDateFormatter();
 
         Birth birth = individual.getBirth();
         Death death = individual.getDeath();
@@ -284,36 +284,36 @@ public class SvgRenderer {
         if (death != null && death.getDate() != null) {
             String deathLabel = death.getDate().getDate(dateFormatter);
             if (!hasBirth) {
-                deathLabel = renderOptions.getResourceBundle().getString("deathAbbrev") + " " + deathLabel;
+                deathLabel = generatingOptions.getResourceBundle().getString("deathAbbrev") + " " + deathLabel;
             }
             dateList.add(deathLabel);
         }
 
         Rect rect = new Rect(individual.getBoundaryRect());
 
-        int fontSize = renderOptions.getMainFontMetrics().getFont().getSize();
-        double textPadding = (renderOptions.getMainLineHeightInPixels() - fontSize) / 2.0;
+        int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
+        double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
-        int baseTopY = shiftY - rect.getY() + renderOptions.getMainLineHeightInPixels() / 2;
+        int baseTopY = shiftY - rect.getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
 
         for (int i = 0; i < dateList.size(); i++) {
 
             String date = dateList.get(i);
-            int dateWidth = renderOptions.getMainFontMetrics().stringWidth(date);
+            int dateWidth = generatingOptions.getMainFontMetrics().stringWidth(date);
 
-            int topY = baseTopY + i * renderOptions.getMainLineHeightInPixels();
+            int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
             writer.writeStartElement("rect");
             writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - dateWidth / 2 - shiftX));
             writer.writeAttribute("y", String.valueOf(topY));
             writer.writeAttribute("width", String.valueOf(dateWidth));
-            writer.writeAttribute("height", String.valueOf(renderOptions.getMainLineHeightInPixels()));
+            writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
             writer.writeEndElement();
 
             writer.writeStartElement("text");
             writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
-            writer.writeAttribute("y", String.valueOf(topY - textPadding + renderOptions.getMainLineHeightInPixels()));
+            writer.writeAttribute("y", String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
 
             writer.writeCharacters(dateList.get(i));
@@ -321,7 +321,7 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualSymbol(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderIndividualSymbol(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Position position = individual.getPosition();
 
@@ -371,7 +371,7 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualAge(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderIndividualAge(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Position position = individual.getPosition();
 
@@ -406,7 +406,7 @@ public class SvgRenderer {
         Birth birth = individual.getBirth();
         Death death = individual.getDeath();
 
-        String age = renderOptions.getAgeFormatter().format(birth, death);
+        String age = generatingOptions.getAgeFormatter().format(birth, death);
 
         if ((death == null || !death.hasDate()) && individual.isDead()) {
             age = null;
@@ -415,8 +415,8 @@ public class SvgRenderer {
         if (age != null) {
 
             // smaller font requires smaller metrics
-            double ageWidth = renderOptions.getAgeFontMetrics().stringWidth(age);
-            int fontSize = renderOptions.getAgeFontMetrics().getFont().getSize();
+            double ageWidth = generatingOptions.getAgeFontMetrics().stringWidth(age);
+            int fontSize = generatingOptions.getAgeFontMetrics().getFont().getSize();
 
             writer.writeStartElement("rect");
             writer.writeAttribute("x", String.valueOf(position.getX() - ageWidth / 2.0 - shiftX));
@@ -435,15 +435,15 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualLabel(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderIndividualLabel(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Name name = individual.getName();
 
         if (name != null) {
 
             Rect rect = new Rect(individual.getBoundaryRect());
-            int fontSize = renderOptions.getMainFontMetrics().getFont().getSize();
-            double textPadding = (renderOptions.getMainLineHeightInPixels() - fontSize) / 2.0;
+            int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
+            double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
             String firstName = name.getFirst();
             String middleName = name.getMiddle();
@@ -465,35 +465,35 @@ public class SvgRenderer {
                 nameList.add("(" + lastName2 + ")");
             }
 
-            List<String> wrappedLineList = StringUtil.getWrappedLineList(String.join(" ", nameList), rect.getWidth() - 2 * 8, renderOptions.getMainFontMetrics());
+            List<String> wrappedLineList = StringUtil.getWrappedLineList(String.join(" ", nameList), rect.getWidth() - 2 * 8, generatingOptions.getMainFontMetrics());
 
-            int baseTopY = shiftY - individual.getPosition().getY() + renderOptions.getMainLineHeightInPixels();
+            int baseTopY = shiftY - individual.getPosition().getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
             boolean isHyperlink = individual.getHyperlink() != null;
 
             for (int i = 0; i < wrappedLineList.size(); i++) {
 
                 String line = wrappedLineList.get(i);
-                double lineWidth = renderOptions.getMainFontMetrics().stringWidth(line);
+                double lineWidth = generatingOptions.getMainFontMetrics().stringWidth(line);
 
-                int topY = baseTopY + i * renderOptions.getMainLineHeightInPixels();
+                int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
                 writer.writeStartElement("rect");
                 writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - lineWidth / 2 - shiftX));
                 writer.writeAttribute("y", String.valueOf(topY));
                 writer.writeAttribute("width", String.valueOf(lineWidth));
-                writer.writeAttribute("height", String.valueOf(renderOptions.getMainLineHeightInPixels()));
+                writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("class", "individual-label");
                 writer.writeEndElement();
             }
 
             for (int i = 0; i < wrappedLineList.size(); i++) {
 
-                int topY = baseTopY + i * renderOptions.getMainLineHeightInPixels();
+                int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
                 writer.writeStartElement("text");
                 writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
-                writer.writeAttribute("y", String.valueOf(topY - textPadding + renderOptions.getMainLineHeightInPixels()));
+                writer.writeAttribute("y", String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("class", isHyperlink ? "individual-label-hyperlink" : "individual-label");
 
                 writer.writeCharacters(wrappedLineList.get(i));
@@ -502,7 +502,7 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderActiveArea(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, RenderOptions renderOptions) throws XMLStreamException {
+    private static void renderActiveArea(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
 
         int boxSize = 8;
 

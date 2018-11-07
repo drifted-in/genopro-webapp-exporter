@@ -22,10 +22,7 @@ import in.drifted.tools.genopro.model.BasicAgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.webapp.model.RenderOptions;
-import java.awt.Canvas;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,17 +42,13 @@ public class App {
     private static final String PARAM_LANGUAGE = "-lang";
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
-    private static final String PARAM_MAIN_FONT_SIZE_IN_PIXELS = "-mainFontSizePx";
-    private static final String PARAM_AGE_FONT_SIZE_IN_PIXELS = "-ageFontSizePx";
-    private static final String PARAM_MAIN_LINE_HEIGHT_IN_PIXELS = "-mainLineHeightPx";
+    private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final String DEFAULT_LANGUAGE = "en";
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
-    private static final int DEFAULT_MAIN_FONT_SIZE_IN_PIXELS = 11;
-    private static final int DEFAULT_AGE_FONT_SIZE_IN_PIXELS = 9;
-    private static final int DEFAULT_MAIN_LINE_HEIGHT_IN_PIXELS = 14;
+    private static final String DEFAULT_RELATIVE_FONT_PATH = "res/OpenSans-Regular-webfont.woff";
 
     private static final String RESOURCE_BUNDLE_PATH = "in/drifted/tools/genopro/webapp/messages";
 
@@ -70,7 +63,7 @@ public class App {
             }
         }
 
-        String mode = (passedValuesMap.containsKey(PARAM_MODE) ? passedValuesMap.get(PARAM_MODE) : DEFAULT_MODE);
+        String mode = passedValuesMap.getOrDefault(PARAM_MODE, DEFAULT_MODE);
         boolean dynamic = mode.equals("dynamic");
 
         if (passedValuesMap.containsKey(PARAM_INPUT_PATH) && passedValuesMap.containsKey(PARAM_OUTPUT_FOLDER_PATH) && (!dynamic || (dynamic && passedValuesMap.containsKey(PARAM_RELATIVE_APP_URL)))) {
@@ -78,52 +71,21 @@ public class App {
             Path inputPath = Paths.get(passedValuesMap.get(PARAM_INPUT_PATH));
             Path outputFolderFolder = Paths.get(passedValuesMap.get(PARAM_OUTPUT_FOLDER_PATH));
 
-            String language = DEFAULT_LANGUAGE;
-
-            if (passedValuesMap.containsKey(PARAM_LANGUAGE)) {
-                language = passedValuesMap.get(PARAM_LANGUAGE);
-            }
-
+            String language = passedValuesMap.getOrDefault(PARAM_LANGUAGE, DEFAULT_LANGUAGE);
             Locale locale = new Locale(language);
             ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_PATH, locale);
 
-            String datePattern = DEFAULT_DATE_PATTERN;
-
-            if (passedValuesMap.containsKey(PARAM_DATE_PATTERN)) {
-                datePattern = passedValuesMap.get(PARAM_DATE_PATTERN);
-            }
-
-            String fontFamily = DEFAULT_FONT_FAMILY;
-
-            if (passedValuesMap.containsKey(PARAM_FONT_FAMILY)) {
-                fontFamily = passedValuesMap.get(PARAM_FONT_FAMILY);
-            }
-
-            int mainFontSizeInPixels = DEFAULT_MAIN_FONT_SIZE_IN_PIXELS;
-
-            if (passedValuesMap.containsKey(PARAM_MAIN_FONT_SIZE_IN_PIXELS)) {
-                mainFontSizeInPixels = Integer.parseInt(passedValuesMap.get(PARAM_MAIN_FONT_SIZE_IN_PIXELS));
-            }
-
-            int ageFontSizeInPixels = DEFAULT_AGE_FONT_SIZE_IN_PIXELS;
-
-            if (passedValuesMap.containsKey(PARAM_AGE_FONT_SIZE_IN_PIXELS)) {
-                ageFontSizeInPixels = Integer.parseInt(passedValuesMap.get(PARAM_AGE_FONT_SIZE_IN_PIXELS));
-            }
-
-            int mainLineHeightInPixels = DEFAULT_MAIN_LINE_HEIGHT_IN_PIXELS;
-
-            if (passedValuesMap.containsKey(PARAM_MAIN_LINE_HEIGHT_IN_PIXELS)) {
-                mainLineHeightInPixels = Integer.parseInt(passedValuesMap.get(PARAM_MAIN_LINE_HEIGHT_IN_PIXELS));
-            }
+            String datePattern = passedValuesMap.getOrDefault(PARAM_DATE_PATTERN, DEFAULT_DATE_PATTERN);
+            String fontFamily = passedValuesMap.getOrDefault(PARAM_FONT_FAMILY, DEFAULT_FONT_FAMILY);
+            String relativeFontPath = passedValuesMap.getOrDefault(PARAM_RELATIVE_FONT_PATH, DEFAULT_RELATIVE_FONT_PATH);
 
             DateFormatter dateFormatter = new DateFormatter(datePattern, locale, new HashMap<>());
             AgeFormatter ageFormatter = new BasicAgeFormatter(resourceBundle);
 
-            FontMetrics mainFontMetrics = new Canvas().getFontMetrics(new Font(fontFamily, Font.PLAIN, mainFontSizeInPixels));
-            FontMetrics ageFontMetrics = new Canvas().getFontMetrics(new Font(fontFamily, Font.PLAIN, ageFontSizeInPixels));
+            Map<String, String> additionalOptionMap = new HashMap<>();
+            additionalOptionMap.put("relativeFontPath", relativeFontPath);
 
-            RenderOptions renderOptions = new RenderOptions(locale, resourceBundle, dateFormatter, ageFormatter, mainFontMetrics, ageFontMetrics, mainLineHeightInPixels);
+            GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily, dateFormatter, ageFormatter, additionalOptionMap);
 
             Path individualsPath = outputFolderFolder.resolve("individuals.js");
             Path genomapsPath = outputFolderFolder.resolve("genomaps.js");
@@ -136,22 +98,20 @@ public class App {
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
 
-            Map<String, String> optionMap = new HashMap<>();
-
             if (dynamic) {
-                optionMap.put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
-                WebAppExporter.export(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap);
+                generatingOptions.getAdditionalOptionsMap().put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
+                WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
 
             } else {
-                WebAppExporter.exportAsStaticPage(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap);
+                WebAppExporter.exportAsStaticPage(reportPath, documentInfo, genoMapDataList, generatingOptions);
             }
 
         } else {
 
             System.out.println("Specify at least: \n"
-                    + "         - input GenoPro file path (-in:)\n"
-                    + "         - output folder (-out:)\n"
-                    + "         - relative app URL (-relativeAppUrl:)\n\n"
+                    + "         - input GenoPro file path (-in:) \n"
+                    + "         - output folder (-out:) \n"
+                    + "         - relative app URL (-relativeAppUrl:) \n\n"
                     + "Usage: java -jar genopro-webapp-exporter.jar \n"
                     + "         -in:C:\\family-tree.gno \n"
                     + "         -out:C:\\family-tree \n"
@@ -160,9 +120,7 @@ public class App {
                     + "        [-lang:en] \n"
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
-                    + "        [-mainFontSizePx:11] \n"
-                    + "        [-ageFontSizePx:9] \n"
-                    + "        [-mainLineHeightPx:14]"
+                    + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"]"
             );
         }
     }

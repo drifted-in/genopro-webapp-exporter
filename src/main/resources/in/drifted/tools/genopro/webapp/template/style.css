@@ -1,0 +1,298 @@
+@font-face {
+    font-family: "${fontFamily}";
+    font-style: normal;
+    font-weight: normal;
+    src: url("${relativeFontPath}") format("woff");
+}
+
+body {
+    font-family: "${fontFamily}";
+    font-size: 11px;
+    margin: 0;
+    line-height: 0;
+}
+
+svg {
+    text-anchor: middle;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+path.family-line {
+    stroke: black;
+    stroke-width: 3px;
+    fill: none;
+}
+
+text.individual-label-hyperlink {
+    text-decoration: underline;
+    fill: dodgerblue;
+    cursor: pointer;
+}
+
+text.individual-age {
+    font-size: 9px;
+}
+
+rect.individual-age,
+rect.individual-label,
+rect.family-label {
+    stroke: none;
+    fill: white;
+}
+
+rect.individual-active-area {
+    fill: transparent;
+    stroke: none;
+    cursor: default;
+}
+
+.individual-symbol {
+    stroke: black;
+    stroke-width: 3px;
+    fill: white;
+}
+
+.individual-symbol-background {
+    fill: white;
+}
+
+text.individual-symbol {
+    stroke: none;
+    fill: black;
+}
+
+path.individual-deceased {
+    stroke: black;
+    stroke-width: 1px;
+    fill: none;
+}
+
+path.parent,
+path.biological {
+    stroke: black;
+    stroke-width: 3px;
+    fill: none;
+}
+
+path.adopted {
+    stroke: dodgerblue;
+    stroke-width: 3px;
+    fill: none;
+}
+
+#container {
+    width: 100vw;
+    height: 100vh;
+    background-color: white;
+    line-height: normal;
+}
+
+#content svg {
+    width: 100vw;
+    height: 100vh;
+    cursor: grab;
+}
+
+.handle {
+    fill: orangered;
+}
+
+#search {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#search input[type=search] {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid grey;
+    background: whitesmoke;
+    width: calc(100vw - 49px);
+    max-width: 322px;
+    z-index: 100;
+}
+
+#search input[type=search]::-webkit-search-cancel-button {
+    display: none;
+}
+
+#search button {
+    width: 49px;
+    padding: 10px;
+    background: dodgerblue;
+    color: white;
+    font-size: 16px;
+    border: 1px solid grey;
+    border-bottom: 1px solid white;
+    border-left: none;
+    cursor: pointer;
+    z-index: 100;
+}
+
+#search #clearSearchButton {
+    border-bottom: 1px solid grey;
+}
+
+.genomap-list {
+    display: inline-block;
+    position: absolute;
+    top: 48px;
+    left: 0px;
+}
+
+.genomap-list select {
+    display: inline-block;
+    border: 1px solid grey;
+    padding: 10px;
+    padding-left: 5px;
+    margin: 0;
+    font-size: 16px;
+    width: 100vw;
+    max-width: 371px;
+    height: 49px;
+    background: whitesmoke;
+}
+
+.genomap-list:after {
+    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='-12 -12 24 24'><path d='M-8-8h16L0 8z' fill='white' stroke='none' /></svg>");
+    position: absolute;
+    width: 24px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px;
+    background: dodgerblue;
+    border: 1px solid grey;
+    border-top: 1px solid white;
+    pointer-events: none;
+}
+
+#attribution {
+    display: flex;
+    position: absolute;
+    z-index: 10;
+    right: 0px;
+    bottom: 0px;
+    padding: 3px 5px;
+    background: whitesmoke;
+}
+
+#results {
+    position: absolute;
+    top: 49px;
+    width: 369px;
+    height: calc(100vh - 51px);
+    background-color: whitesmoke;
+    overflow: auto;
+    z-index: 50;
+    border: 1px solid grey;
+    display: none;
+}
+
+.entry {
+    padding: 2px 0;
+    border-bottom: 1px solid grey;
+    display: flex;
+}
+
+.entry .hitarea {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='-20 0 40 40'><path d='M0 37S0 37 0 37S-20 3 0 3S0 37 0 37M-4 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0' fill='dodgerblue'/></svg>");
+}
+
+.entry .info {
+    cursor: pointer;
+}
+
+.top,
+.detail,
+.bottom {
+    white-space: nowrap;
+    font-size: 13px;
+    display: flex;
+}
+
+.detail {
+    flex-direction: column;
+}
+
+.top div,
+.detail div,
+.bottom div {
+    padding: 0 5px;
+}
+
+.detail div,
+.bottom div {
+    display: flex;
+}
+
+.top .name {
+    width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 16px;
+}
+
+.top .lastname {
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 16px;
+}
+
+.top .birthdate {
+    width: 80px;
+    text-align: right;
+    overflow: hidden;
+}
+
+.bottom .genomapname {
+    width: 100%;
+}
+
+.father:not(:empty)::before {
+    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -10 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><g transform='rotate(45)'><path d='M0 -3v-4M-2 -5L0 -7L2 -5' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    margin-right: 3px;
+}
+
+.mother:not(:empty)::before {
+    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -8 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><path d='M0 4v3M-2 5h4' stroke='black' stroke-linecap='round'/></svg>");
+    margin-right: 3px;
+}
+
+.mate:not(:empty)::before {
+    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -9 12 15'><g transform='rotate(-45)'><path d='M-1.1 0A2.2 2.2 0 0 1 1.1 -2.2L3.6 -2.2A2.2 2.2 0 0 1 3.6 2.2L2.8 2.2' fill='none' stroke='black' stroke-linecap='round'/><path d='M1.1 0A2.2 2.2 0 0 1 -1.1 2.2L-3.6 2.2A2.2 2.2 0 0 1 -3.6 -2.2L-2.8 -2.2' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    margin-right: 3px;
+}
+
+.genomapname:not(:empty)::before {
+    content: "@";
+    margin-right: 3px;
+}
+
+.detail.expandable:not(.expanded)::before {
+    content: "...";
+    color: dodgerblue;
+    line-height: 0px;
+    padding: 0px 5px 5px;
+}
+
+.pinned {
+    position: absolute;
+    top: 49px;
+    width: 369px;
+    background-color: whitesmoke;
+    overflow: auto;
+    z-index: 50;
+    border: 1px solid grey;
+}
+
+.pinned .hitarea {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='-20 0 40 40'><path d='M0 3S0 3 0 3S20 37 0 37S0 3 0 3M-4 28a4 4 0 1 0 8 0a4 4 0 1 0 -8 0' fill='dodgerblue'/></svg>");
+}

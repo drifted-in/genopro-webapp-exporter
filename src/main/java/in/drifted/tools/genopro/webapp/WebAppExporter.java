@@ -18,7 +18,7 @@ package in.drifted.tools.genopro.webapp;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.webapp.model.RenderOptions;
+import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,6 +41,7 @@ public class WebAppExporter {
 
     private static final String MAIN_HTML_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/index.html";
     private static final String MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/main.js";
+    private static final String CSS_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/style.css";
     private static final String SERVICE_WORKER_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/service-worker.js";
     private static final String MANIFEST_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/manifest.json";
     private static final String[] MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS = {
@@ -48,21 +49,24 @@ public class WebAppExporter {
         "birth", "death", "mate", "father", "mother", "alertDynamicOnFileSystem"
     };
 
-    public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap) throws IOException {
+    public static void export(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions) throws IOException {
 
-        generateGenoMaps(reportPath.getParent(), genoMapDataList, renderOptions);
-        generateMainHtml(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap, true);
-        generateServiceWorker(reportPath.getParent().resolve("service-worker.js"), genoMapDataList, optionMap);
-        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, optionMap);
+        String relativeAppUrl = generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", "");
+
+        generateGenoMaps(reportPath.getParent(), genoMapDataList, generatingOptions);
+        generateMainHtml(reportPath, documentInfo, genoMapDataList, generatingOptions, true);
+        generateCss(reportPath.getParent().resolve("style.css"), generatingOptions);
+        generateServiceWorker(reportPath.getParent().resolve("service-worker.js"), genoMapDataList, relativeAppUrl);
+        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, relativeAppUrl);
     }
 
-    public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap) throws IOException {
+    public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions) throws IOException {
 
-        generateMainHtml(reportPath, documentInfo, genoMapDataList, renderOptions, optionMap, false);
-        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, optionMap);
+        generateMainHtml(reportPath, documentInfo, genoMapDataList, generatingOptions, false);
+        generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, "");
     }
 
-    private static void generateGenoMaps(Path folderPath, List<GenoMapData> genoMapDataList, RenderOptions renderOptions) throws IOException {
+    private static void generateGenoMaps(Path folderPath, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions) throws IOException {
 
         for (GenoMapData genoMapData : genoMapDataList) {
 
@@ -70,19 +74,19 @@ public class WebAppExporter {
 
             if (genoMap.getTitle() != null) {
                 try (OutputStream outputStream = Files.newOutputStream(folderPath.resolve(genoMap.getId() + ".svg"))) {
-                    SvgRenderer.render(genoMapData, outputStream, renderOptions);
+                    SvgRenderer.render(genoMapData, outputStream, generatingOptions);
                 }
             }
         }
     }
 
-    private static void generateMainHtml(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, RenderOptions renderOptions, Map<String, String> optionMap, boolean dynamic) throws IOException {
+    private static void generateMainHtml(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions, boolean dynamic) throws IOException {
 
         String content;
 
         if (dynamic) {
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, renderOptions);
+                SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, generatingOptions);
                 content = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
             }
 
@@ -97,7 +101,7 @@ public class WebAppExporter {
                 if (genoMap.getTitle() != null) {
 
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    SvgRenderer.render(genoMapData, outputStream, renderOptions);
+                    SvgRenderer.render(genoMapData, outputStream, generatingOptions);
                     svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
                 }
             }
@@ -105,7 +109,7 @@ public class WebAppExporter {
             content = svgContentBuilder.toString();
         }
 
-        String mainScript = getMainScript(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH, renderOptions.getResourceBundle(), dynamic);
+        String mainScript = getMainScript(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH, generatingOptions.getResourceBundle(), dynamic);
 
         Map<String, String> placeholderMap = new HashMap<>();
 
@@ -113,10 +117,7 @@ public class WebAppExporter {
         placeholderMap.put("content", content);
         placeholderMap.put("script", mainScript.replaceAll("\\s+", " "));
         placeholderMap.put("dynamic", dynamic ? "true" : "false");
-
-        if (optionMap.containsKey("relativeAppUrl")) {
-            placeholderMap.put("relativeAppUrl", optionMap.get("relativeAppUrl"));
-        }
+        placeholderMap.put("relativeAppUrl", generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", ""));
 
         String mainHtml = getResourceAsString(MAIN_HTML_TEMPLATE_RESOURCE_PATH);
 
@@ -129,12 +130,26 @@ public class WebAppExporter {
         }
     }
 
-    private static void generateServiceWorker(Path serviceWorkerPath, List<GenoMapData> genoMapDataList, Map<String, String> optionMap) throws IOException {
+    private static void generateCss(Path cssPath, GeneratingOptions generatingOptions) throws IOException {
+
+        Map<String, String> additionalOptionMap = generatingOptions.getAdditionalOptionsMap();
+
+        try (BufferedWriter writer = Files.newBufferedWriter(cssPath)) {
+
+            String css = getResourceAsString(CSS_TEMPLATE_RESOURCE_PATH);
+            css = css.replace("${fontFamily}", generatingOptions.getFontFamily());
+            css = css.replace("${relativeFontPath}", additionalOptionMap.get("relativeFontPath"));
+
+            writer.write(css);
+        }
+    }
+
+    private static void generateServiceWorker(Path serviceWorkerPath, List<GenoMapData> genoMapDataList, String relativeAppUrl) throws IOException {
 
         try (BufferedWriter writer = Files.newBufferedWriter(serviceWorkerPath)) {
 
             String serviceWorker = getResourceAsString(SERVICE_WORKER_TEMPLATE_RESOURCE_PATH);
-            serviceWorker = serviceWorker.replace("${relativeAppUrl}", optionMap.get("relativeAppUrl"));
+            serviceWorker = serviceWorker.replace("${relativeAppUrl}", relativeAppUrl);
             serviceWorker = serviceWorker.replace("${currentCacheId}", LocalDateTime.now().toString());
 
             List<String> genoMapPathList = new ArrayList<>();
@@ -149,13 +164,7 @@ public class WebAppExporter {
         }
     }
 
-    private static void generateManifest(Path manifestPath, DocumentInfo documentInfo, Map<String, String> optionMap) throws IOException {
-
-        String relativeAppUrl = "";
-
-        if (optionMap.containsKey("relativeAppUrl")) {
-            relativeAppUrl = optionMap.get("relativeAppUrl");
-        }
+    private static void generateManifest(Path manifestPath, DocumentInfo documentInfo, String relativeAppUrl) throws IOException {
 
         try (BufferedWriter writer = Files.newBufferedWriter(manifestPath)) {
 
