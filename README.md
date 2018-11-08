@@ -101,7 +101,6 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
    Auxiliary scripts:
     - `attribution.js` - optional attribution
-    - `analytics.js` - optional analytics
 
 3. Alter attribution:
 
@@ -113,10 +112,6 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
    or more complex:
 
    `var attributionBody = "<span xmlns:cc='http://creativecommons.org/ns#'><a rel='cc:attributionURL' property='cc:attributionName' href='https://github.com/jan-tosovsky-cz/rodokmen-tosovskych'>Rodokmen Tošovských</a> by Jan Tošovský is licensed under a <a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/4.0/'>CC-BY-SA</a> license</span>";`
-
-3. Alter analytics:
-
-   If you are interested how many users visited your app, you can put your analytics code into `analytics.js` file.
 
 ## Export
 

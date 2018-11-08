@@ -44,6 +44,8 @@ public class WebAppExporter {
     private static final String CSS_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/style.css";
     private static final String SERVICE_WORKER_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/service-worker.js";
     private static final String MANIFEST_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/manifest.json";
+    private static final String GTAG_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/gtag.js";
+
     private static final String[] MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS = {
         "searchPlaceholder", "searchResults", "genoMap", "firstName", "middleName", "lastName",
         "birth", "death", "mate", "father", "mother", "alertDynamicOnFileSystem"
@@ -110,6 +112,7 @@ public class WebAppExporter {
         }
 
         String mainScript = getMainScript(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH, generatingOptions.getResourceBundle(), dynamic);
+        String gtag = getGtag(GTAG_TEMPLATE_RESOURCE_PATH, generatingOptions);
 
         Map<String, String> placeholderMap = new HashMap<>();
 
@@ -118,6 +121,7 @@ public class WebAppExporter {
         placeholderMap.put("script", mainScript.replaceAll("\\s+", " "));
         placeholderMap.put("dynamic", dynamic ? "true" : "false");
         placeholderMap.put("relativeAppUrl", generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", ""));
+        placeholderMap.put("gtag", gtag);
 
         String mainHtml = getResourceAsString(MAIN_HTML_TEMPLATE_RESOURCE_PATH);
 
@@ -187,6 +191,19 @@ public class WebAppExporter {
         mainScript = mainScript.replace("\"${dynamic}\"", dynamic ? "true" : "false");
 
         return mainScript;
+    }
+
+    private static String getGtag(String resourcePath, GeneratingOptions generatingOptions) throws IOException {
+
+        String gtag = "";
+
+        String gaTrackingId = generatingOptions.getAdditionalOptionsMap().get("gaTrackingId");
+
+        if (gaTrackingId != null) {
+            gtag = getResourceAsString(resourcePath).replace("${gaTrackingId}", gaTrackingId);
+        }
+
+        return gtag;
     }
 
     private static String getResourceAsString(String resourcePath) throws IOException {

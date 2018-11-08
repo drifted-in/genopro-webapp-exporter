@@ -43,6 +43,7 @@ public class App {
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
+    private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final String DEFAULT_LANGUAGE = "en";
@@ -84,6 +85,9 @@ public class App {
 
             Map<String, String> additionalOptionMap = new HashMap<>();
             additionalOptionMap.put("relativeFontPath", relativeFontPath);
+            if (passedValuesMap.containsKey(PARAM_GA_TRACKING_ID)) {
+                additionalOptionMap.put("gaTrackingId", passedValuesMap.get(PARAM_GA_TRACKING_ID));
+            }
 
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily, dateFormatter, ageFormatter, additionalOptionMap);
 
@@ -120,7 +124,8 @@ public class App {
                     + "        [-lang:en] \n"
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
-                    + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"]"
+                    + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
+                    + "        [-gaTrackingId:<empty>]"
             );
         }
     }
