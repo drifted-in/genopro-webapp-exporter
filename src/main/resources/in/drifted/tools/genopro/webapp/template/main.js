@@ -14,7 +14,7 @@ var rowsProcessed = 0;
 document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("input", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
-document.getElementById("clearSearchButton").addEventListener("click", hideResults);
+document.getElementById("clearSearchInputButton").addEventListener("click", hideResults);
 
 function init(e) {
 
@@ -454,11 +454,11 @@ function showResults() {
         }
     }
 
-    var clearSearchButton = document.getElementById("clearSearchButton");
-    if (clearSearchButton.style.display === "none") {
+    var clearSearchInputButton = document.getElementById("clearSearchInputButton");
+    if (clearSearchInputButton.style.display === "none") {
         var searchButton = document.getElementById("searchButton");
         searchButton.style.display = "none";
-        clearSearchButton.style.display = "block";
+        clearSearchInputButton.style.display = "block";
     }
 
     addMoreSearchResultEntries(results);
@@ -564,10 +564,10 @@ function createSearchResultEntry(resultsElement, id, value) {
 function hideResults() {
 
     var searchButton = document.getElementById("searchButton");
-    var clearSearchButton = document.getElementById("clearSearchButton");
+    var clearSearchInputButton = document.getElementById("clearSearchInputButton");
 
     searchButton.style.display = "block";
-    clearSearchButton.style.display = "none";
+    clearSearchInputButton.style.display = "none";
 
     if (pinnedEntry !== null) {
         pinnedEntry.parentElement.removeChild(pinnedEntry);

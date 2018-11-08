@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="${language}">
 
 <head>
     ${gtag}
     <meta charset="UTF-8">
     <meta name="generator" content="GenoPro® WebApp exporter" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
+    <meta name="Description" content="${description}">
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -25,14 +26,14 @@
             ${content}
         </div>
         <div id="search">
-            <input id="keywords" type="search" name="keywords">
-            <button id="searchButton">
+            <input id="keywords" type="search" name="keywords" aria-label="${keywords}">
+            <button id="searchButton" aria-label="${search}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
                     <circle cx="10" cy="10" r="6" stroke="white" fill="none" stroke-width="3" />
                     <path d="M14.24 14.24l5 5" stroke="white" stroke-width="3" />
                 </svg>
             </button>
-            <button id="clearSearchButton" style="display: none">
+            <button id="clearSearchInputButton" style="display: none" aria-label="${clearSearchInput}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
                     <path d="M4 4L20 20M4 20L20 4" stroke="white" fill="none" stroke-width="3" />
                 </svg>
@@ -40,7 +41,7 @@
         </div>
         <div id="results"></div>
         <div class="genomap-list">
-            <select id="genomap-list"></select>
+            <select id="genomap-list" aria-label="${selectGenoMap}"></select>
         </div>
         <div id="attribution"></div>
     </div>

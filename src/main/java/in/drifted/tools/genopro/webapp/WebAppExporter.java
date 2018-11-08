@@ -46,8 +46,12 @@ public class WebAppExporter {
     private static final String MANIFEST_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/manifest.json";
     private static final String GTAG_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/gtag.js";
 
-    private static final String[] MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS = {
-        "searchPlaceholder", "searchResults", "genoMap", "firstName", "middleName", "lastName",
+    private static final String[] MAIN_HTML_TEMPLATE_LOCALIZED_PLACEHOLDERS = {
+        "keywords", "search", "clearSearchInput", "selectGenoMap"
+    };
+
+    private static final String[] MAIN_SCRIPT_TEMPLATE_LOCALIZED_PLACEHOLDERS = {
+        "searchPlaceholder", "genoMap", "firstName", "middleName", "lastName",
         "birth", "death", "mate", "father", "mother", "alertDynamicOnFileSystem"
     };
 
@@ -116,7 +120,9 @@ public class WebAppExporter {
 
         Map<String, String> placeholderMap = new HashMap<>();
 
+        placeholderMap.put("language", generatingOptions.getLocale().getLanguage());
         placeholderMap.put("title", documentInfo.getTitle());
+        placeholderMap.put("description", documentInfo.getDescription());
         placeholderMap.put("content", content);
         placeholderMap.put("script", mainScript.replaceAll("\\s+", " "));
         placeholderMap.put("dynamic", dynamic ? "true" : "false");
@@ -127,6 +133,10 @@ public class WebAppExporter {
 
         for (Entry<String, String> entry : placeholderMap.entrySet()) {
             mainHtml = mainHtml.replace("${" + entry.getKey() + "}", entry.getValue());
+        }
+
+        for (String placeholder : MAIN_HTML_TEMPLATE_LOCALIZED_PLACEHOLDERS) {
+            mainHtml = mainHtml.replace("${" + placeholder + "}", generatingOptions.getResourceBundle().getString(placeholder));
         }
 
         try (BufferedWriter writer = Files.newBufferedWriter(reportPath)) {
@@ -184,7 +194,7 @@ public class WebAppExporter {
 
         String mainScript = getResourceAsString(resourcePath);
 
-        for (String placeholder : MAIN_SCRIPT_TEMPLATE_PLACEHOLDERS) {
+        for (String placeholder : MAIN_SCRIPT_TEMPLATE_LOCALIZED_PLACEHOLDERS) {
             mainScript = mainScript.replace("${" + placeholder + "}", resourceBundle.getString(placeholder));
         }
 

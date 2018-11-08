@@ -1,5 +1,6 @@
 @font-face {
     font-family: "${fontFamily}";
+    font-display: fallback;
     font-style: normal;
     font-weight: normal;
     src: url("${relativeFontPath}") format("woff");
@@ -132,7 +133,7 @@ path.adopted {
     z-index: 100;
 }
 
-#search #clearSearchButton {
+#search #clearSearchInputButton {
     border-bottom: 1px solid grey;
 }
 
