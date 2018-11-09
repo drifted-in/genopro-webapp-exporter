@@ -7,6 +7,7 @@
     <meta name="generator" content="GenoPro® WebApp exporter" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1" />
     <meta name="Description" content="${description}">
+    <meta name="theme-color" content="whitesmoke">
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -14,8 +15,8 @@
     <link rel="manifest" href="manifest.json">
     <script src="res/hammer.min.js"></script>
     <script src="res/svg-pan-zoom.min.js"></script>
-    <script src="individuals.js"></script>
     <script src="genomaps.js"></script>
+    <script async src="individuals.js"></script>
     <script src="attribution.js"></script>
     <title>${title}</title>
 </head>
@@ -26,7 +27,7 @@
             ${content}
         </div>
         <div id="search">
-            <input id="keywords" type="search" name="keywords" aria-label="${keywords}">
+            <input id="keywords" type="search" name="keywords" aria-label="${keywords}" autocomplete="off">
             <button id="searchButton" aria-label="${search}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
                     <circle cx="10" cy="10" r="6" stroke="white" fill="none" stroke-width="3" />
