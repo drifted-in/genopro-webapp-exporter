@@ -121,11 +121,24 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
    Type `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static` and press enter.
 
+   Several other options can be used:
+    - `lang` - The language of user interface. Currently only `en` and `cs` values are supported. If new languages are needed,
+      just translate [all the words](https://github.com/drifted-in/genopro-webapp-exporter/blob/master/src/main/resources/in/drifted/tools/genopro/webapp/messages_en.properties) and send them to me via email.
+    - `datePattern` - The date pattern consisting of `d`, `M`, `y` symbols (for day, month, year) separated by various punctuation. See the complete [reference](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html).
+      To ensure the formatted date doesn't overflow the bounding box the pattern should match the format used in your document.
+    - `fontFamily` - If default Open Sans font doesn't suit your needs, it can be overridden by this parameter. In this case the `relativeFontPath` option becomes mandatory. If the font family contains a space, the value needs to be enclosed in quotes. 
+    - `relativeFontPath` - The relative path to the custom font in the WOFF format.
+    - `gaTrackingId` - For analyzing the web app traffic via Google Analytics just specify your tracking ID.
+
+    Example: `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static -lang:cs -datePattern:dd.MM.yyyy -fontFamily:Muli -relativeFontPath:res/Muli-Regular-webfont.woff -gaTrackingId:UA-00000000-1`
+
 3. Once everything looks good, generate dynamic pages:
 
    Type `java -jar genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -relativeAppUrl:/family-tree` and press enter.
 
    The last parameter represents the URL fragment relative to the server origin and must match the target app location.
    If your app URL is e.g. https://www.server.com/doe/family-tree/index.html, the `relativeAppUrl` is `/doe/family-tree`.
+
+   You can use same options as in case of static app.
 
 4. Copy the web application to the server.
