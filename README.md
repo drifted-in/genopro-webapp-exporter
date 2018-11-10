@@ -8,14 +8,24 @@ If you need to share your family trees with someone else, you can:
 2. export your data as a set of HTML pages
 
 For my use case I'd rather share my data in the form of a tiny web app, which would offer:
-- panning and zooming of visual family trees
-- selecting tree fragment sheets (GenoMaps) from the list
-- instant searching
-- showing basic/extended info for the selected person
-- highlighting the person in the family tree
-- anonymizing data related to living individuals
+- visual representation of family trees
+- fast navigation for large data sets
+- instant search
+- filtering out living individuals
 
-So I finally created a custom exporter. See sample output at http://drifted.in/other/rodokmen-tosovskych/.
+So I finally created a custom exporter, which brings advanced control over various aspects of the final output.
+
+## Offline mode
+
+If the web app is shown in [modern](https://caniuse.com/#feat=serviceworkers) web browsers, it is automatically cached so it can be served later on even without internet connection.
+
+## Mobile App
+
+The web app conforms to the [Progressive Web Apps](https://en.wikipedia.org/wiki/Progressive_Web_Apps) (PWA) standard which means it can be installed as a mobile app to the home screen if shown in the [supported browser](https://caniuse.com/#feat=web-app-manifest). 
+
+## Examples
+
+See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
 <p float="left">
 <img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
