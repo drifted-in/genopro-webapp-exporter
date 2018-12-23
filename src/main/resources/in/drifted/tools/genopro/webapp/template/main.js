@@ -1,7 +1,7 @@
 /* Copyright (c) 2018 Jan Tošovský */
 var svgPanZoomInstance;
 var genoMapSvg = null;
-var genoMapId = null;
+var genoMapId = getGenoMapId();
 var genoMapSelectedIndividualId = null;
 var keywords = [];
 var searchResultsSelectedEntryDetail = null;
@@ -11,10 +11,25 @@ var dragging = false;
 var dynamic = "${dynamic}";
 var rowsProcessed = 0;
 
+window.addEventListener("hashchange", processParams);
 document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("input", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
 document.getElementById("clearSearchInputButton").addEventListener("click", hideResults);
+
+function processParams() {
+
+    var passedGenoMapId = getGenoMapId();
+
+    if (passedGenoMapId !== null && passedGenoMapId !== genoMapId) {
+        genoMapId = passedGenoMapId;
+        document.getElementById("genomap-list").value = genoMapId;
+
+        switchGenoMap(function() {
+            svgPanZoomInstance.zoomBy(1 / svgPanZoomInstance.getSizes().realZoom);
+        });
+    }
+}
 
 function init(e) {
 
@@ -34,6 +49,10 @@ function init(e) {
             genoMapSelectItem.text = value;
             genoMapSelect.appendChild(genoMapSelectItem);
         });
+
+        if (genoMapId !== null) {
+            genoMapSelect.value = genoMapId;
+        }
 
         var genoMaps = document.getElementById("content").getElementsByTagName("svg");
 
@@ -137,6 +156,8 @@ function switchGenoMap(callback) {
 
         callback();
     }
+
+    location.hash = "#/sheet/" + genoMapId;
 }
 
 function initSvgListeners() {
@@ -677,4 +698,9 @@ function isSame(array1, array2) {
     return (typeof array1 !== "undefined" && array1.length === array2.length) && array1.every(function(element, index) {
         return element === array2[index];
     });
+}
+
+function getGenoMapId() {
+    var result = location.hash.match("#/sheet/([a-z0-9-]*)");
+    return result && genoMapMap.has(result[1]) ? result[1] : null;
 }
