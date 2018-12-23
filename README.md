@@ -134,13 +134,14 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
    Several other options can be used:
     - `lang` - The language of user interface. Currently only `en` and `cs` values are supported. If new languages are needed,
       just translate [all the words](https://github.com/drifted-in/genopro-webapp-exporter/blob/master/src/main/resources/in/drifted/tools/genopro/webapp/messages_en.properties) and send them to me via email.
+    - `anonymizedYears` - Years before present used for anonymizing data. If zero value is used, only dates of living individuals are anonymized. A negative value deactivates anonymization completely. 
     - `datePattern` - The date pattern consisting of `d`, `M`, `y` symbols (for day, month, year) separated by various punctuation. See the complete [reference](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html).
       To ensure the formatted date doesn't overflow the bounding box the pattern should match the format used in your document.
     - `fontFamily` - If default Open Sans font doesn't suit your needs, it can be overridden by this parameter. In this case the `relativeFontPath` option becomes mandatory. If the font family contains a space, the value needs to be enclosed in quotes. 
     - `relativeFontPath` - The relative path to the custom font in the WOFF format.
     - `gaTrackingId` - For analyzing the web app traffic via Google Analytics just specify your tracking ID.
 
-    Example: `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static -lang:cs -datePattern:dd.MM.yyyy -fontFamily:Muli -relativeFontPath:res/Muli-Regular-webfont.woff -gaTrackingId:UA-00000000-1`
+    Example: `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static -lang:cs -anonymizedYears:120 -datePattern:dd.MM.yyyy -fontFamily:Muli -relativeFontPath:res/Muli-Regular-webfont.woff -gaTrackingId:UA-00000000-1`
 
 3. Once everything looks good, generate dynamic pages:
 

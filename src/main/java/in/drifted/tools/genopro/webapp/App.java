@@ -26,6 +26,8 @@ import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +42,7 @@ public class App {
     private static final String PARAM_RELATIVE_APP_URL = "-relativeAppUrl";
     private static final String PARAM_MODE = "-mode";
     private static final String PARAM_LANGUAGE = "-lang";
+    private static final String PARAM_ANONYMIZED_YEARS = "-anonymizedYears";
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
@@ -47,6 +50,7 @@ public class App {
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final String DEFAULT_LANGUAGE = "en";
+    private static final int DEFAULT_ANONYMIZED_YEARS = 100;
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
     private static final String DEFAULT_RELATIVE_FONT_PATH = "res/OpenSans-Regular-webfont.woff";
@@ -76,6 +80,12 @@ public class App {
             Locale locale = new Locale(language);
             ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_PATH, locale);
 
+            int anonymizedYears = DEFAULT_ANONYMIZED_YEARS;
+
+            if (passedValuesMap.containsKey(PARAM_ANONYMIZED_YEARS)) {
+                anonymizedYears = Integer.parseInt(passedValuesMap.get(PARAM_ANONYMIZED_YEARS));
+            }
+
             String datePattern = passedValuesMap.getOrDefault(PARAM_DATE_PATTERN, DEFAULT_DATE_PATTERN);
             String fontFamily = passedValuesMap.getOrDefault(PARAM_FONT_FAMILY, DEFAULT_FONT_FAMILY);
             String relativeFontPath = passedValuesMap.getOrDefault(PARAM_RELATIVE_FONT_PATH, DEFAULT_RELATIVE_FONT_PATH);
@@ -97,7 +107,8 @@ public class App {
 
             Document document = DataParser.getDocument(inputPath);
             DocumentInfo documentInfo = DataParser.getDocumentInfo(document);
-            List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document);
+            LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
+            List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, anonymizedSinceLocalDate);
 
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
@@ -122,6 +133,7 @@ public class App {
                     + "         -relativeAppUrl:/family-tree \n"
                     + "        [-mode:dynamic] \n"
                     + "        [-lang:en] \n"
+                    + "        [-anonymizedYears:100] \n"
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
