@@ -69,6 +69,7 @@ public class WebAppExporter {
     public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions) throws IOException {
 
         generateMainHtml(reportPath, documentInfo, genoMapDataList, generatingOptions, false);
+        generateCss(reportPath.getParent().resolve("style.css"), generatingOptions);
         generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, "");
     }
 
