@@ -2,6 +2,7 @@ var relativeAppUrl = "${relativeAppUrl}";
 var currentCacheId = "${currentCacheId}";
 
 self.addEventListener("install", function(event) {
+    self.skipWaiting();
     event.waitUntil(
         caches.open(currentCacheId).then(function(cache) {
             return cache.addAll([
@@ -28,6 +29,7 @@ self.addEventListener("install", function(event) {
 });
 
 self.addEventListener('activate', function(event) {
+    clients.claim();
     event.waitUntil(
         caches.keys().then(function(keyList) {
             return Promise.all(keyList.map(function(key) {
