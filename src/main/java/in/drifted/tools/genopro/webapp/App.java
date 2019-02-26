@@ -22,6 +22,7 @@ import in.drifted.tools.genopro.model.BasicAgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
+import in.drifted.tools.genopro.model.ParserOptions;
 import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -107,8 +108,14 @@ public class App {
 
             Document document = DataParser.getDocument(inputPath);
             DocumentInfo documentInfo = DataParser.getDocumentInfo(document);
+
+            ParserOptions parserOptions = new ParserOptions();
+            parserOptions.setExcludeUntitledGenoMaps(true);
+            parserOptions.setResolveHyperlinks(true);
             LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
-            List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, anonymizedSinceLocalDate);
+            parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
+
+            List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, parserOptions);
 
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
