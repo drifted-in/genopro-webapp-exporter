@@ -83,15 +83,22 @@ path.adopted {
 }
 
 #container {
-    width: 100vw;
-    height: 100vh;
     background-color: white;
     line-height: normal;
 }
 
-#content svg {
+#content {
     width: 100vw;
     height: 100vh;
+}
+
+#content svg {
+    width: inherit;
+    min-width: inherit;
+    max-width: inherit;
+    height: inherit;
+    min-height: inherit;
+    max-height: inherit;
     cursor: grab;
 }
 
@@ -297,4 +304,12 @@ path.adopted {
 
 .pinned .hitarea {
     background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='-20 0 40 40'><path d='M0 3S0 3 0 3S20 37 0 37S0 3 0 3M-4 28a4 4 0 1 0 8 0a4 4 0 1 0 -8 0' fill='dodgerblue'/></svg>");
+}
+
+@media print {
+    #search,
+    #results,
+    .genomap-list {
+        display: none;
+    }
 }

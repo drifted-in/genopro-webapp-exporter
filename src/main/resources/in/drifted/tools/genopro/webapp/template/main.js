@@ -10,8 +10,12 @@ var pinnedEntry = null;
 var dragging = false;
 var dynamic = "${dynamic}";
 var rowsProcessed = 0;
+var zoom;
+var pan;
 
 window.addEventListener("hashchange", processParams);
+window.addEventListener("beforeprint", setRealSize);
+window.addEventListener("afterprint", restoreSize);
 document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("input", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
@@ -673,6 +677,32 @@ function setDragging(e) {
 
 function resetDragging(e) {
     dragging = false;
+}
+
+function setRealSize(e) {
+
+    pan = svgPanZoomInstance.getPan();
+    zoom = svgPanZoomInstance.getZoom();
+    svgPanZoomInstance.zoomBy(1.0);
+    svgPanZoomInstance.panBy({x:0, y:0});
+
+    var sizes = svgPanZoomInstance.getSizes();
+
+    var content = document.getElementById("content");
+    content.style.width = sizes.viewBox.width + "px";
+    content.style.height = sizes.viewBox.height + "px";
+
+    console.log(sizes);
+}
+
+function restoreSize(e) {
+
+    var content = document.getElementById("content");
+    content.style.width = "100vw";
+    content.style.height = "100vh";
+
+    svgPanZoomInstance.zoom(zoom);
+    svgPanZoomInstance.pan(pan);
 }
 
 function matches(value, keywords) {

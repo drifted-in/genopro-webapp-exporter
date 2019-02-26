@@ -57,8 +57,6 @@ public class SvgRenderer {
             writer.writeAttribute("id", id);
             writer.writeAttribute("xmlns", "http://www.w3.org/2000/svg");
             writer.writeAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-            writer.writeAttribute("width", "100%");
-            writer.writeAttribute("height", "100%");
             Position topLeft = genoMap.getBoundaryRect().getTopLeft();
             Position bottomRight = genoMap.getBoundaryRect().getBottomRight();
             int shiftX = topLeft.getX();
