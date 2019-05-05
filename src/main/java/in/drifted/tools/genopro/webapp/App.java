@@ -48,6 +48,7 @@ public class App {
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
+    private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final String DEFAULT_LANGUAGE = "en";
@@ -55,6 +56,7 @@ public class App {
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
     private static final String DEFAULT_RELATIVE_FONT_PATH = "res/OpenSans-Regular-webfont.woff";
+    private static final int DEFAULT_HIGHLIGHT_MODE = 0;
 
     private static final String RESOURCE_BUNDLE_PATH = "in/drifted/tools/genopro/webapp/messages";
 
@@ -100,6 +102,13 @@ public class App {
                 additionalOptionMap.put("gaTrackingId", passedValuesMap.get(PARAM_GA_TRACKING_ID));
             }
 
+            int highlightMode = DEFAULT_HIGHLIGHT_MODE;
+
+            if (passedValuesMap.containsKey(PARAM_HIGHLIGHT_MODE)) {
+                highlightMode = Integer.parseInt(passedValuesMap.get(PARAM_HIGHLIGHT_MODE));
+                additionalOptionMap.put("highlightMode", String.valueOf(highlightMode));
+            }
+
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily, dateFormatter, ageFormatter, additionalOptionMap);
 
             Path individualsPath = outputFolderFolder.resolve("individuals.js");
@@ -114,6 +123,7 @@ public class App {
             parserOptions.setResolveHyperlinks(true);
             LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
             parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
+            parserOptions.setHighlightMode(highlightMode);
 
             List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, parserOptions);
 
@@ -144,7 +154,8 @@ public class App {
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
-                    + "        [-gaTrackingId:<empty>]"
+                    + "        [-gaTrackingId:<empty>]\n"
+                    + "        [-highlightMode:0]\n"
             );
         }
     }

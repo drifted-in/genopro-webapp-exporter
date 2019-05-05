@@ -34,14 +34,17 @@ import in.drifted.tools.genopro.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class SvgRenderer {
 
-    public static void render(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions) throws IOException {
+    public static void render(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions)
+            throws IOException {
 
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
@@ -65,8 +68,13 @@ public class SvgRenderer {
             int height = topLeft.getY() - bottomRight.getY();
             writer.writeAttribute("viewBox", "0 0 " + width + " " + height);
 
+            Map<String, Individual> individualMap = new HashMap<>();
+            for (Individual individual : genoMapData.getIndividualCollection()) {
+                individualMap.put(individual.getId(), individual);
+            }
+
             for (Family family : genoMapData.getFamilyCollection()) {
-                renderFamilyRelations(writer, family, shiftX, shiftY, generatingOptions);
+                renderFamilyRelations(writer, family, individualMap, shiftX, shiftY, generatingOptions);
             }
 
             for (Individual individual : genoMapData.getIndividualCollection()) {
@@ -84,7 +92,9 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderFamilyRelations(XMLStreamWriter writer, Family family, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderFamilyRelations(XMLStreamWriter writer, Family family,
+            Map<String, Individual> individualMap, int shiftX, int shiftY, GeneratingOptions generatingOptions)
+            throws XMLStreamException {
 
         Position position = family.getPosition();
         BoundaryRect topBoundaryRect = family.getTopBoundaryRect();
@@ -93,16 +103,115 @@ public class SvgRenderer {
         Rect topRect = null;
         Rect bottomRect = null;
 
+        int highlightMode = Integer.parseInt(
+                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
+
+        boolean hasChildren = false;
+
+        for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
+            if (pedigreeLink.getType() != PedigreeLink.PARENT) {
+                hasChildren = true;
+                break;
+            }
+        }
+
+        Individual individual;
+
+        if (highlightMode == 2) {
+            individual = individualMap.get(family.getMotherId());
+
+        } else {
+            individual = individualMap.get(family.getFatherId());
+        }
+
+        int highlightKeysCount = individual.getHighlightKeySet().size();
+
         if (topBoundaryRect != null) {
 
             topRect = new Rect(topBoundaryRect);
 
             int y = shiftY - topRect.getY();
 
-            writer.writeStartElement("path");
-            writer.writeAttribute("d", "M" + (topRect.getX() - shiftX) + " " + y + "h" + topRect.getWidth());
-            writer.writeAttribute("class", "family-line");
-            writer.writeEndElement();
+            String className = "family-line";
+
+            String linePathData = "M" + (topRect.getX() - shiftX) + " " + y + "h" + topRect.getWidth();
+
+            if (highlightMode > 0) {
+
+                String[] linePathDataArray = new String[]{
+                    "M" + (topRect.getX() - shiftX) + " " + y + "H" + (position.getX() - shiftX),
+                    "M" + (position.getX() - shiftX) + " " + y + "H" + (topRect.getX() + topRect.getWidth() - shiftX)
+                };
+
+                if (hasChildren) {
+
+                    int i = 0;
+
+                    for (String highlightKey : individual.getHighlightKeySet()) {
+
+                        StringBuilder style = new StringBuilder();
+                        style.append("stroke:");
+                        style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                        if (i > 0) {
+                            style.append(";stroke-dasharray:");
+                            style.append(5 * (highlightKeysCount - i));
+                            style.append(",");
+                            style.append(5 * i);
+                            style.append(";stroke-linecap:butt;");
+                            style.append(";fill:none;");
+                        }
+
+                        if (bottomBoundaryRect != null) {
+
+                            writer.writeStartElement("path");
+                            writer.writeAttribute("d", linePathDataArray[0]);
+
+                            if (highlightMode == 1) {
+                                writer.writeAttribute("class", className + " highlighted");
+                                writer.writeAttribute("style", style.toString());
+                            } else {
+                                writer.writeAttribute("class", className + " unhighlighted");
+                            }
+
+                            writer.writeEndElement();
+
+                            writer.writeStartElement("path");
+                            writer.writeAttribute("d", linePathDataArray[1]);
+
+                            if (highlightMode == 2) {
+                                writer.writeAttribute("class", className + " highlighted");
+                                writer.writeAttribute("style", style.toString());
+                            } else {
+                                writer.writeAttribute("class", className + " unhighlighted");
+                            }
+
+                            writer.writeEndElement();
+
+                        } else {
+                            writer.writeStartElement("path");
+                            writer.writeAttribute("d", linePathData);
+                            writer.writeAttribute("class", className + " highlighted");
+                            writer.writeAttribute("style", style.toString());
+                            writer.writeEndElement();
+                        }
+
+                        i++;
+                    }
+
+                } else {
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", linePathData);
+                    writer.writeAttribute("class", className + " unhighlighted");
+                    writer.writeEndElement();
+                }
+
+            } else {
+                writer.writeStartElement("path");
+                writer.writeAttribute("d", linePathData);
+                writer.writeAttribute("class", className);
+                writer.writeEndElement();
+            }
 
             if (family.getLabel() != null) {
 
@@ -123,7 +232,8 @@ public class SvgRenderer {
 
                 writer.writeStartElement("text");
                 writer.writeAttribute("x", String.valueOf(centerX));
-                writer.writeAttribute("y", String.valueOf(y - 0.3 * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - textPadding));
+                writer.writeAttribute("y",
+                        String.valueOf(y - 0.3 * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - textPadding));
                 writer.writeAttribute("class", "family-label");
                 writer.writeCharacters(label);
                 writer.writeEndElement();
@@ -133,30 +243,77 @@ public class SvgRenderer {
         if (bottomBoundaryRect != null) {
 
             // if children are anonymized, the bottom rect can be skipped
-            boolean hasChildren = false;
-
-            for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
-                if (pedigreeLink.getType() != PedigreeLink.PARENT) {
-                    hasChildren = true;
-                    break;
-                }
-            }
-
             if (hasChildren) {
 
                 bottomRect = new Rect(bottomBoundaryRect);
 
-                writer.writeStartElement("path");
-                writer.writeAttribute("d", "M" + (position.getX() - shiftX) + " " + (shiftY - position.getY()) + "v" + (position.getY() - bottomRect.getY()));
-                writer.writeAttribute("class", "family-line");
-                writer.writeEndElement();
+                String className = "family-line";
 
-                writer.writeStartElement("path");
-                writer.writeAttribute("d", "M" + (bottomRect.getX() - shiftX) + " " + (shiftY - bottomRect.getY()) + "h" + bottomRect.getWidth());
-                writer.writeAttribute("class", "family-line");
-                writer.writeEndElement();
+                StringBuilder verticalPathData = new StringBuilder();
+                verticalPathData.append("M");
+                verticalPathData.append(position.getX() - shiftX);
+                verticalPathData.append(" ");
+                verticalPathData.append(shiftY - position.getY());
+                verticalPathData.append("v");
+                verticalPathData.append(position.getY() - bottomRect.getY());
+
+                StringBuilder horizontalPathData = new StringBuilder();
+                horizontalPathData.append("M");
+                horizontalPathData.append(bottomRect.getX() - shiftX);
+                horizontalPathData.append(" ");
+                horizontalPathData.append(shiftY - bottomRect.getY());
+                horizontalPathData.append("h");
+                horizontalPathData.append(bottomRect.getWidth());
+
+                if (highlightMode > 0) {
+
+                    int i = 0;
+
+                    for (String highlightKey : individual.getHighlightKeySet()) {
+
+                        StringBuilder style = new StringBuilder();
+                        style.append("stroke:");
+                        style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                        if (i > 0) {
+                            style.append(";stroke-dasharray:");
+                            style.append(5 * (highlightKeysCount - i));
+                            style.append(",");
+                            style.append(5 * i);
+                            style.append(";stroke-linecap:butt;");
+                            style.append(";fill:none;");
+                        }
+
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", verticalPathData.toString());
+                        writer.writeAttribute("class", className + " highlighted");
+                        writer.writeAttribute("style", style.toString());
+                        writer.writeEndElement();
+
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", horizontalPathData.toString());
+                        writer.writeAttribute("class", className + " highlighted");
+                        writer.writeAttribute("style", style.toString());
+                        writer.writeEndElement();
+
+                        i++;
+                    }
+
+                } else {
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", verticalPathData.toString());
+                    writer.writeAttribute("class", className);
+                    writer.writeEndElement();
+
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", horizontalPathData.toString());
+                    writer.writeAttribute("class", className);
+                    writer.writeEndElement();
+                }
             }
         }
+
+        String className = "pedigree-link";
 
         for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
 
@@ -213,30 +370,75 @@ public class SvgRenderer {
 
             if (!isEmpty) {
 
-                writer.writeStartElement("path");
-                writer.writeAttribute("d", pathData.toString());
+                if (highlightMode > 0) {
 
-                switch (pedigreeLink.getType()) {
+                    Individual child = individualMap.get(pedigreeLink.getIndividualId());
 
-                    case PedigreeLink.PARENT:
-                        writer.writeAttribute("class", "parent");
-                        break;
+                    if ((highlightMode == 1 && child.getGender() == 0)
+                            || (highlightMode == 2 && child.getGender() == 1)) {
 
-                    case PedigreeLink.ADOPTED:
-                        writer.writeAttribute("class", "adopted");
-                        break;
+                        int childHighlightKeysCount = child.getHighlightKeySet().size();
 
-                    default:
-                        writer.writeAttribute("class", "biological");
-                        break;
+                        int i = 0;
+
+                        for (String highlightKey : child.getHighlightKeySet()) {
+
+                            StringBuilder style = new StringBuilder();
+                            style.append("stroke:");
+                            style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                            if (i > 0) {
+                                style.append(";stroke-dasharray:");
+                                style.append(5 * (childHighlightKeysCount - i));
+                                style.append(",");
+                                style.append(5 * i);
+                                style.append(";stroke-linecap:butt;");
+                                style.append(";fill:none;");
+                            }
+
+                            writer.writeStartElement("path");
+                            writer.writeAttribute("d", pathData.toString());
+                            writer.writeAttribute("class", className + " highlighted");
+                            writer.writeAttribute("style", style.toString());
+                            writer.writeEndElement();
+
+                            i++;
+                        }
+
+                    } else {
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", pathData.toString());
+                        writer.writeAttribute("class", className + " unhighlighted");
+                        writer.writeEndElement();
+                    }
+
+                } else {
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", pathData.toString());
+
+                    switch (pedigreeLink.getType()) {
+
+                        case PedigreeLink.PARENT:
+                            writer.writeAttribute("class", className + " parent");
+                            break;
+
+                        case PedigreeLink.ADOPTED:
+                            writer.writeAttribute("class", className + " adopted");
+                            break;
+
+                        default:
+                            writer.writeAttribute("class", className + " biological");
+                            break;
+                    }
+
+                    writer.writeEndElement();
                 }
-
-                writer.writeEndElement();
             }
         }
     }
 
-    private static void renderIndividual(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderIndividual(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         writer.writeStartElement("g");
         writer.writeAttribute("id", individual.getId());
@@ -263,7 +465,8 @@ public class SvgRenderer {
         writer.writeEndElement();
     }
 
-    private static void renderIndividualDates(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderIndividualDates(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         DateFormatter dateFormatter = generatingOptions.getDateFormatter();
 
@@ -311,7 +514,8 @@ public class SvgRenderer {
 
             writer.writeStartElement("text");
             writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
-            writer.writeAttribute("y", String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
+            writer.writeAttribute("y",
+                    String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
 
             writer.writeCharacters(dateList.get(i));
@@ -319,31 +523,110 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualSymbol(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderIndividualSymbol(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Position position = individual.getPosition();
+
+        int highlightMode = Integer.parseInt(
+                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
 
         switch (individual.getGender()) {
 
             case Gender.MALE: {
-                writer.writeStartElement("rect");
-                writer.writeAttribute("x", String.valueOf(position.getX() - shiftX - 9));
-                writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
-                writer.writeAttribute("width", "18");
-                writer.writeAttribute("height", "18");
-                writer.writeAttribute("class", "individual-symbol");
-                writer.writeEndElement();
+
+                if (highlightMode == 1) {
+                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int i = 0;
+
+                    for (String highlightKey : individual.getHighlightKeySet()) {
+
+                        StringBuilder data = new StringBuilder();
+                        data.append("M");
+                        data.append(String.valueOf(position.getX() - shiftX - 9));
+                        data.append(" ");
+                        data.append(String.valueOf(shiftY - position.getY() - 9));
+                        data.append("h18v18h-18z");
+
+                        StringBuilder style = new StringBuilder();
+                        style.append("stroke:");
+                        style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                        if (i > 0) {
+                            style.append(";stroke-dasharray:");
+                            style.append(5 * (highlightKeysCount - i));
+                            style.append(",");
+                            style.append(5 * i);
+                            style.append(";stroke-linecap:butt;");
+                            style.append(";fill:none;");
+                        }
+
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", data.toString());
+                        writer.writeAttribute("class", "individual-symbol highlighted");
+                        writer.writeAttribute("style", style.toString());
+                        writer.writeEndElement();
+                        i++;
+                    }
+
+                } else {
+                    writer.writeStartElement("rect");
+                    writer.writeAttribute("x", String.valueOf(position.getX() - shiftX - 9));
+                    writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
+                    writer.writeAttribute("width", "18");
+                    writer.writeAttribute("height", "18");
+                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == 2 ? " unhighlighted" : ""));
+                    writer.writeEndElement();
+                }
 
                 break;
             }
 
             case Gender.FEMALE: {
-                writer.writeStartElement("circle");
-                writer.writeAttribute("cx", String.valueOf(position.getX() - shiftX));
-                writer.writeAttribute("cy", String.valueOf(shiftY - position.getY()));
-                writer.writeAttribute("r", "9");
-                writer.writeAttribute("class", "individual-symbol");
-                writer.writeEndElement();
+
+                if (highlightMode == 2) {
+
+                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int i = 0;
+
+                    for (String highlightKey : individual.getHighlightKeySet()) {
+
+                        StringBuilder data = new StringBuilder();
+                        data.append("M");
+                        data.append(String.valueOf(position.getX() - shiftX));
+                        data.append(" ");
+                        data.append(String.valueOf(shiftY - position.getY()));
+                        data.append("m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0");
+
+                        StringBuilder style = new StringBuilder();
+                        style.append("stroke:");
+                        style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                        if (i > 0) {
+                            style.append(";stroke-dasharray:");
+                            style.append(5 * (highlightKeysCount - i));
+                            style.append(",");
+                            style.append(5 * i);
+                            style.append(";stroke-linecap:butt;");
+                            style.append(";fill:none;");
+                        }
+
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", data.toString());
+                        writer.writeAttribute("class", "individual-symbol highlighted");
+                        writer.writeAttribute("style", style.toString());
+                        writer.writeEndElement();
+                        i++;
+                    }
+
+                } else {
+                    writer.writeStartElement("circle");
+                    writer.writeAttribute("cx", String.valueOf(position.getX() - shiftX));
+                    writer.writeAttribute("cy", String.valueOf(shiftY - position.getY()));
+                    writer.writeAttribute("r", "9");
+                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == 1 ? " unhighlighted" : ""));
+                    writer.writeEndElement();
+                }
 
                 break;
             }
@@ -369,11 +652,15 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualAge(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderIndividualAge(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Position position = individual.getPosition();
 
         if (individual.isDead()) {
+
+            int highlightMode = Integer.parseInt(
+                    generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
 
             float delta = (individual.getGender() == Gender.MALE) ? 9 : 6.4f;
 
@@ -395,10 +682,55 @@ public class SvgRenderer {
             dataBuilder.append(" ");
             dataBuilder.append(shiftY - position.getY() - delta);
 
-            writer.writeStartElement("path");
-            writer.writeAttribute("d", dataBuilder.toString());
-            writer.writeAttribute("class", "individual-deceased");
-            writer.writeEndElement();
+            String className = "individual-deceased";
+
+            if (highlightMode > 0) {
+
+                boolean isHighlighted = highlightMode == 1 && individual.getGender() == Gender.MALE
+                        || highlightMode == 2 && individual.getGender() == Gender.FEMALE;
+
+                if (isHighlighted) {
+
+                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int i = 0;
+
+                    for (String highlightKey : individual.getHighlightKeySet()) {
+
+                        StringBuilder style = new StringBuilder();
+                        style.append("stroke:");
+                        style.append(highlightKey.equals("n/a") ? "black" : highlightKey);
+
+                        if (i > 0) {
+                            style.append(";stroke-dasharray:");
+                            style.append(5 * (highlightKeysCount - i));
+                            style.append(",");
+                            style.append(5 * i);
+                            style.append(";stroke-linecap:butt;");
+                            style.append(";fill:none;");
+                        }
+
+                        writer.writeStartElement("path");
+                        writer.writeAttribute("d", dataBuilder.toString());
+                        writer.writeAttribute("class", className + " highlighted");
+                        writer.writeAttribute("style", style.toString());
+                        writer.writeEndElement();
+
+                        i++;
+                    }
+
+                } else {
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", dataBuilder.toString());
+                    writer.writeAttribute("class", className + " unhighlighted");
+                    writer.writeEndElement();
+                }
+
+            } else {
+                writer.writeStartElement("path");
+                writer.writeAttribute("d", dataBuilder.toString());
+                writer.writeAttribute("class", className);
+                writer.writeEndElement();
+            }
         }
 
         Birth birth = individual.getBirth();
@@ -433,7 +765,8 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderIndividualLabel(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderIndividualLabel(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         Name name = individual.getName();
 
@@ -463,7 +796,8 @@ public class SvgRenderer {
                 nameList.add("(" + lastName2 + ")");
             }
 
-            List<String> wrappedLineList = StringUtil.getWrappedLineList(String.join(" ", nameList), rect.getWidth() - 2 * 8, generatingOptions.getMainFontMetrics());
+            List<String> wrappedLineList = StringUtil.getWrappedLineList(String.join(" ", nameList),
+                    rect.getWidth() - 2 * 8, generatingOptions.getMainFontMetrics());
 
             int baseTopY = shiftY - individual.getPosition().getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
@@ -491,7 +825,8 @@ public class SvgRenderer {
 
                 writer.writeStartElement("text");
                 writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
-                writer.writeAttribute("y", String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
+                writer.writeAttribute("y",
+                        String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("class", isHyperlink ? "individual-label-hyperlink" : "individual-label");
 
                 writer.writeCharacters(wrappedLineList.get(i));
@@ -500,7 +835,8 @@ public class SvgRenderer {
         }
     }
 
-    private static void renderActiveArea(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY, GeneratingOptions generatingOptions) throws XMLStreamException {
+    private static void renderActiveArea(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
 
         int boxSize = 8;
 

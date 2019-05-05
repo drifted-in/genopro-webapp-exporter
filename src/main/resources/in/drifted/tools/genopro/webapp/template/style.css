@@ -19,7 +19,8 @@ svg {
     stroke-linecap: round;
 }
 
-path.family-line {
+path.family-line,
+path.pedigree-link {
     stroke: black;
     stroke-width: 3px;
     fill: none;
@@ -69,17 +70,27 @@ path.individual-deceased {
     fill: none;
 }
 
-path.parent,
-path.biological {
+path.pedigree-link.parent,
+path.pedigree-link.biological {
     stroke: black;
     stroke-width: 3px;
     fill: none;
 }
 
-path.adopted {
+path.pedigree-link.adopted {
     stroke: dodgerblue;
     stroke-width: 3px;
     fill: none;
+}
+
+.highlighted,
+path.highlighted {
+    stroke: none;
+}
+
+.unhighlighted,
+path.unhighlighted {
+    stroke: silver;
 }
 
 #container {
