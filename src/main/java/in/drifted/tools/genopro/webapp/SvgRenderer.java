@@ -243,6 +243,15 @@ public class SvgRenderer {
                 writer.writeCharacters(label);
                 writer.writeEndElement();
             }
+
+            if (family.getFamilyLineType() == FamilyLineType.NO_MORE_CHILDREN) {
+
+                linePathData = "M" + (topRect.getX() + topRect.getWidth() - 10 - shiftX) + " " + (y + 8) + "l3 4l4 -7";
+                writer.writeStartElement("path");
+                writer.writeAttribute("d", linePathData);
+                writer.writeAttribute("class", className);
+                writer.writeEndElement();
+            }
         }
 
         if (bottomBoundaryRect != null) {
