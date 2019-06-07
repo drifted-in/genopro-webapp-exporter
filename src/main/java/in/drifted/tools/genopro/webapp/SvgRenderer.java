@@ -20,6 +20,7 @@ import in.drifted.tools.genopro.model.BoundaryRect;
 import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.Death;
 import in.drifted.tools.genopro.model.Family;
+import in.drifted.tools.genopro.model.FamilyLineType;
 import in.drifted.tools.genopro.model.Gender;
 import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
@@ -109,22 +110,26 @@ public class SvgRenderer {
         boolean hasChildren = false;
 
         for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
-            if (pedigreeLink.getType() != PedigreeLink.PARENT) {
+            if (!pedigreeLink.isParent()) {
                 hasChildren = true;
                 break;
             }
         }
 
-        Individual individual;
+        Individual individual = null;
+        int highlightKeysCount = 0;
 
-        if (highlightMode == 2) {
-            individual = individualMap.get(family.getMotherId());
+        if (highlightMode > 0) {
 
-        } else {
-            individual = individualMap.get(family.getFatherId());
+            if (highlightMode == 2) {
+                individual = individualMap.get(family.getMotherId());
+
+            } else {
+                individual = individualMap.get(family.getFatherId());
+            }
+
+            highlightKeysCount = individual.getHighlightKeySet().size();
         }
-
-        int highlightKeysCount = individual.getHighlightKeySet().size();
 
         if (topBoundaryRect != null) {
 
@@ -332,7 +337,7 @@ public class SvgRenderer {
             pathData.append(" ");
             pathData.append(shiftY - individualPosition.getY());
 
-            if (pedigreeLink.getType() == PedigreeLink.PARENT) {
+            if (pedigreeLink.isParent()) {
                 if (topRect != null) {
                     pathData.append("v");
                     pathData.append(individualPosition.getY() - topRect.getY());
@@ -374,8 +379,7 @@ public class SvgRenderer {
 
                     Individual child = individualMap.get(pedigreeLink.getIndividualId());
 
-                    if ((highlightMode == 1 && child.getGender() == 0)
-                            || (highlightMode == 2 && child.getGender() == 1)) {
+                    if ((highlightMode == 1 && child.isMale()) || (highlightMode == 2 && child.isFemale())) {
 
                         int childHighlightKeysCount = child.getHighlightKeySet().size();
 
@@ -416,13 +420,13 @@ public class SvgRenderer {
                     writer.writeStartElement("path");
                     writer.writeAttribute("d", pathData.toString());
 
-                    switch (pedigreeLink.getType()) {
+                    switch (pedigreeLink.getPedigreeLinkType()) {
 
-                        case PedigreeLink.PARENT:
+                        case PARENT:
                             writer.writeAttribute("class", className + " parent");
                             break;
 
-                        case PedigreeLink.ADOPTED:
+                        case ADOPTED:
                             writer.writeAttribute("class", className + " adopted");
                             break;
 
@@ -533,7 +537,7 @@ public class SvgRenderer {
 
         switch (individual.getGender()) {
 
-            case Gender.MALE: {
+            case MALE: {
 
                 if (highlightMode == 1) {
                     int highlightKeysCount = individual.getHighlightKeySet().size();
@@ -582,7 +586,7 @@ public class SvgRenderer {
                 break;
             }
 
-            case Gender.FEMALE: {
+            case FEMALE: {
 
                 if (highlightMode == 2) {
 
@@ -631,7 +635,7 @@ public class SvgRenderer {
                 break;
             }
 
-            case Gender.UNKNOWN: {
+            case UNKNOWN: {
                 writer.writeStartElement("rect");
                 writer.writeAttribute("x", String.valueOf(position.getX() - shiftX - 9));
                 writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
