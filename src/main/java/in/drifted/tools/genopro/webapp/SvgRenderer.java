@@ -244,13 +244,34 @@ public class SvgRenderer {
                 writer.writeEndElement();
             }
 
-            if (family.getFamilyLineType() == FamilyLineType.NO_MORE_CHILDREN) {
+            if (family.getFamilyLineType() != FamilyLineType.UNSPECIFIED) {
 
-                linePathData = "M" + (topRect.getX() + topRect.getWidth() - 10 - shiftX) + " " + (y + 8) + "l3 4l4 -7";
-                writer.writeStartElement("path");
-                writer.writeAttribute("d", linePathData);
-                writer.writeAttribute("class", className);
-                writer.writeEndElement();
+                String familyLineTypeSymbolPathData = null;
+                String familyLineTypeSymbolClassName = className;
+                double topRight = topRect.getX() + topRect.getWidth() - shiftX;
+
+                switch (family.getFamilyLineType()) {
+                    case NO_MORE_CHILDREN :
+                        familyLineTypeSymbolPathData = "M" + (topRight - 6.5) + " " + (y + 3) + "h5v5h-5z";
+                        familyLineTypeSymbolClassName += "-no-more-children";
+
+                        break;
+
+                    case POSSIBLY_MORE_CHILDREN:
+                        familyLineTypeSymbolPathData = "M" + (topRight - 11)  + " " + (y + 6) + "h8m-4 -4v8";
+                        break;
+
+                    case TO_BE_COMPLETED:
+                        familyLineTypeSymbolPathData = "M" + (topRight - 8.5) + " " + (y + 3) + "l6 6m-6 0l6-6";
+                        break;
+                }
+
+                if (familyLineTypeSymbolPathData != null) {
+                    writer.writeStartElement("path");
+                    writer.writeAttribute("d", familyLineTypeSymbolPathData);
+                    writer.writeAttribute("class", familyLineTypeSymbolClassName);
+                    writer.writeEndElement();
+                }
             }
         }
 
