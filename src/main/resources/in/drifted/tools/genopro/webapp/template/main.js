@@ -691,8 +691,6 @@ function setRealSize(e) {
     var content = document.getElementById("content");
     content.style.width = sizes.viewBox.width + "px";
     content.style.height = sizes.viewBox.height + "px";
-
-    console.log(sizes);
 }
 
 function restoreSize(e) {
