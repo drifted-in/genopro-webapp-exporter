@@ -129,6 +129,7 @@ public class WebAppExporter {
         placeholderMap.put("dynamic", dynamic ? "true" : "false");
         placeholderMap.put("relativeAppUrl", generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", ""));
         placeholderMap.put("gtag", gtag);
+        placeholderMap.put("timestamp", "<!-- " + LocalDateTime.now().toString() + " -->");
 
         String mainHtml = getResourceAsString(MAIN_HTML_TEMPLATE_RESOURCE_PATH);
 
