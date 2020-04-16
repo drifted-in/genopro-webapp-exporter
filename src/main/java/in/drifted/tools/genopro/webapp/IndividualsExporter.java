@@ -20,6 +20,7 @@ import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.FamilyRelation;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.model.Individual;
+import in.drifted.tools.genopro.model.IndividualBirthDateComparator;
 import in.drifted.tools.genopro.model.Name;
 import in.drifted.tools.genopro.util.MapUtil;
 import java.io.BufferedWriter;
@@ -37,7 +38,7 @@ public class IndividualsExporter {
     public static void export(Path individualsPath, List<GenoMapData> genoMapDataList, DateFormatter dateFormatter) throws IOException {
 
         Map<String, Individual> individualMap = getValidIndividualMap(genoMapDataList);
-        individualMap = MapUtil.sortByValue(individualMap);
+        individualMap = MapUtil.sortByValue(individualMap, new IndividualBirthDateComparator(true));
 
         Map<String, FamilyRelation> familyRelationMap = DataUtil.getFamilyRelationMap(genoMapDataList, individualMap);
 
