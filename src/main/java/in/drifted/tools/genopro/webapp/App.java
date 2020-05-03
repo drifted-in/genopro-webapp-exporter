@@ -43,7 +43,7 @@ public class App {
     private static final String PARAM_OUTPUT_FOLDER_PATH = "-out";
     private static final String PARAM_RELATIVE_APP_URL = "-relativeAppUrl";
     private static final String PARAM_MODE = "-mode";
-    private static final String PARAM_LANGUAGE = "-lang";
+    private static final String PARAM_LOCALE = "-locale";
     private static final String PARAM_ANONYMIZED_YEARS = "-anonymizedYears";
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
@@ -52,7 +52,6 @@ public class App {
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
 
     private static final String DEFAULT_MODE = "dynamic";
-    private static final String DEFAULT_LANGUAGE = "en";
     private static final int DEFAULT_ANONYMIZED_YEARS = 100;
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
@@ -82,8 +81,15 @@ public class App {
             Path inputPath = Paths.get(passedValuesMap.get(PARAM_INPUT_PATH));
             Path outputFolderFolder = Paths.get(passedValuesMap.get(PARAM_OUTPUT_FOLDER_PATH));
 
-            String language = passedValuesMap.getOrDefault(PARAM_LANGUAGE, DEFAULT_LANGUAGE);
-            Locale locale = new Locale(language);
+            Locale locale = Locale.getDefault();
+
+            if (passedValuesMap.containsKey(PARAM_LOCALE)) {
+                locale = new Locale(passedValuesMap.get(PARAM_LOCALE));
+            }
+
+            // changing default Locale which is then used for ResourceBundle retrieval as a fallback Locale
+            Locale.setDefault(Locale.US);
+
             ResourceBundle resourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE_PATH, locale);
 
             int anonymizedYears = DEFAULT_ANONYMIZED_YEARS;
@@ -165,7 +171,7 @@ public class App {
                     + "         -out:C:\\family-tree \n"
                     + "         -relativeAppUrl:/family-tree \n"
                     + "        [-mode:dynamic] \n"
-                    + "        [-lang:en] \n"
+                    + "        [-locale:en] \n"
                     + "        [-anonymizedYears:100] \n"
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
