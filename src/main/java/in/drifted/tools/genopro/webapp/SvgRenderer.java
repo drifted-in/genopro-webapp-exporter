@@ -525,12 +525,6 @@ public class SvgRenderer {
 
             DateFormatter dateFormatter = generatingOptions.getDateFormatter();
 
-            if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
-                    || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID) {
-
-                dateFormatter = new DateFormatter("yyyy", generatingOptions.getLocale(), dateFormatter.getPrefixReplacementMap());
-            }
-
             Birth birth = individual.getBirth();
             Death death = individual.getDeath();
             boolean hasBirth = false;

@@ -20,6 +20,7 @@ import in.drifted.tools.genopro.DataUtil;
 import in.drifted.tools.genopro.model.AgeFormatter;
 import in.drifted.tools.genopro.model.BasicAgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
+import in.drifted.tools.genopro.model.DisplayStyle;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.model.ParserOptions;
@@ -135,8 +136,16 @@ public class App {
                 additionalOptionMap.put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
             }
 
+            DisplayStyle displayStyle = documentInfo.getDisplayStyle();
+
+            if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
+                    || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID) {
+
+                dateFormatter = new DateFormatter("yyyy", locale, dateFormatter.getPrefixReplacementMap());
+            }
+
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
-                    documentInfo.getDisplayStyle(), dateFormatter, ageFormatter, additionalOptionMap);
+                    displayStyle, dateFormatter, ageFormatter, additionalOptionMap);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
