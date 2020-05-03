@@ -74,7 +74,9 @@ public class App {
         String mode = passedValuesMap.getOrDefault(PARAM_MODE, DEFAULT_MODE);
         boolean dynamic = mode.equals("dynamic");
 
-        if (passedValuesMap.containsKey(PARAM_INPUT_PATH) && passedValuesMap.containsKey(PARAM_OUTPUT_FOLDER_PATH) && (!dynamic || (dynamic && passedValuesMap.containsKey(PARAM_RELATIVE_APP_URL)))) {
+        if (passedValuesMap.containsKey(PARAM_INPUT_PATH)
+                && passedValuesMap.containsKey(PARAM_OUTPUT_FOLDER_PATH)
+                && (!dynamic || (dynamic && passedValuesMap.containsKey(PARAM_RELATIVE_APP_URL)))) {
 
             Path inputPath = Paths.get(passedValuesMap.get(PARAM_INPUT_PATH));
             Path outputFolderFolder = Paths.get(passedValuesMap.get(PARAM_OUTPUT_FOLDER_PATH));
@@ -109,8 +111,6 @@ public class App {
                 additionalOptionMap.put("highlightMode", String.valueOf(highlightMode));
             }
 
-            GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily, dateFormatter, ageFormatter, additionalOptionMap);
-
             Path individualsPath = outputFolderFolder.resolve("individuals.js");
             Path genomapsPath = outputFolderFolder.resolve("genomaps.js");
             Path reportPath = outputFolderFolder.resolve("index.html");
@@ -121,7 +121,8 @@ public class App {
             ParserOptions parserOptions = new ParserOptions();
             parserOptions.setExcludeUntitledGenoMaps(true);
             parserOptions.setResolveHyperlinks(true);
-            LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
+            LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null
+                    : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
             parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
             parserOptions.setHighlightMode(highlightMode);
 
@@ -131,7 +132,13 @@ public class App {
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
 
             if (dynamic) {
-                generatingOptions.getAdditionalOptionsMap().put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
+                additionalOptionMap.put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
+            }
+
+            GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
+                    documentInfo.getDisplayStyle(), dateFormatter, ageFormatter, additionalOptionMap);
+
+            if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
 
             } else {

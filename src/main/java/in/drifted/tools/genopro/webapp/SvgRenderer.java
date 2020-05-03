@@ -19,6 +19,7 @@ import in.drifted.tools.genopro.model.Birth;
 import in.drifted.tools.genopro.model.BoundaryRect;
 import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.Death;
+import in.drifted.tools.genopro.model.DisplayStyle;
 import in.drifted.tools.genopro.model.Family;
 import in.drifted.tools.genopro.model.FamilyLineType;
 import in.drifted.tools.genopro.model.Gender;
@@ -251,14 +252,14 @@ public class SvgRenderer {
                 double topRight = topRect.getX() + topRect.getWidth() - shiftX;
 
                 switch (family.getFamilyLineType()) {
-                    case NO_MORE_CHILDREN :
+                    case NO_MORE_CHILDREN:
                         familyLineTypeSymbolPathData = "M" + (topRight - 6.5) + " " + (y + 3) + "h5v5h-5z";
                         familyLineTypeSymbolClassName += "-no-more-children";
 
                         break;
 
                     case POSSIBLY_MORE_CHILDREN:
-                        familyLineTypeSymbolPathData = "M" + (topRight - 11)  + " " + (y + 6) + "h8m-4 -4v8";
+                        familyLineTypeSymbolPathData = "M" + (topRight - 11) + " " + (y + 6) + "h8m-4 -4v8";
                         break;
 
                     case TO_BE_COMPLETED:
@@ -502,26 +503,62 @@ public class SvgRenderer {
     private static void renderIndividualDates(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        DateFormatter dateFormatter = generatingOptions.getDateFormatter();
+        List<String> labelList = new ArrayList<>();
+        DisplayStyle displayStyle = generatingOptions.getDisplayStyle();
 
-        Birth birth = individual.getBirth();
-        Death death = individual.getDeath();
-        boolean hasBirth = false;
-
-        List<String> dateList = new ArrayList<>();
-
-        if (birth != null && birth.getDate() != null) {
-            String birthLabel = birth.getDate().getDate(dateFormatter);
-            dateList.add(birthLabel);
-            hasBirth = true;
+        if (displayStyle == DisplayStyle.NOTHING) {
+            return;
         }
 
-        if (death != null && death.getDate() != null) {
-            String deathLabel = death.getDate().getDate(dateFormatter);
-            if (!hasBirth) {
-                deathLabel = generatingOptions.getResourceBundle().getString("deathAbbrev") + " " + deathLabel;
+        if (displayStyle == DisplayStyle.ID
+                || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID
+                || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ID) {
+
+            labelList.add(individual.getId());
+        }
+
+        if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
+                || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID
+                || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH
+                || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ON_SEPARATE_LINES
+                || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ID) {
+
+            DateFormatter dateFormatter = generatingOptions.getDateFormatter();
+
+            if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
+                    || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID) {
+
+                dateFormatter = new DateFormatter("yyyy", generatingOptions.getLocale(), dateFormatter.getPrefixReplacementMap());
             }
-            dateList.add(deathLabel);
+
+            Birth birth = individual.getBirth();
+            Death death = individual.getDeath();
+            boolean hasBirth = false;
+
+            List<String> dateList = new ArrayList<>();
+
+            if (birth != null && birth.getDate() != null) {
+                String birthLabel = birth.getDate().getDate(dateFormatter);
+                dateList.add(birthLabel);
+                hasBirth = true;
+            }
+
+            if (death != null && death.getDate() != null) {
+                String deathLabel = death.getDate().getDate(dateFormatter);
+                if (!hasBirth) {
+                    deathLabel = generatingOptions.getResourceBundle().getString("deathAbbrev") + " " + deathLabel;
+                }
+                dateList.add(deathLabel);
+            }
+
+            if (displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ON_SEPARATE_LINES
+                    || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ID) {
+
+                labelList.addAll(dateList);
+
+            } else {
+                labelList.add(String.join(" – ", dateList));
+            }
         }
 
         Rect rect = new Rect(individual.getBoundaryRect());
@@ -531,17 +568,17 @@ public class SvgRenderer {
 
         int baseTopY = shiftY - rect.getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
 
-        for (int i = 0; i < dateList.size(); i++) {
+        for (int i = 0; i < labelList.size(); i++) {
 
-            String date = dateList.get(i);
-            int dateWidth = generatingOptions.getMainFontMetrics().stringWidth(date);
+            String label = labelList.get(i);
+            int labelWidth = generatingOptions.getMainFontMetrics().stringWidth(label);
 
             int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
             writer.writeStartElement("rect");
-            writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - dateWidth / 2 - shiftX));
+            writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - labelWidth / 2 - shiftX));
             writer.writeAttribute("y", String.valueOf(topY));
-            writer.writeAttribute("width", String.valueOf(dateWidth));
+            writer.writeAttribute("width", String.valueOf(labelWidth));
             writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
             writer.writeEndElement();
@@ -552,7 +589,7 @@ public class SvgRenderer {
                     String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
 
-            writer.writeCharacters(dateList.get(i));
+            writer.writeCharacters(labelList.get(i));
             writer.writeEndElement();
         }
     }

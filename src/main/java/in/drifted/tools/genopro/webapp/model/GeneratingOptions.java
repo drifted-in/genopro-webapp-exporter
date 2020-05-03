@@ -17,6 +17,7 @@ package in.drifted.tools.genopro.webapp.model;
 
 import in.drifted.tools.genopro.model.AgeFormatter;
 import in.drifted.tools.genopro.model.DateFormatter;
+import in.drifted.tools.genopro.model.DisplayStyle;
 import java.awt.Canvas;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -33,19 +34,21 @@ public class GeneratingOptions {
     private final Locale locale;
     private final ResourceBundle resourceBundle;
     private final String fontFamily;
+    private final DisplayStyle displayStyle;
     private final DateFormatter dateFormatter;
     private final AgeFormatter ageFormatter;
     private final FontMetrics mainFontMetrics;
     private final FontMetrics ageFontMetrics;
     private final Map<String, String> additionalOptionsMap;
 
-    public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily, DateFormatter dateFormatter, AgeFormatter ageFormatter, Map<String, String> additionalOptionsMap) {
+    public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily, DisplayStyle displayStyle, DateFormatter dateFormatter, AgeFormatter ageFormatter, Map<String, String> additionalOptionsMap) {
 
         Canvas canvas = new Canvas();
 
         this.locale = locale;
         this.resourceBundle = resourceBundle;
         this.fontFamily = fontFamily;
+        this.displayStyle = displayStyle;
         this.dateFormatter = dateFormatter;
         this.ageFormatter = ageFormatter;
         this.mainFontMetrics = canvas.getFontMetrics(new Font(fontFamily, Font.PLAIN, MAIN_FONT_SIZE_IN_PIXELS));
@@ -63,6 +66,10 @@ public class GeneratingOptions {
 
     public String getFontFamily() {
         return fontFamily;
+    }
+
+    public DisplayStyle getDisplayStyle() {
+        return displayStyle;
     }
 
     public DateFormatter getDateFormatter() {
