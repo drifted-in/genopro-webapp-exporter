@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 
 public class GeneratingOptions {
 
-    public static final int MAIN_FONT_SIZE_IN_PIXELS = 11;
+    public static final int MAIN_FONT_SIZE_IN_PIXELS = 10;
     public static final int AGE_FONT_SIZE_IN_PIXELS = 9;
     public static final int MAIN_LINE_HEIGHT_IN_PIXELS = 14;
 
