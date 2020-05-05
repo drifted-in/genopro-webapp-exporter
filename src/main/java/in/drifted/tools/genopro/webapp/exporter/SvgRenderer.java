@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package in.drifted.tools.genopro.webapp;
+package in.drifted.tools.genopro.webapp.exporter;
 
 import in.drifted.tools.genopro.model.Birth;
 import in.drifted.tools.genopro.model.BoundaryRect;
@@ -31,7 +31,7 @@ import in.drifted.tools.genopro.model.Name;
 import in.drifted.tools.genopro.model.PedigreeLink;
 import in.drifted.tools.genopro.model.Position;
 import in.drifted.tools.genopro.model.Rect;
-import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
+import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import in.drifted.tools.genopro.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;

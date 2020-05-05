@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package in.drifted.tools.genopro.webapp;
+package in.drifted.tools.genopro.webapp.exporter;
 
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
+import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,7 +37,7 @@ import java.util.ResourceBundle;
 
 public class WebAppExporter {
 
-    private static final String RESOURCE_PATH = "/in/drifted/tools/genopro/webapp/template";
+    private static final String RESOURCE_PATH = "/in/drifted/tools/genopro/webapp/exporter/resources/template";
 
     private static final String MAIN_HTML_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/index.html";
     private static final String MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/main.js";

@@ -29,7 +29,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>in.drifted.tools.genopro.webapp.App</mainClass>
+                            <mainClass>in.drifted.tools.genopro.webapp.exporter.App</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

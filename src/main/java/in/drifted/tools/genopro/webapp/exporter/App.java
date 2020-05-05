@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package in.drifted.tools.genopro.webapp;
+package in.drifted.tools.genopro.webapp.exporter;
 
 import in.drifted.tools.genopro.DataParser;
 import in.drifted.tools.genopro.DataUtil;
@@ -24,7 +24,7 @@ import in.drifted.tools.genopro.model.DisplayStyle;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.model.ParserOptions;
-import in.drifted.tools.genopro.webapp.model.GeneratingOptions;
+import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
