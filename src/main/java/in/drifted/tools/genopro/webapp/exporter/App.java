@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,8 +127,8 @@ public class App {
             DocumentInfo documentInfo = DataParser.getDocumentInfo(document);
 
             ParserOptions parserOptions = new ParserOptions();
-            parserOptions.setExcludeUntitledGenoMaps(true);
-            parserOptions.setResolveHyperlinks(true);
+            parserOptions.setUntitledGenoMapsExcluded(true);
+            parserOptions.setHyperlinksResolved(true);
             LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null
                     : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
             parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
@@ -151,7 +152,7 @@ public class App {
             }
 
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
-                    displayStyle, dateFormatter, ageFormatter, additionalOptionMap);
+                    displayStyle, dateFormatter, ageFormatter, additionalOptionMap, new HashSet<>());
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);

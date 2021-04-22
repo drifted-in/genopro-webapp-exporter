@@ -15,6 +15,7 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
+import in.drifted.tools.genopro.model.Alignment;
 import in.drifted.tools.genopro.model.Birth;
 import in.drifted.tools.genopro.model.BoundaryRect;
 import in.drifted.tools.genopro.model.DateFormatter;
@@ -27,15 +28,20 @@ import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.model.Hyperlink;
 import in.drifted.tools.genopro.model.Individual;
+import in.drifted.tools.genopro.model.Label;
+import in.drifted.tools.genopro.model.LabelStyle;
 import in.drifted.tools.genopro.model.Name;
 import in.drifted.tools.genopro.model.PedigreeLink;
 import in.drifted.tools.genopro.model.Position;
 import in.drifted.tools.genopro.model.Rect;
+import in.drifted.tools.genopro.model.Size;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import in.drifted.tools.genopro.util.StringUtil;
+import java.awt.FontMetrics;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +50,29 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class SvgRenderer {
+
+    private static final Map<Size, Double> FONT_SIZE_SCALE_FACTOR_MAP = new HashMap<>();
+    private static final Map<Size, Double> STROKE_WIDTH_SCALE_FACTOR_MAP = new HashMap<>();
+
+    static {
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.T, 0.63);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.S, 0.8);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.M, 1.109);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.L, 1.62);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.XL, 2.22);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.XXL, 3.2);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.XXXL, 4.89);
+        FONT_SIZE_SCALE_FACTOR_MAP.put(Size.XXXXL, 9.73);
+
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.T, 0.27);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.S, 0.7);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.M, 1.0);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.L, 1.35);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.XL, 1.7);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.XXL, 2.0);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.XXXL, 2.2);
+        STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.XXXXL, 2.8);
+    }
 
     public static void render(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions)
             throws IOException {
@@ -70,6 +99,12 @@ public class SvgRenderer {
             int height = topLeft.getY() - bottomRight.getY();
             writer.writeAttribute("viewBox", "0 0 " + width + " " + height);
 
+            for (Label label : genoMapData.getLabelCollection()) {
+                if (!generatingOptions.getUnsupportedLabelColorSet().contains(label.getLabelStyle().getFillColor())) {
+                    renderLabel(writer, label, shiftX, shiftY, generatingOptions);
+                }
+            }
+
             Map<String, Individual> individualMap = new HashMap<>();
             for (Individual individual : genoMapData.getIndividualCollection()) {
                 individualMap.put(individual.getId(), individual);
@@ -91,6 +126,143 @@ public class SvgRenderer {
 
         } catch (XMLStreamException e) {
             throw new IOException(e);
+        }
+    }
+
+    private static void renderLabel(XMLStreamWriter writer, Label label, int shiftX, int shiftY,
+            GeneratingOptions generatingOptions) throws XMLStreamException {
+
+        int width = label.getRect().getWidth();
+        int height = label.getRect().getHeight();
+        int rectX = label.getRect().getX() - shiftX;
+        int rectY = shiftY - label.getRect().getY();
+
+        LabelStyle labelStyle = label.getLabelStyle();
+        StringBuilder style = new StringBuilder();
+        style.append("fill: ");
+        style.append(labelStyle.getFillColor().getHex());
+        style.append(";stroke: ");
+        style.append(labelStyle.getBorder().getColor().getHex());
+        style.append(";stroke-width: ");
+        style.append(getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
+
+        writer.writeStartElement("rect");
+        writer.writeAttribute("x", String.valueOf(rectX));
+        writer.writeAttribute("y", String.valueOf(rectY));
+        writer.writeAttribute("width", String.valueOf(width));
+        writer.writeAttribute("height", String.valueOf(height));
+        writer.writeAttribute("style", style.toString());
+        writer.writeEndElement();
+
+        int padding = labelStyle.getPadding();
+        String id = "idx-" + label.getRect().hashCode();
+
+        writer.writeStartElement("clipPath");
+        writer.writeAttribute("id", id);
+        writer.writeStartElement("rect");
+        writer.writeAttribute("x", String.valueOf(rectX + padding));
+        writer.writeAttribute("y", String.valueOf(rectY + padding));
+        writer.writeAttribute("width", String.valueOf(width - 2 * padding));
+        writer.writeAttribute("height", String.valueOf(height - 2 * padding));
+        writer.writeEndElement();
+        writer.writeEndElement();
+
+        double scaleFactor = FONT_SIZE_SCALE_FACTOR_MAP.get(label.getLabelStyle().getSize());
+        double fontSize = scaleFactor * generatingOptions.getMainFontMetrics().getFont().getSize();
+
+        String text = label.getText();
+
+        if (text != null) {
+
+            List<String> lineList = Arrays.asList(text.split("\n", -1));
+
+            FontMetrics scaledFontMetrics = generatingOptions.getFontMetrics(10 * fontSize);
+            int ascent = scaledFontMetrics.getAscent() / 10;
+            int descent = scaledFontMetrics.getDescent() / 10;
+
+            List<String> wrappedLineList = new ArrayList<>();
+
+            for (String line : lineList) {
+                wrappedLineList.addAll(StringUtil.getWrappedLineList(line,
+                        10 * (width - (2 * labelStyle.getPadding())),
+                        scaledFontMetrics));
+            }
+
+            int baseX = getLabelBaseX(rectX, width, labelStyle);
+            int baseY = rectY + padding + ascent;
+            
+            int availableHeight = (height - 2 * padding);
+            int textBlockHeight = ascent + (int)((wrappedLineList.size() - 1) * 1.36 * fontSize) + descent;
+            
+            if (textBlockHeight < availableHeight && (labelStyle.getVerticalAlignment() != Alignment.TOP)) {
+                if (labelStyle.getVerticalAlignment() == Alignment.BOTTOM) {
+                    baseY = rectY + height - padding - textBlockHeight + ascent;
+                } else {
+                    baseY = rectY + padding + (availableHeight - textBlockHeight) / 2 + ascent;
+                }
+            }
+
+            for (int i = 0; i < wrappedLineList.size(); i++) {
+                
+                int y = baseY + (int) (1.36 * i * fontSize);
+
+                writer.writeStartElement("text");
+                writer.writeAttribute("clip-path", "url(#" + id + ")");
+                writer.writeAttribute("text-anchor", getLabelTextAnchor(labelStyle));
+                writer.writeAttribute("x", String.valueOf(baseX));
+                writer.writeAttribute("y", String.valueOf(y));
+                writer.writeAttribute("style", "font-size:" + fontSize + "px");
+                writer.writeCharacters(wrappedLineList.get(i));
+                writer.writeEndElement();
+            }
+
+            if (textBlockHeight > availableHeight) {
+                int lineWidth = width / 2;
+                int arrowWidth = 6;
+                int startX = rectX + width / 4;
+                int endX = startX + lineWidth;
+                int startY = rectY + height - padding + 2;
+
+                StringBuilder data = new StringBuilder();
+                data.append("M");
+                data.append(startX);
+                data.append(",");
+                data.append(startY);
+                data.append("h");
+                data.append(lineWidth);
+
+                if (lineWidth > (2 * arrowWidth)) {
+                    data.append("M");
+                    data.append(startX);
+                    data.append(",");
+                    data.append(startY);
+                    data.append("L");
+                    data.append(startX + arrowWidth / 2);
+                    data.append(",");
+                    data.append(startY + arrowWidth * 0.7);
+                    data.append("L");
+                    data.append(startX + arrowWidth);
+                    data.append(",");
+                    data.append(startY);
+                    data.append("M");
+                    data.append(endX);
+                    data.append(",");
+                    data.append(startY);
+                    data.append("L");
+                    data.append(endX - arrowWidth / 2);
+                    data.append(",");
+                    data.append(startY + arrowWidth * 0.7);
+                    data.append("L");
+                    data.append(endX - arrowWidth);
+                    data.append(",");
+                    data.append(startY);
+                }
+
+                writer.writeStartElement("path");
+                writer.writeAttribute("d", data.toString());
+                writer.writeAttribute("style", "stroke: red; stroke-width: 0.5px; fill: none;");
+                writer.writeEndElement();
+            }
         }
     }
 
@@ -915,5 +1087,35 @@ public class SvgRenderer {
         writer.writeAttribute("height", String.valueOf(rect.getHeight() - 2 * boxSize));
         writer.writeAttribute("class", "individual-active-area");
         writer.writeEndElement();
+    }
+
+    private static String getStrokeWidth(Size size, double defaultStrokeWidth) {
+        double factor = STROKE_WIDTH_SCALE_FACTOR_MAP.getOrDefault(size, 1.0);
+        return String.valueOf(defaultStrokeWidth * factor);
+    }
+
+    private static int getLabelBaseX(int rectX, int width, LabelStyle labelStyle) {
+
+        int padding = labelStyle.getPadding();
+
+        switch (labelStyle.getHorizontalAlignment()) {
+            case CENTER:
+                return (int) (rectX + width / 2.0);
+            case RIGHT:
+                return rectX + width - padding;
+            default:
+                return rectX + padding;
+        }
+    }
+
+    private static String getLabelTextAnchor(LabelStyle labelStyle) {
+        switch (labelStyle.getHorizontalAlignment()) {
+            case CENTER:
+                return "middle";
+            case RIGHT:
+                return "end";
+            default:
+                return "start";
+        }
     }
 }
