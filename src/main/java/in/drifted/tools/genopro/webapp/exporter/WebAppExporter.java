@@ -81,7 +81,7 @@ public class WebAppExporter {
 
             if (genoMap.getTitle() != null) {
                 try (OutputStream outputStream = Files.newOutputStream(folderPath.resolve(genoMap.getId() + ".svg"))) {
-                    SvgRenderer.render(genoMapData, outputStream, generatingOptions);
+                    SvgExporter.export(genoMapData, outputStream, generatingOptions);
                 }
             }
         }
@@ -93,7 +93,7 @@ public class WebAppExporter {
 
         if (dynamic) {
             try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-                SvgRenderer.render(genoMapDataList.iterator().next(), outputStream, generatingOptions);
+                SvgExporter.export(genoMapDataList.iterator().next(), outputStream, generatingOptions);
                 content = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
             }
 
@@ -108,7 +108,7 @@ public class WebAppExporter {
                 if (genoMap.getTitle() != null) {
 
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    SvgRenderer.render(genoMapData, outputStream, generatingOptions);
+                    SvgExporter.export(genoMapData, outputStream, generatingOptions);
                     svgContentBuilder.append(new String(outputStream.toByteArray(), StandardCharsets.UTF_8));
                 }
             }

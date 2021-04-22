@@ -49,7 +49,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class SvgRenderer {
+public class SvgExporter {
 
     private static final Map<Size, Double> FONT_SIZE_SCALE_FACTOR_MAP = new HashMap<>();
     private static final Map<Size, Double> STROKE_WIDTH_SCALE_FACTOR_MAP = new HashMap<>();
@@ -74,7 +74,7 @@ public class SvgRenderer {
         STROKE_WIDTH_SCALE_FACTOR_MAP.put(Size.XXXXL, 2.8);
     }
 
-    public static void render(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions)
+    public static void export(GenoMapData genoMapData, OutputStream outputStream, GeneratingOptions generatingOptions)
             throws IOException {
 
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
