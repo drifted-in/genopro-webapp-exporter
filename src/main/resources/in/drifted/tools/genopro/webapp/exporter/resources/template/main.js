@@ -461,7 +461,7 @@ function showResults() {
     results.style.display = "block";
 
     results.addEventListener("scroll", function() {
-        if (results.scrollTop + results.clientHeight >= results.scrollHeight) {
+        if (Math.ceil(results.scrollTop + results.clientHeight) >= results.scrollHeight) {
             addMoreSearchResultEntries(results);
         }
     });
