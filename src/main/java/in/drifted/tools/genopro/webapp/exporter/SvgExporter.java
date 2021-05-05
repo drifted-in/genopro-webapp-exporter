@@ -26,6 +26,7 @@ import in.drifted.tools.genopro.model.FamilyLineType;
 import in.drifted.tools.genopro.model.Gender;
 import in.drifted.tools.genopro.model.GenoMap;
 import in.drifted.tools.genopro.model.GenoMapData;
+import in.drifted.tools.genopro.model.HighlightMode;
 import in.drifted.tools.genopro.model.Hyperlink;
 import in.drifted.tools.genopro.model.Individual;
 import in.drifted.tools.genopro.model.Label;
@@ -277,8 +278,8 @@ public class SvgExporter {
         Rect topRect = null;
         Rect bottomRect = null;
 
-        int highlightMode = Integer.parseInt(
-                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
+        HighlightMode highlightMode = HighlightMode.of(Integer.parseInt(
+                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0")));
 
         boolean hasChildren = false;
 
@@ -292,9 +293,9 @@ public class SvgExporter {
         Individual individual = null;
         int highlightKeysCount = 0;
 
-        if (highlightMode > 0) {
+        if (highlightMode != HighlightMode.NONE) {
 
-            if (highlightMode == 2) {
+            if (highlightMode == HighlightMode.MATERNAL) {
                 individual = individualMap.get(family.getMotherId());
 
             } else {
@@ -314,7 +315,7 @@ public class SvgExporter {
 
             String linePathData = "M" + (topRect.getX() - shiftX) + " " + y + "h" + topRect.getWidth();
 
-            if (highlightMode > 0) {
+            if (highlightMode != HighlightMode.NONE) {
 
                 String[] linePathDataArray = new String[]{
                     "M" + (topRect.getX() - shiftX) + " " + y + "H" + (position.getX() - shiftX),
@@ -345,7 +346,7 @@ public class SvgExporter {
                             writer.writeStartElement("path");
                             writer.writeAttribute("d", linePathDataArray[0]);
 
-                            if (highlightMode == 1) {
+                            if (highlightMode == HighlightMode.PATERNAL) {
                                 writer.writeAttribute("class", className + " highlighted");
                                 writer.writeAttribute("style", style.toString());
                             } else {
@@ -357,7 +358,7 @@ public class SvgExporter {
                             writer.writeStartElement("path");
                             writer.writeAttribute("d", linePathDataArray[1]);
 
-                            if (highlightMode == 2) {
+                            if (highlightMode == HighlightMode.MATERNAL) {
                                 writer.writeAttribute("class", className + " highlighted");
                                 writer.writeAttribute("style", style.toString());
                             } else {
@@ -473,7 +474,7 @@ public class SvgExporter {
                 horizontalPathData.append("h");
                 horizontalPathData.append(bottomRect.getWidth());
 
-                if (highlightMode > 0) {
+                if (highlightMode != HighlightMode.NONE) {
 
                     int i = 0;
 
@@ -578,11 +579,12 @@ public class SvgExporter {
 
             if (!isEmpty) {
 
-                if (highlightMode > 0) {
+                if (highlightMode != HighlightMode.NONE) {
 
                     Individual child = individualMap.get(pedigreeLink.getIndividualId());
 
-                    if ((highlightMode == 1 && child.isMale()) || (highlightMode == 2 && child.isFemale())) {
+                    if ((highlightMode == HighlightMode.PATERNAL && child.isMale())
+                            || (highlightMode == HighlightMode.MATERNAL && child.isFemale())) {
 
                         int childHighlightKeysCount = child.getHighlightKeySet().size();
 
@@ -765,14 +767,14 @@ public class SvgExporter {
 
         Position position = individual.getPosition();
 
-        int highlightMode = Integer.parseInt(
-                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
+        HighlightMode highlightMode = HighlightMode.of(Integer.parseInt(
+                generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0")));
 
         switch (individual.getGender()) {
 
             case MALE: {
 
-                if (highlightMode == 1) {
+                if (highlightMode == HighlightMode.PATERNAL) {
                     int highlightKeysCount = individual.getHighlightKeySet().size();
                     int i = 0;
 
@@ -812,7 +814,7 @@ public class SvgExporter {
                     writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
                     writer.writeAttribute("width", "18");
                     writer.writeAttribute("height", "18");
-                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == 2 ? " unhighlighted" : ""));
+                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == HighlightMode.MATERNAL ? " unhighlighted" : ""));
                     writer.writeEndElement();
                 }
 
@@ -821,7 +823,7 @@ public class SvgExporter {
 
             case FEMALE: {
 
-                if (highlightMode == 2) {
+                if (highlightMode == HighlightMode.MATERNAL) {
 
                     int highlightKeysCount = individual.getHighlightKeySet().size();
                     int i = 0;
@@ -861,7 +863,7 @@ public class SvgExporter {
                     writer.writeAttribute("cx", String.valueOf(position.getX() - shiftX));
                     writer.writeAttribute("cy", String.valueOf(shiftY - position.getY()));
                     writer.writeAttribute("r", "9");
-                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == 1 ? " unhighlighted" : ""));
+                    writer.writeAttribute("class", "individual-symbol" + (highlightMode == HighlightMode.PATERNAL ? " unhighlighted" : ""));
                     writer.writeEndElement();
                 }
 
@@ -896,8 +898,8 @@ public class SvgExporter {
 
         if (individual.isDead()) {
 
-            int highlightMode = Integer.parseInt(
-                    generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0"));
+            HighlightMode highlightMode = HighlightMode.of(Integer.parseInt(
+                    generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0")));
 
             float delta = (individual.getGender() == Gender.MALE) ? 9 : 6.4f;
 
@@ -921,10 +923,10 @@ public class SvgExporter {
 
             String className = "individual-deceased";
 
-            if (highlightMode > 0) {
+            if (highlightMode != HighlightMode.NONE) {
 
-                boolean isHighlighted = highlightMode == 1 && individual.getGender() == Gender.MALE
-                        || highlightMode == 2 && individual.getGender() == Gender.FEMALE;
+                boolean isHighlighted = highlightMode == HighlightMode.PATERNAL && individual.getGender() == Gender.MALE
+                        || highlightMode == HighlightMode.MATERNAL && individual.getGender() == Gender.FEMALE;
 
                 if (isHighlighted) {
 
@@ -1077,6 +1079,7 @@ public class SvgExporter {
 
         int boxSize = 8;
 
+        /*
         Rect rect = new Rect(individual.getBoundaryRect());
 
         writer.writeStartElement("rect");
@@ -1087,6 +1090,7 @@ public class SvgExporter {
         writer.writeAttribute("height", String.valueOf(rect.getHeight() - 2 * boxSize));
         writer.writeAttribute("class", "individual-active-area");
         writer.writeEndElement();
+        */
     }
 
     private static String getStrokeWidth(Size size, double defaultStrokeWidth) {

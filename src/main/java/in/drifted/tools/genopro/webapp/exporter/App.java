@@ -23,6 +23,7 @@ import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.DisplayStyle;
 import in.drifted.tools.genopro.model.DocumentInfo;
 import in.drifted.tools.genopro.model.GenoMapData;
+import in.drifted.tools.genopro.model.HighlightMode;
 import in.drifted.tools.genopro.model.ParserOptions;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import java.io.IOException;
@@ -128,11 +129,11 @@ public class App {
 
             ParserOptions parserOptions = new ParserOptions();
             parserOptions.setUntitledGenoMapsExcluded(true);
-            parserOptions.setHyperlinksResolved(true);
+            parserOptions.setHyperlinkedIndividualInstancesDeduplicated(true);
             LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null
                     : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
             parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
-            parserOptions.setHighlightMode(highlightMode);
+            parserOptions.setHighlightMode(HighlightMode.of(highlightMode));
 
             List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, parserOptions);
 
