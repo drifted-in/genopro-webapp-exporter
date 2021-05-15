@@ -24,6 +24,9 @@
     --father-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -10 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><g transform='rotate(45)'><path d='M0 -3v-4M-2 -5L0 -7L2 -5' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
     --mother-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -8 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><path d='M0 4v3M-2 5h4' fill='none' stroke='black' stroke-linecap='round'/></svg>");
     --mate-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -9 12 15'><g transform='rotate(-45)'><path d='M-1.1 0A2.2 2.2 0 0 1 1.1 -2.2L3.6 -2.2A2.2 2.2 0 0 1 3.6 2.2L2.8 2.2' fill='none' stroke='black' stroke-linecap='round'/><path d='M1.1 0A2.2 2.2 0 0 1 -1.1 2.2L-3.6 2.2A2.2 2.2 0 0 1 -3.6 -2.2L-2.8 -2.2' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    --search-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24'><circle cx='10' cy='10' r='6' stroke='white' fill='none' stroke-width='3'/><path d='M14.24 14.24l5 5' stroke='white' stroke-width='3'/></svg>");
+    --clear-search-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24'><path d='M4 4L20 20M4 20L20 4' stroke='white' fill='none' stroke-width='3'/></svg>");
+    --dropdown-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='-12 -12 24 24'><path d='M-8-8h16L0 8z' fill='white' stroke='none' /></svg>");
     --theme-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 40 40'><path d='M12,4a16,16 0 0,0 24,18a16,16 0 1,1-24-18' fill='white'/></svg>");
     --scrollbar-track-background-color: #e0e0e0;
     --scrollbar-thumb-background-color: grey;
@@ -231,8 +234,16 @@ path.unhighlighted {
     z-index: 100;
 }
 
-#search #clearSearchInputButton {
+#searchButton::after {
+    content: var(--search-symbol);
+}
+
+#clearSearchInputButton {
     border-bottom: 1px solid var(--input-border-color);
+}
+
+#clearSearchInputButton::after {
+    content: var(--clear-search-symbol);
 }
 
 .genomap-list {
@@ -258,7 +269,7 @@ path.unhighlighted {
 }
 
 .genomap-list::after {
-    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='-12 -12 24 24'><path d='M-8-8h16L0 8z' fill='white' stroke='none' /></svg>");
+    content: var(--dropdown-symbol); 
     position: absolute;
     width: 24px;
     top: 0;
