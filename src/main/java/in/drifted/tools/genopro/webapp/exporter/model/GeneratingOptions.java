@@ -45,12 +45,14 @@ public class GeneratingOptions {
     private final Font mainFont;
     private final FontMetrics mainFontMetrics;
     private final FontMetrics ageFontMetrics;
-    private final Map<String, String> additionalOptionsMap;
     private final Set<Color> unsupportedLabelColorSet;
+    private final boolean monochromeLabels;
+    private final Map<String, String> additionalOptionsMap;
 
     public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily,
             DisplayStyle displayStyle, DateFormatter dateFormatter, AgeFormatter ageFormatter,
-            Map<String, String> additionalOptionsMap, Set<Color> unsupportedLabelColorSet) {
+            Set<Color> unsupportedLabelColorSet, boolean monochromeLabels,
+            Map<String, String> additionalOptionsMap) {
 
         Canvas canvas = new Canvas();
 
@@ -69,8 +71,9 @@ public class GeneratingOptions {
         this.canvas = new Canvas();
         this.mainFontMetrics = canvas.getFontMetrics(mainFont);
         this.ageFontMetrics = getFontMetrics(AGE_FONT_SIZE_IN_PIXELS);
-        this.additionalOptionsMap = additionalOptionsMap;
         this.unsupportedLabelColorSet = unsupportedLabelColorSet;
+        this.monochromeLabels = monochromeLabels;
+        this.additionalOptionsMap = additionalOptionsMap;
     }
 
     public FontMetrics getFontMetrics(double sizeInPixels) {
@@ -109,12 +112,16 @@ public class GeneratingOptions {
         return ageFontMetrics;
     }
 
-    public Map<String, String> getAdditionalOptionsMap() {
-        return additionalOptionsMap;
-    }
-
     public Set<Color> getUnsupportedLabelColorSet() {
         return unsupportedLabelColorSet;
+    }
+
+    public boolean hasMonochromeLabels() {
+        return monochromeLabels;
+    }
+
+    public Map<String, String> getAdditionalOptionsMap() {
+        return additionalOptionsMap;
     }
 
 }

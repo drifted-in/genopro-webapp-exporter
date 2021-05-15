@@ -139,20 +139,19 @@ public class SvgExporter {
         int rectY = shiftY - label.getRect().getY();
 
         LabelStyle labelStyle = label.getLabelStyle();
-        StringBuilder style = new StringBuilder();
-        style.append("fill: ");
-        style.append(labelStyle.getFillColor().getHex());
-        style.append(";stroke: ");
-        style.append(labelStyle.getBorder().getColor().getHex());
-        style.append(";stroke-width: ");
-        style.append(getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
 
         writer.writeStartElement("rect");
         writer.writeAttribute("x", String.valueOf(rectX));
         writer.writeAttribute("y", String.valueOf(rectY));
         writer.writeAttribute("width", String.valueOf(width));
         writer.writeAttribute("height", String.valueOf(height));
-        writer.writeAttribute("style", style.toString());
+        if (generatingOptions.hasMonochromeLabels()) {
+            writer.writeAttribute("class", "monochrome-label");
+            writer.writeAttribute("style", "stroke-width: "
+                    + getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
+        } else {
+            writer.writeAttribute("style", getLabelStyleAttribute(labelStyle));
+        }
         writer.writeEndElement();
 
         int padding = labelStyle.getPadding();
@@ -191,10 +190,10 @@ public class SvgExporter {
 
             int baseX = getLabelBaseX(rectX, width, labelStyle);
             int baseY = rectY + padding + ascent;
-            
+
             int availableHeight = (height - 2 * padding);
-            int textBlockHeight = ascent + (int)((wrappedLineList.size() - 1) * 1.36 * fontSize) + descent;
-            
+            int textBlockHeight = ascent + (int) ((wrappedLineList.size() - 1) * 1.36 * fontSize) + descent;
+
             if (textBlockHeight < availableHeight && (labelStyle.getVerticalAlignment() != Alignment.TOP)) {
                 if (labelStyle.getVerticalAlignment() == Alignment.BOTTOM) {
                     baseY = rectY + height - padding - textBlockHeight + ascent;
@@ -204,7 +203,7 @@ public class SvgExporter {
             }
 
             for (int i = 0; i < wrappedLineList.size(); i++) {
-                
+
                 int y = baseY + (int) (1.36 * i * fontSize);
 
                 writer.writeStartElement("text");
@@ -433,10 +432,12 @@ public class SvgExporter {
 
                     case POSSIBLY_MORE_CHILDREN:
                         familyLineTypeSymbolPathData = "M" + (topRight - 11) + " " + (y + 6) + "h8m-4 -4v8";
+                        familyLineTypeSymbolClassName += "-possibly-more-children";
                         break;
 
                     case TO_BE_COMPLETED:
                         familyLineTypeSymbolPathData = "M" + (topRight - 8.5) + " " + (y + 3) + "l6 6m-6 0l6-6";
+                        familyLineTypeSymbolClassName += "-to-be-completed";
                         break;
                 }
 
@@ -1079,7 +1080,6 @@ public class SvgExporter {
 
         int boxSize = 8;
 
-        /*
         Rect rect = new Rect(individual.getBoundaryRect());
 
         writer.writeStartElement("rect");
@@ -1090,7 +1090,20 @@ public class SvgExporter {
         writer.writeAttribute("height", String.valueOf(rect.getHeight() - 2 * boxSize));
         writer.writeAttribute("class", "individual-active-area");
         writer.writeEndElement();
-        */
+    }
+
+    private static String getLabelStyleAttribute(LabelStyle labelStyle) {
+
+        StringBuilder style = new StringBuilder();
+
+        style.append("fill: ");
+        style.append(labelStyle.getFillColor().getHex());
+        style.append(";stroke: ");
+        style.append(labelStyle.getBorder().getColor().getHex());
+        style.append(";stroke-width: ");
+        style.append(getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
+
+        return style.toString();
     }
 
     private static String getStrokeWidth(Size size, double defaultStrokeWidth) {

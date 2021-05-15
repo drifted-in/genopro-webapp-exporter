@@ -19,6 +19,7 @@ import in.drifted.tools.genopro.DataParser;
 import in.drifted.tools.genopro.DataUtil;
 import in.drifted.tools.genopro.model.AgeFormatter;
 import in.drifted.tools.genopro.model.BasicAgeFormatter;
+import in.drifted.tools.genopro.model.Color;
 import in.drifted.tools.genopro.model.DateFormatter;
 import in.drifted.tools.genopro.model.DisplayStyle;
 import in.drifted.tools.genopro.model.DocumentInfo;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import org.w3c.dom.Document;
 
 public class App {
@@ -50,6 +52,8 @@ public class App {
     private static final String PARAM_DATE_PATTERN = "-datePattern";
     private static final String PARAM_FONT_FAMILY = "-fontFamily";
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
+    private static final String PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET = "-unsupportedLabelHexColorSet";
+    private static final String PARAM_MONOCHROME_LABELS = "-monochromeLabels";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
 
@@ -103,6 +107,19 @@ public class App {
             String datePattern = passedValuesMap.getOrDefault(PARAM_DATE_PATTERN, DEFAULT_DATE_PATTERN);
             String fontFamily = passedValuesMap.getOrDefault(PARAM_FONT_FAMILY, DEFAULT_FONT_FAMILY);
             String relativeFontPath = passedValuesMap.getOrDefault(PARAM_RELATIVE_FONT_PATH, DEFAULT_RELATIVE_FONT_PATH);
+   
+            Set<Color> unsupportedLabelColorSet = new HashSet<>();
+            String unsupportedLabelHexColors = passedValuesMap.getOrDefault(PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET, "{}");
+            if (unsupportedLabelHexColors.startsWith("{") && unsupportedLabelHexColors.endsWith("}")) {
+                if (unsupportedLabelHexColors.length() > 2) {
+                    unsupportedLabelHexColors = unsupportedLabelHexColors.substring(0, unsupportedLabelHexColors.length() - 2);
+                    for (String unsupportedLabelHexColor : unsupportedLabelHexColors.split(",")) {
+                        unsupportedLabelColorSet.add(new Color(unsupportedLabelHexColor));
+                    }
+                }
+            }
+            
+            boolean monochromeLabels = Boolean.parseBoolean(passedValuesMap.getOrDefault(PARAM_MONOCHROME_LABELS, "false"));
 
             DateFormatter dateFormatter = new DateFormatter(datePattern, locale, new HashMap<>());
             AgeFormatter ageFormatter = new BasicAgeFormatter(resourceBundle);
@@ -153,7 +170,8 @@ public class App {
             }
 
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
-                    displayStyle, dateFormatter, ageFormatter, additionalOptionMap, new HashSet<>());
+                    displayStyle, dateFormatter, ageFormatter, unsupportedLabelColorSet, monochromeLabels,
+                    additionalOptionMap);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
@@ -178,6 +196,8 @@ public class App {
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
+                    + "        [-unsupportedLabelHexColorSet:{}]\n"
+                    + "        [-monochromeLabels:0]\n"                    
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
             );
