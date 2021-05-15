@@ -12,6 +12,7 @@ var dynamic = "${dynamic}";
 var rowsProcessed = 0;
 var zoom;
 var pan;
+var theme = "light";
 
 window.addEventListener("hashchange", processParams);
 window.addEventListener("beforeprint", setRealSize);
@@ -20,6 +21,7 @@ document.addEventListener("DOMContentLoaded", init);
 document.getElementById("keywords").addEventListener("input", triggerSearch);
 document.getElementById("searchButton").addEventListener("click", triggerSearch);
 document.getElementById("clearSearchInputButton").addEventListener("click", hideResults);
+document.getElementById("themeSwitch").addEventListener("click", switchTheme);
 
 function processParams() {
 
@@ -44,6 +46,9 @@ function init(e) {
         document.getElementById("content").innerHTML = "${alertDynamicOnFileSystem}";
 
     } else {
+        
+        theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+        setTheme();
 
         var genoMapSelect = document.getElementById("genomap-list");
 
@@ -348,64 +353,9 @@ function showDetail(e) {
         document.getElementById("keywords").blur();
 
         var entry = e.target.closest(".entry");
-
-        if (pinnedEntry !== null) {
-            searchResultsSelectedEntryDetail = pinnedEntry.getElementsByClassName("detail")[0];
-        }
-
-        if (searchResultsSelectedEntryDetail !== null) {
-            searchResultsSelectedEntryDetail.classList.remove("expanded");
-            if (searchResultsSelectedEntryDetail.hasChildNodes()) {
-                while (searchResultsSelectedEntryDetail.firstChild) {
-                    searchResultsSelectedEntryDetail.removeChild(searchResultsSelectedEntryDetail.firstChild);
-                }
-            }
-        }
-
+        
         if (entry.id !== searchResultsSelectedIndividualId) {
-
             searchResultsSelectedIndividualId = entry.id;
-            searchResultsSelectedEntryDetail = entry.getElementsByClassName("detail")[0];
-            searchResultsSelectedEntryDetail.classList.add("expanded");
-
-            var father = document.createElement("div");
-            father.classList.add("father");
-
-            var fatherId = iMap.get(searchResultsSelectedIndividualId.substring(1))[7];
-            if (fatherId.length > 0) {
-                father.textContent = getFullName(iMap.get(fatherId));
-            }
-
-            searchResultsSelectedEntryDetail.appendChild(father);
-
-            var mother = document.createElement("div");
-            mother.classList.add("mother");
-
-            var motherId = iMap.get(searchResultsSelectedIndividualId.substring(1))[8];
-            if (motherId.length > 0) {
-                mother.textContent = getFullName(iMap.get(motherId));
-            }
-
-            searchResultsSelectedEntryDetail.appendChild(mother);
-
-            var mate = document.createElement("div");
-            mate.classList.add("mate");
-
-            var delimitedMateIds = iMap.get(searchResultsSelectedIndividualId.substring(1))[6];
-
-            if (delimitedMateIds.length > 0) {
-
-                var matesArray = new Array();
-                var mateIds = delimitedMateIds.split(",");
-
-                for (var m = 0; m < mateIds.length; m++) {
-                    var individualInfo = iMap.get(mateIds[m]);
-                    matesArray.push(getFullName(individualInfo));
-                }
-                mate.textContent = matesArray.join(", ");
-            }
-
-            searchResultsSelectedEntryDetail.appendChild(mate);
 
         } else {
             searchResultsSelectedIndividualId = null;
@@ -447,7 +397,7 @@ function getFullName(individualInfo) {
     var nameArray = new Array();
 
     for (var i = 1; i <= 3; i++) {
-        if (individualInfo[i].length !== -1) {
+        if (individualInfo[i].length > 0) {
             nameArray.push(individualInfo[i]);
         }
     }
@@ -572,8 +522,46 @@ function createSearchResultEntry(resultsElement, id, value) {
     var detail = document.createElement('div');
     detail.classList.add("detail");
     if ((value[6] + value[7] + value[8]).length > 0) {
-        detail.classList.add("expandable");
+
+        var fatherId = value[7];
+        if (fatherId.length > 0) {
+            var fatherName = getFullName(iMap.get(fatherId));
+            if (fatherName.length > 0) {
+                var father = document.createElement("div");
+                father.classList.add("father");
+                father.textContent = fatherName;
+                detail.appendChild(father);
+            }
+        }
+
+        var motherId = value[8];
+        if (motherId.length > 0) {
+            var mother = document.createElement("div");
+            mother.classList.add("mother");
+            mother.textContent = getFullName(iMap.get(motherId));
+            detail.appendChild(mother);
+        }
+
+        var delimitedMateIds = value[6];
+        if (delimitedMateIds.length > 0) {
+            var matesArray = new Array();
+            var mateIds = delimitedMateIds.split(",");
+
+            for (var m = 0; m < mateIds.length; m++) {
+                var individualInfo = iMap.get(mateIds[m]);
+                var fullName = getFullName(individualInfo);
+                if (fullName.length > 0) {
+                    matesArray.push(fullName);
+                }
+            }
+
+            var mate = document.createElement("div");
+            mate.classList.add("mate");
+            mate.textContent = matesArray.join(", ");
+            detail.appendChild(mate);     
+        }
     }
+
     info.appendChild(detail);
 
     var bottomRow = document.createElement('div');
@@ -616,20 +604,11 @@ function pinEntry(e) {
         e.preventDefault();
 
         document.getElementById("keywords").blur();
+        document.getElementById("search").style.display = "none";
         document.getElementById("results").style.display = "none";
+        document.getElementById("genomap-list").style.display = "none";
 
         var entry = e.target.closest(".entry");
-
-        if (entry.id !== searchResultsSelectedIndividualId) {
-            if (searchResultsSelectedEntryDetail !== null) {
-                searchResultsSelectedEntryDetail.classList.remove("expanded");
-                if (searchResultsSelectedEntryDetail.hasChildNodes()) {
-                    while (searchResultsSelectedEntryDetail.firstChild) {
-                        searchResultsSelectedEntryDetail.removeChild(searchResultsSelectedEntryDetail.firstChild);
-                    }
-                }
-            }
-        }
 
         pinnedEntry = entry.cloneNode(true);
 
@@ -653,19 +632,12 @@ function unpinEntry(e) {
     e.preventDefault();
 
     searchResultsSelectedIndividualId = pinnedEntry.id;
-    searchResultsSelectedEntryDetail = pinnedEntry.getElementsByClassName("detail")[0];
     document.getElementById("container").removeChild(pinnedEntry);
     /* it is not deleted directly because of global variable */
     pinnedEntry = null;
+    document.getElementById("search").style.display = "flex";
     document.getElementById("results").style.display = "block";
-
-    var entry = document.getElementById(searchResultsSelectedIndividualId);
-    var detail = entry.getElementsByClassName("detail")[0];
-    detail.parentElement.replaceChild(searchResultsSelectedEntryDetail, detail);
-
-    if (!searchResultsSelectedEntryDetail.classList.contains("expanded")) {
-        searchResultsSelectedIndividualId = null;
-    }
+    document.getElementById("genomap-list").style.display = "inline-block";
 
     /* centering */
     scrollIntoViewById(genoMapSelectedIndividualId);
@@ -731,4 +703,19 @@ function isSame(array1, array2) {
 function getGenoMapId() {
     var result = location.hash.match("#/sheet/([a-z0-9-]*)");
     return result && genoMapMap.has(result[1]) ? result[1] : null;
+}
+
+function switchTheme() {
+    theme = (theme === "dark") ? "light" : "dark";
+    setTheme();
+}
+
+function setTheme() {
+    if (theme === "dark") {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+    localStorage.setItem("theme", theme);
 }

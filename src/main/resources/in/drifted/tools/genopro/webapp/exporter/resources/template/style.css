@@ -1,3 +1,65 @@
+:root {
+    --background-color: white;
+    --text-color: black;
+    --link-color: dodgerblue;
+    --line-color: black;
+    --line-adopted-color: dodgerblue;
+    --individual-highlight-color: orangered;
+    --input-background-color: whitesmoke;
+    --input-highlight-color: #333;
+    --input-border-color: silver; 
+    --input-button-background-color: #666;
+    --input-button-foreground-color: white;
+    --results-background-color: whitesmoke;
+    --results-item-background-color: #e8e8e8;
+    --results-item-highlight-color: whitesmoke;
+    --results-item-details-background-color: whitesmoke;
+    --results-item-details-highlight-color: white;
+    --results-item-text-color: black;
+    --monochrome-label-background-color: whitesmoke;
+    --monochrome-label-border-color: grey;
+    --monochrome-label-text-color: black;
+    --collapse-button: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' fill='none' stroke='grey' stroke-width='2px' viewBox='0 0 40 40'><path d='M10 25L20 15L30 25'/></svg>");
+    --expand-button: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' fill='none' stroke='grey' stroke-width='2px' viewBox='0 0 40 40'><path d='M10 15L20 25L30 15'/></svg>");
+    --father-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -10 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><g transform='rotate(45)'><path d='M0 -3v-4M-2 -5L0 -7L2 -5' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    --mother-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -8 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><path d='M0 4v3M-2 5h4' fill='none' stroke='black' stroke-linecap='round'/></svg>");
+    --mate-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -9 12 15'><g transform='rotate(-45)'><path d='M-1.1 0A2.2 2.2 0 0 1 1.1 -2.2L3.6 -2.2A2.2 2.2 0 0 1 3.6 2.2L2.8 2.2' fill='none' stroke='black' stroke-linecap='round'/><path d='M1.1 0A2.2 2.2 0 0 1 -1.1 2.2L-3.6 2.2A2.2 2.2 0 0 1 -3.6 -2.2L-2.8 -2.2' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    --theme-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 40 40'><path d='M12,4a16,16 0 0,0 24,18a16,16 0 1,1-24-18' fill='white'/></svg>");
+    --scrollbar-track-background-color: #e0e0e0;
+    --scrollbar-thumb-background-color: grey;
+}
+
+[data-theme="dark"] {
+    --background-color: #2b2b2b;
+    --text-color: silver;
+    --link-color: dodgerblue;
+    --line-color: silver;
+    --line-adopted-color: dodgerblue;
+    --individual-highlight-color: orangered;
+    --input-background-color: #333;
+    --input-highlight-color: silver;
+    --input-border-color: #444; 
+    --input-button-background-color: #666;
+    --input-button-foreground-color: white;
+    --results-background-color: #2b2b2b;
+    --results-item-background-color: #333;
+    --results-item-highlight-color: #383838;
+    --results-item-details-background-color: #444;
+    --results-item-details-highlight-color: #555;
+    --results-item-text-color: silver;
+    --monochrome-label-background-color: #333;
+    --monochrome-label-border-color: #444;
+    --monochrome-label-text-color: silver;
+    --collapse-button: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' fill='none' stroke='grey' stroke-width='2px' viewBox='0 0 40 40'><path d='M10 25L20 15L30 25'/></svg>");
+    --expand-button: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' fill='none' stroke='grey' stroke-width='2px' viewBox='0 0 40 40'><path d='M10 15L20 25L30 15'/></svg>");
+    --father-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -10 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='silver' /><g transform='rotate(45)'><path d='M0 -3v-4M-2 -5L0 -7L2 -5' fill='none' stroke='silver' stroke-linecap='round'/></g></svg>");
+    --mother-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -8 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='silver' /><path d='M0 4v3M-2 5h4' fill='none' stroke='silver' stroke-linecap='round'/></svg>");
+    --mate-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -9 12 15'><g transform='rotate(-45)'><path d='M-1.1 0A2.2 2.2 0 0 1 1.1 -2.2L3.6 -2.2A2.2 2.2 0 0 1 3.6 2.2L2.8 2.2' fill='none' stroke='silver' stroke-linecap='round'/><path d='M1.1 0A2.2 2.2 0 0 1 -1.1 2.2L-3.6 2.2A2.2 2.2 0 0 1 -3.6 -2.2L-2.8 -2.2' fill='none' stroke='silver' stroke-linecap='round'/></g></svg>");
+    --theme-symbol: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='-12 -12 24 24'><circle cx='0' cy='0' r='5' fill='white' stroke='none' /><path d='M-11 0h2M11 0h-2M0 -11v2M0 11v-2' stroke='white' stroke-width='2' stroke-linecap='round'/><g transform='rotate(45)'><path d='M-11 0h2M11 0h-2M0 -11v2M0 11v-2' stroke='white' stroke-width='2' stroke-linecap='round'/></g></svg>");
+    --scrollbar-track-background-color: grey;
+    --scrollbar-thumb-background-color: silver;
+}
+
 @font-face {
     font-family: "${fontFamily}";
     font-display: fallback;
@@ -19,16 +81,27 @@ svg {
     stroke-linecap: round;
 }
 
+text {
+    fill: var(--text-color);
+}
+
 path.family-line,
-path.pedigree-link {
-    stroke: black;
-    stroke-width: 3px;
+path.pedigree-link,
+path.family-line-possibly-more-children,
+path.family-line-to-be-completed {
     fill: none;
+    stroke: var(--line-color);
+    stroke-width: 3px;
+}
+
+path.family-line-no-more-children {
+    fill: var(--line-color);
+    stroke: none;
 }
 
 text.individual-label-hyperlink {
+    fill: var(--link-color);
     text-decoration: underline;
-    fill: dodgerblue;
     cursor: pointer;
 }
 
@@ -39,8 +112,8 @@ text.individual-age {
 rect.individual-age,
 rect.individual-label,
 rect.family-label {
+    fill: var(--background-color);
     stroke: none;
-    fill: white;
 }
 
 rect.individual-active-area {
@@ -50,37 +123,42 @@ rect.individual-active-area {
 }
 
 .individual-symbol {
-    stroke: black;
+    fill: var(--background-color);
+    stroke: var(--line-color);
     stroke-width: 3px;
-    fill: white;
 }
 
 .individual-symbol-background {
-    fill: white;
+    fill: var(--background-color);
 }
 
 text.individual-symbol {
+    fill: var(--text-color);
     stroke: none;
-    fill: black;
 }
 
 path.individual-deceased {
-    stroke: black;
-    stroke-width: 1px;
     fill: none;
+    stroke: var(--line-color);
+    stroke-width: 1px;
 }
 
 path.pedigree-link.parent,
 path.pedigree-link.biological {
-    stroke: black;
-    stroke-width: 3px;
     fill: none;
+    stroke: var(--line-color);
+    stroke-width: 3px;
 }
 
 path.pedigree-link.adopted {
-    stroke: dodgerblue;
-    stroke-width: 3px;
     fill: none;
+    stroke: var(--line-adopted-color);
+    stroke-width: 3px;
+}
+
+.monochrome-label {
+    fill: var(--monochrome-label-background-color);
+    stroke: var(--monochrome-label-border-color);
 }
 
 .highlighted,
@@ -94,7 +172,7 @@ path.unhighlighted {
 }
 
 #container {
-    background-color: white;
+    background-color: var(--background-color);
     line-height: normal;
 }
 
@@ -114,7 +192,7 @@ path.unhighlighted {
 }
 
 .handle {
-    fill: orangered;
+    fill: var(--individual-highlight-color);
 }
 
 #search {
@@ -126,10 +204,12 @@ path.unhighlighted {
 
 #search input[type=search] {
     padding: 10px;
+    font-family: "${fontFamily}";
     font-size: 16px;
-    border: 1px solid grey;
+    border: 1px solid var(--input-border-color);
     border-radius: 0;
-    background: whitesmoke;
+    background: var(--input-background-color);
+    color: var(--text-color);
     width: calc(100vw - 49px);
     max-width: 322px;
     z-index: 100;
@@ -142,18 +222,17 @@ path.unhighlighted {
 #search button {
     width: 49px;
     padding: 10px;
-    background: dodgerblue;
-    color: white;
+    background: var(--input-button-background-color);
+    color: var(--input-button-foreground-color);
     font-size: 16px;
-    border: 1px solid grey;
-    border-bottom: 1px solid white;
+    border: 1px solid var(--input-border-color);
     border-left: none;
     cursor: pointer;
     z-index: 100;
 }
 
 #search #clearSearchInputButton {
-    border-bottom: 1px solid grey;
+    border-bottom: 1px solid var(--input-border-color);
 }
 
 .genomap-list {
@@ -165,7 +244,7 @@ path.unhighlighted {
 
 .genomap-list select {
     display: inline-block;
-    border: 1px solid grey;
+    border: 1px solid var(--input-border-color);
     padding: 10px;
     padding-left: 5px;
     margin: 0;
@@ -173,10 +252,12 @@ path.unhighlighted {
     width: 100vw;
     max-width: 371px;
     height: 49px;
-    background: whitesmoke;
+    background-color: var(--input-background-color);
+    color: var(--text-color);
+    font-family: "${fontFamily}";
 }
 
-.genomap-list:after {
+.genomap-list::after {
     content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='-12 -12 24 24'><path d='M-8-8h16L0 8z' fill='white' stroke='none' /></svg>");
     position: absolute;
     width: 24px;
@@ -184,49 +265,81 @@ path.unhighlighted {
     right: 0;
     bottom: 0;
     padding: 12px;
-    background: dodgerblue;
-    border: 1px solid grey;
-    border-top: 1px solid white;
+    background-color: var(--input-button-background-color);
+    border: 1px solid var(--input-border-color);
     pointer-events: none;
 }
 
-#attribution {
+.footer {
     display: flex;
+}
+
+#themeSwitch {
+    position: absolute;
+    bottom: 0;
+    width: 49px;
+    height: 49px;
+    padding: 10px;
+    background: var(--input-button-background-color);
+    color: var(--input-button-foreground-color);
+    border: 1px solid var(--input-border-color);
+    cursor: pointer;
+    z-index: 1;
+}
+
+#themeSwitch::after {
+    content: var(--theme-symbol);
+}
+
+#attribution {
     position: absolute;
     z-index: 10;
     right: 0px;
     bottom: 0px;
     padding: 3px 5px;
-    background: whitesmoke;
+    background: var(--background-color);
+    color: var(--text-color);
 }
 
 #results {
     position: absolute;
     top: 49px;
-    width: 369px;
-    height: calc(100vh - 51px);
-    background-color: whitesmoke;
+    width: 371px;
+    height: calc(100vh - 50px);
+    background-color: var(--results-background-color);
     overflow: auto;
     z-index: 50;
-    border: 1px solid grey;
     display: none;
 }
 
 .entry {
     padding: 2px 0;
-    border-bottom: 1px solid grey;
     display: flex;
+    background-color: var(--results-item-background-color);
+}
+
+.entry:hover, entry:active {
+    background-color: var(--results-item-highlight-color);
 }
 
 .entry .hitarea {
     cursor: pointer;
     width: 40px;
     height: 40px;
-    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='-20 0 40 40'><path d='M0 37S0 37 0 37S-20 3 0 3S0 37 0 37M-4 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0' fill='dodgerblue'/></svg>");
+    background-image: var(--collapse-button);
 }
 
 .entry .info {
     cursor: pointer;
+    width: calc(100% - 60px);
+    border-radius: 8px;
+    padding: 4px 8px;
+    background-color: var(--results-item-details-background-color);
+    color: var(--results-item-text-color);
+}
+
+.entry:hover .info, .entry:active .info {
+    background-color: var(--results-item-details-highlight-color);
 }
 
 .top,
@@ -277,17 +390,17 @@ path.unhighlighted {
 }
 
 .father:not(:empty)::before {
-    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -10 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><g transform='rotate(45)'><path d='M0 -3v-4M-2 -5L0 -7L2 -5' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    content: var(--father-symbol);
     margin-right: 3px;
 }
 
 .mother:not(:empty)::before {
-    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -8 12 15'><circle cx='0' cy='0' r='3' fill='none' stroke='black' /><path d='M0 4v3M-2 5h4' stroke='black' stroke-linecap='round'/></svg>");
+    content: var(--mother-symbol);
     margin-right: 3px;
 }
 
 .mate:not(:empty)::before {
-    content: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12px' height='15px' viewBox='-6 -9 12 15'><g transform='rotate(-45)'><path d='M-1.1 0A2.2 2.2 0 0 1 1.1 -2.2L3.6 -2.2A2.2 2.2 0 0 1 3.6 2.2L2.8 2.2' fill='none' stroke='black' stroke-linecap='round'/><path d='M1.1 0A2.2 2.2 0 0 1 -1.1 2.2L-3.6 2.2A2.2 2.2 0 0 1 -3.6 -2.2L-2.8 -2.2' fill='none' stroke='black' stroke-linecap='round'/></g></svg>");
+    content: var(--mate-symbol); 
     margin-right: 3px;
 }
 
@@ -296,25 +409,43 @@ path.unhighlighted {
     margin-right: 3px;
 }
 
-.detail.expandable:not(.expanded)::before {
-    content: "...";
-    color: dodgerblue;
-    line-height: 0px;
-    padding: 0px 5px 5px;
-}
-
 .pinned {
     position: absolute;
-    top: 49px;
+    top: 0px;
     width: 369px;
-    background-color: whitesmoke;
+    background-color: var(--results-item-background-color);
     overflow: auto;
     z-index: 50;
-    border: 1px solid grey;
+    padding: 6px 2px;
+    border: 1px solid var(--input-border-color);
 }
 
 .pinned .hitarea {
-    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='40px' height='40px' viewBox='-20 0 40 40'><path d='M0 3S0 3 0 3S20 37 0 37S0 3 0 3M-4 28a4 4 0 1 0 8 0a4 4 0 1 0 -8 0' fill='dodgerblue'/></svg>");
+    background-image: var(--expand-button);
+}
+
+/* disble Chrome input focus */
+*,*:focus,*:hover{
+    outline: none;
+}
+
+select:active, select:hover {
+  outline-color: silver;
+}
+
+a, a:visited {
+    color: var(--link-color);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track-background-color);
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-background-color);
+  border-radius: 20px;
 }
 
 @media print {
