@@ -365,6 +365,10 @@ path.unhighlighted {
     flex-direction: column;
 }
 
+.detail div {
+    overflow: hidden;
+}
+
 .top div,
 .detail div,
 .bottom div {
