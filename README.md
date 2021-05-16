@@ -29,16 +29,16 @@ See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
 In the light mode:
 <p float="left">
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-light-2021-05.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-light-2021-05.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-light-2021-05.png" width="280">
 </p>
 
 In the dark mode:
 <p float="left">
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-dark.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark-2021-05.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark-2021-05.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-dark-2021-06.png" width="280">
 </p>
 
 ## Do not panic
