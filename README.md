@@ -36,9 +36,9 @@ In the light mode:
 
 In the dark mode:
 <p float="left">
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-dark.png" width="280">
 </p>
 
 ## Do not panic
