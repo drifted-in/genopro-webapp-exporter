@@ -28,14 +28,18 @@ The web app conforms to the [Progressive Web Apps](https://en.wikipedia.org/wiki
 See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
 In the light mode:
-![Initial view](http://drifted.in/other/genopro-webapp-exporter/initial-view.png | width=280)
-![Search results](http://drifted.in/other/genopro-webapp-exporter/search-results.png | width=280)
-![Pinned individual](http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png | width=280)
+<p float="left">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+</p>
 
 In the dark mode:
-![Initial view](http://drifted.in/other/genopro-webapp-exporter/initial-view.png | width=280)
-![Search results](http://drifted.in/other/genopro-webapp-exporter/search-results.png | width=280)
-![Pinned individual](http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png | width=280)
+<p float="left">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual.png" width="280">
+</p>
 
 ## Do not panic
 
