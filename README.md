@@ -95,15 +95,12 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
 
 1. Download the font
     1. Go to https://fonts.google.com/specimen/Open+Sans?selection.family=Open+Sans
-    2. Click the Select this font button at the top right corner.
-    3. Click the black bar at the bottom of the page (expand that minimized window).
-    4. Click the download icon.
-       ![](http://drifted.in/other/genopro-webapp-exporter/download-font.png)
+    2. Click the Download family button at the top right corner.
 
 2. Install the font
-    1. Once the archive is downloaded, it has to be unzipped. There are multiple fonts of various styles
+    1. Once the ZIP archive is downloaded, it has to be unzipped. There are multiple fonts of various styles
        in the archive, but it is sufficient to unzip just `OpenSans-Regular.ttf` (to any location).
-    2. Navigate that file in e.g. Windows explorer and via the right click context menu select Install item.
+    2. Navigate that file in e.g. Windows explorer and via the right click context menu select Install for all users item.
 
 3. Apply the font
     1. In GenoPro open your document.
