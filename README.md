@@ -7,56 +7,84 @@ If you need to share your family trees with someone else, you can:
 1. share your source GNO file, which can be opened even with the free GenoPro version
 2. export your data as a set of HTML pages
 
-For my use case I'd rather share my data in the form of a tiny web app, which would offer:
-- visual representation of family trees
-- fast navigation for large data sets
-- instant search
-- filtering out living individuals
+I missed several features so I created a custom exporter.
 
-So I finally created a custom exporter, which brings advanced control over various aspects of the final output.
-
-## Offline mode
-
-If the web app is shown in [modern](https://caniuse.com/#feat=serviceworkers) web browsers, it is automatically cached so it can be served later on even without internet connection.
-
-## Mobile App
-
-The web app conforms to the [Progressive Web Apps](https://en.wikipedia.org/wiki/Progressive_Web_Apps) (PWA) standard which means it can be installed as a mobile app to the home screen if shown in the [supported browser](https://caniuse.com/#feat=web-app-manifest). 
-
-## Examples
+# Examples
 
 See sample output at http://drifted.in/other/rodokmen-tosovskych/.
 
-In the light mode:
+## Light mode
 <p float="left">
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-light-2021-05.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-light-2021-05.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-light-2021-05.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-light-2021-05.png" height="420">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-light-2021-05.png" height="420">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-light-2021-05.png" height="420">
 </p>
 
-In the dark mode:
+## Dark mode
 <p float="left">
-<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark-2021-05.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark-2021-05.png" width="280">
-<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-dark-2021-06.png" width="280">
+<img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark-2021-05.png" height="420">
+<img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark-2021-05.png" height="420">
+<img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-dark-2021-06.png" height="420">
 </p>
+
+## Highlights
+- a mobile-ready web app which, after initial loading, doesn't need internet connection
+- enhanced control of what assets are exported
+- enhanced privacy policy (i.e. excluding data related to living individuals)
+- instant search
+- highlighting DNA inheritance (experimental)
+
+## Limitations
+- only basic individual data is exported
+- the missing support for custom formatting (gender symbols, family lines, ...)
+- the missing support for picture mode
+- the missing support for genograms, medical symbols, emotional or social relationships
+
+### Offline mode
+
+If the web app is shown in [modern](https://caniuse.com/#feat=serviceworkers) web browsers, it is automatically cached so it can be served later on even without internet connection.
+
+### Mobile App
+
+The web app conforms to the [Progressive Web Apps](https://en.wikipedia.org/wiki/Progressive_Web_Apps) (PWA) standard which means it can be installed as a mobile app to the home screen if shown in the [supported browser](https://caniuse.com/#feat=web-app-manifest). 
+
+## Managing assets to export
+
+Only genomaps with a report title (can be set via File | Properties | GenoMaps) are exported. So you can easily control which parts of your tree will be included. 
+If some labels are private, you can set a dedicated background to them. This color can be then set as a filter applied when exporting items.
+
+## Privacy policy
+
+For living individuals it is possible to specify policy for anonymizing their data. It is controlled by the age. Individuals younger than specified limit are excluded. If the limit equals to zero, individuals are shown, but without birthdates. If the limit is negative, the anonymization is deactivated.
+
+## Instant search
+
+Just type few characters and inspect all matches sorted by the birthdate. By activating entries the corresponding genomap is loaded and the selected individual highlighted.
+
+## Highlighting DNA inheritance
+
+If there are variations in DNA results (especially Y-STR marker values) of distant relatives and every such variation is encoded into a color of the gender symbol, you can visualize projected inheritance of these mutations using the corresponding color. If the estimate is ambiguous, colors are combined in the form of dashed line.
+
+See sample output at http://drifted.in/other/rodokmen-tosovskych-gap/.
+
+<img src="http://drifted.in/other/genopro-webapp-exporter/highlight-y-dna-variations.png">
 
 ## Do not panic
 
-While the next description looks complex, lot of things needs to be set once.
+While the description below looks complex, lot of things needs to be set once.
 Any subsequent exports are quite straightforward.
 
 ## Prerequisites
 
 ### Java
 
-This export is written in Java. To execute it you need Java Virtual Machine. Installers can be found at https://www.java.com/download/.
+This exporter is written in Java. To execute it you need a Java Virtual Machine (JDK 8.0 or greater). Installers can be found at https://www.java.com/download/.
 
 ### Exporter
 
 You can download the pre-built exporter at http://drifted.in/other/genopro-webapp-exporter/app.zip.
 
-For custom builds just clone the project, open it in your favorite IDE and build it.
+For custom builds just clone the project, open it in your favorite Java IDE and build it.
 
 ### Font
 
@@ -142,7 +170,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
    Several other options can be used:
     - `locale` - The user interface locale, e.g. en-US, pt-BR. Currently only `en` and `cs` values are supported. If new languages are needed,
       just translate [all the words](https://github.com/drifted-in/genopro-webapp-exporter/blob/master/src/main/resources/in/drifted/tools/genopro/webapp/messages_en.properties) and send them to me via email.
-    - `anonymizedYears` - Years before present used for anonymizing data. If zero value is used, only dates of living individuals are anonymized. A negative value deactivates anonymization completely.
+    - `anonymizedYears` - Years before present used for anonymizing data (hiding names and dates). If the zero value is used, only names of living individuals are shown, not their birthdates. A negative value deactivates anonymization completely.
     - `datePattern` - The date pattern consisting of `d`, `M`, `y` symbols (for day, month, year) separated by various punctuation. See the complete [reference](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html).
       To ensure the formatted date doesn't overflow the bounding box the pattern should match the format used in your document.
     - `fontFamily` - If default Open Sans font doesn't suit your needs, it can be overridden by this parameter. In this case the `relativeFontPath` option becomes mandatory. If the font family contains a space, the value needs to be enclosed in quotes. 
