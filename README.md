@@ -172,6 +172,8 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
       To ensure the formatted date doesn't overflow the bounding box the pattern should match the format used in your document.
     - `fontFamily` - If default Open Sans font doesn't suit your needs, it can be overridden by this parameter. In this case the `relativeFontPath` option becomes mandatory. If the font family contains a space, the value needs to be enclosed in quotes. 
     - `relativeFontPath` - The relative path to the custom font in the WOFF format.
+    - `unsupportedLabelHexColorSet` - For suppressing some private labels you can set a specific background color to them and then specify this color or comma delimited set of colors in curly braces, e.g. {#FF0000,#C8C8FF}.
+    - `monochromeLabels` - If the label color system has no benefit for end-user, it is better to set this attribute to 1. It means colors will be ignored in favor of default styles and switched accordingly when activating the light/dark theme.  
     - `gaTrackingId` - For analyzing the web app traffic via Google Analytics just specify your tracking ID.
 
     Example: `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static -locale:cs -anonymizedYears:120 -datePattern:dd.MM.yyyy -fontFamily:Muli -relativeFontPath:res/Muli-Regular-webfont.woff -gaTrackingId:UA-00000000-1`
