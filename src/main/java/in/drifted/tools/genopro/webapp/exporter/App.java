@@ -64,7 +64,7 @@ public class App {
     private static final String DEFAULT_RELATIVE_FONT_PATH = "res/OpenSans-Regular-webfont.woff";
     private static final int DEFAULT_HIGHLIGHT_MODE = 0;
 
-    private static final String RESOURCE_BUNDLE_PATH = "in/drifted/tools/genopro/webapp/messages";
+    private static final String RESOURCE_BUNDLE_PATH = "in/drifted/tools/genopro/webapp/exporter/resources/l10n/messages";
 
     public static void main(String[] args) throws IOException {
 
@@ -197,7 +197,7 @@ public class App {
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
                     + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
-                    + "        [-monochromeLabels:0]\n"                    
+                    + "        [-monochromeLabels:0]\n"    
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
             );
