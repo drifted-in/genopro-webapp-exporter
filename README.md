@@ -9,18 +9,18 @@ If you need to share your family trees with someone else, you can:
 
 I missed several features so I created a custom exporter.
 
-# Examples
+## Examples
 
-See sample output at http://drifted.in/other/rodokmen-tosovskych/.
+See sample output at https://drifted.in/other/rodokmen-tosovskych/.
 
-## Light mode
+### Light mode
 <p float="left">
 <img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-light-2021-05.png" height="420">
 <img src="http://drifted.in/other/genopro-webapp-exporter/search-results-light-2021-05.png" height="420">
 <img src="http://drifted.in/other/genopro-webapp-exporter/pinned-individual-light-2021-05.png" height="420">
 </p>
 
-## Dark mode
+### Dark mode
 <p float="left">
 <img src="http://drifted.in/other/genopro-webapp-exporter/initial-view-dark-2021-05.png" height="420">
 <img src="http://drifted.in/other/genopro-webapp-exporter/search-results-dark-2021-05.png" height="420">
@@ -48,26 +48,26 @@ If the web app is shown in [modern](https://caniuse.com/#feat=serviceworkers) we
 
 The web app conforms to the [Progressive Web Apps](https://en.wikipedia.org/wiki/Progressive_Web_Apps) (PWA) standard which means it can be installed as a mobile app to the home screen if shown in the [supported browser](https://caniuse.com/#feat=web-app-manifest). 
 
-## Managing assets to export
+### Managing assets to export
 
 Only genomaps with a report title (can be set via File | Properties | GenoMaps) are exported. So you can easily control which parts of your tree will be included. 
 If some labels are private, you can set a dedicated background to them. This color can be then set as a filter applied when exporting items.
 
-## Privacy policy
+### Privacy policy
 
 For living individuals it is possible to specify policy for anonymizing their data. It is controlled by the age. Individuals younger than specified limit are excluded. If the limit equals to zero, individuals are shown, but without birthdates. If the limit is negative, the anonymization is deactivated.
 
-## Instant search
+### Instant search
 
 Just type few characters and inspect all matches sorted by the birthdate. By activating entries the corresponding genomap is loaded and the selected individual highlighted.
 
-## Highlighting DNA inheritance
+### Highlighting DNA inheritance
 
 If there are variations in DNA results (especially Y-STR marker values) of distant relatives and every such variation is encoded into a color of the gender symbol, you can visualize projected inheritance of these mutations using the corresponding color. If the estimate is ambiguous, colors are combined in the form of dashed line.
 
-See sample output at http://drifted.in/other/rodokmen-tosovskych-gap/.
+See sample output at https://drifted.in/other/rodokmen-tosovskych-gap/.
 
-<img src="http://drifted.in/other/genopro-webapp-exporter/highlight-y-dna-variations.png">
+<img src="https://drifted.in/other/genopro-webapp-exporter/highlight-y-dna-variations.png" width="400px">
 
 ## Do not panic
 
