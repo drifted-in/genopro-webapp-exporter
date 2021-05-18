@@ -196,7 +196,7 @@ public class App {
                     + "        [-datePattern:yyyy-MM-dd] \n"
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
-                    + "        [-unsupportedLabelHexColorSet:{}]\n"
+                    + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
                     + "        [-monochromeLabels:0]\n"                    
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
