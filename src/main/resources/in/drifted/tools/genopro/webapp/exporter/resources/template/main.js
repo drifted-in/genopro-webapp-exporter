@@ -98,33 +98,6 @@ function switchGenoMap(callback) {
 
     if (dynamic) {
 
-        const httpRequest = new XMLHttpRequest();
-
-        httpRequest.onreadystatechange = function() {
-            if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
-
-                const svg = httpRequest.responseXML.documentElement;
-
-                const content = document.getElementById("content");
-
-                const nodes = content.getElementsByTagName("svg");
-
-                while (nodes[0]) {
-                    nodes[0].parentNode.removeChild(nodes[0]);
-                }
-
-                genoMapSvg = content.appendChild(svg);
-                genoMapSvg.style.display = "block";
-
-                genoMapSelectedIndividualId = null;
-
-                initSvgListeners();
-                initSvgPanZoom();
-
-                callback();
-            }
-        };
-
         if (genoMapId === null) {
 
             genoMapId = genoMapMap.keys().next().value;
@@ -137,8 +110,32 @@ function switchGenoMap(callback) {
             callback();
 
         } else {
-            httpRequest.open("GET", genoMapId + ".svg");
-            httpRequest.send();
+
+            fetch(genoMapId + ".svg")
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(data, "application/xml");
+                    const svg = xml.documentElement;
+
+                    const content = document.getElementById("content");
+                    const nodes = content.getElementsByTagName("svg");
+
+                    while (nodes[0]) {
+                        nodes[0].parentNode.removeChild(nodes[0]);
+                    }
+
+                    genoMapSvg = content.appendChild(svg);
+                    genoMapSvg.style.display = "block";
+
+                    genoMapSelectedIndividualId = null;
+
+                    initSvgListeners();
+                    initSvgPanZoom();
+
+                    callback();
+                })
+                .catch(console.error);
         }
 
     } else {
