@@ -7,7 +7,7 @@
     --individual-highlight-color: orangered;
     --input-background-color: whitesmoke;
     --input-highlight-color: #333;
-    --input-border-color: silver; 
+    --input-border-color: silver;
     --input-button-background-color: #666;
     --input-button-foreground-color: white;
     --results-background-color: whitesmoke;
@@ -41,10 +41,10 @@
     --individual-highlight-color: orangered;
     --input-background-color: #333;
     --input-highlight-color: silver;
-    --input-border-color: #444; 
+    --input-border-color: #444;
     --input-button-background-color: #666;
     --input-button-foreground-color: white;
-    --results-background-color: #2b2b2b;
+    --results-background-color: #2f2f2f;
     --results-item-background-color: #333;
     --results-item-highlight-color: #383838;
     --results-item-details-background-color: #444;
@@ -269,7 +269,7 @@ path.unhighlighted {
 }
 
 .genomap-list::after {
-    content: var(--dropdown-symbol); 
+    content: var(--dropdown-symbol);
     position: absolute;
     width: 24px;
     top: 0;
@@ -415,7 +415,7 @@ path.unhighlighted {
 }
 
 .mate:not(:empty)::before {
-    content: var(--mate-symbol); 
+    content: var(--mate-symbol);
     margin-right: 3px;
 }
 

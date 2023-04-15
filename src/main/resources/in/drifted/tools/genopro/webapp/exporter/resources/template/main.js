@@ -46,7 +46,7 @@ function init(e) {
         document.getElementById("content").innerHTML = "${alertDynamicOnFileSystem}";
 
     } else {
-        
+
         theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
         setTheme();
 
@@ -353,7 +353,7 @@ function showDetail(e) {
         document.getElementById("keywords").blur();
 
         var entry = e.target.closest(".entry");
-        
+
         if (entry.id !== searchResultsSelectedIndividualId) {
             searchResultsSelectedIndividualId = entry.id;
 
@@ -558,7 +558,7 @@ function createSearchResultEntry(resultsElement, id, value) {
             var mate = document.createElement("div");
             mate.classList.add("mate");
             mate.textContent = matesArray.join(", ");
-            detail.appendChild(mate);     
+            detail.appendChild(mate);
         }
     }
 

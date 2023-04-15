@@ -107,7 +107,7 @@ public class App {
             String datePattern = passedValuesMap.getOrDefault(PARAM_DATE_PATTERN, DEFAULT_DATE_PATTERN);
             String fontFamily = passedValuesMap.getOrDefault(PARAM_FONT_FAMILY, DEFAULT_FONT_FAMILY);
             String relativeFontPath = passedValuesMap.getOrDefault(PARAM_RELATIVE_FONT_PATH, DEFAULT_RELATIVE_FONT_PATH);
-   
+
             Set<Color> unsupportedLabelColorSet = new HashSet<>();
             String unsupportedLabelHexColors = passedValuesMap.getOrDefault(PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET, "{}");
             if (unsupportedLabelHexColors.startsWith("{") && unsupportedLabelHexColors.endsWith("}")) {
@@ -118,7 +118,7 @@ public class App {
                     }
                 }
             }
-            
+
             boolean monochromeLabels = Boolean.parseBoolean(passedValuesMap.getOrDefault(PARAM_MONOCHROME_LABELS, "false"));
 
             DateFormatter dateFormatter = new DateFormatter(datePattern, locale, new HashMap<>());
@@ -197,7 +197,7 @@ public class App {
                     + "        [-fontFamily:\"Open Sans\"] \n"
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
                     + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
-                    + "        [-monochromeLabels:0]\n"    
+                    + "        [-monochromeLabels:0]\n"
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
             );
