@@ -47,7 +47,7 @@ public class WebAppExporter {
     private static final String GTAG_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/gtag.js";
 
     private static final String[] MAIN_HTML_TEMPLATE_LOCALIZED_PLACEHOLDERS = {
-        "keywords", "search", "clearSearchInput", "selectGenoMap"
+        "keywords", "search", "clearSearchInput", "selectGenoMap", "switchTheme"
     };
 
     private static final String[] MAIN_SCRIPT_TEMPLATE_LOCALIZED_PLACEHOLDERS = {
