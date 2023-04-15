@@ -1,18 +1,18 @@
 /* Copyright (c) 2018 Jan Tošovský */
-var svgPanZoomInstance;
-var genoMapSvg = null;
-var genoMapId = getGenoMapId();
-var genoMapSelectedIndividualId = null;
-var keywords = [];
-var searchResultsSelectedEntryDetail = null;
-var searchResultsSelectedIndividualId = null;
-var pinnedEntry = null;
-var dragging = false;
-var dynamic = "${dynamic}";
-var rowsProcessed = 0;
-var zoom;
-var pan;
-var theme = "light";
+const dynamic = "${dynamic}";
+let svgPanZoomInstance;
+let genoMapSvg = null;
+let genoMapId = getGenoMapId();
+let genoMapSelectedIndividualId = null;
+let keywords = [];
+let searchResultsSelectedEntryDetail = null;
+let searchResultsSelectedIndividualId = null;
+let pinnedEntry = null;
+let dragging = false;
+let rowsProcessed = 0;
+let zoom;
+let pan;
+let theme = "light";
 
 window.addEventListener("hashchange", processParams);
 window.addEventListener("beforeprint", setRealSize);
@@ -25,7 +25,7 @@ document.getElementById("themeSwitch").addEventListener("click", switchTheme);
 
 function processParams() {
 
-    var passedGenoMapId = getGenoMapId();
+    const passedGenoMapId = getGenoMapId();
 
     if (passedGenoMapId !== null && passedGenoMapId !== genoMapId) {
         genoMapId = passedGenoMapId;
@@ -50,10 +50,10 @@ function init(e) {
         theme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
         setTheme();
 
-        var genoMapSelect = document.getElementById("genomap-list");
+        const genoMapSelect = document.getElementById("genomap-list");
 
-        genoMapMap.forEach(function (value, key, map) {
-            var genoMapSelectItem = document.createElement("option");
+        genoMapMap.forEach(function(value, key, map) {
+            const genoMapSelectItem = document.createElement("option");
             genoMapSelectItem.value = key;
             genoMapSelectItem.text = value;
             genoMapSelect.appendChild(genoMapSelectItem);
@@ -63,9 +63,9 @@ function init(e) {
             genoMapSelect.value = genoMapId;
         }
 
-        var genoMaps = document.getElementById("content").getElementsByTagName("svg");
+        const genoMaps = document.getElementById("content").getElementsByTagName("svg");
 
-        for (var i = 0; i < genoMaps.length; i++) {
+        for (let i = 0; i < genoMaps.length; i++) {
             genoMaps[i].style.display = "none";
         }
 
@@ -98,16 +98,16 @@ function switchGenoMap(callback) {
 
     if (dynamic) {
 
-        var httpRequest = new XMLHttpRequest();
+        const httpRequest = new XMLHttpRequest();
 
         httpRequest.onreadystatechange = function() {
             if (httpRequest.readyState === XMLHttpRequest.DONE && httpRequest.status === 200) {
 
-                var svg = httpRequest.responseXML.documentElement;
+                const svg = httpRequest.responseXML.documentElement;
 
-                var content = document.getElementById("content");
+                const content = document.getElementById("content");
 
-                var nodes = content.getElementsByTagName("svg");
+                const nodes = content.getElementsByTagName("svg");
 
                 while (nodes[0]) {
                     nodes[0].parentNode.removeChild(nodes[0]);
@@ -144,7 +144,7 @@ function switchGenoMap(callback) {
     } else {
         if (svgPanZoomInstance) {
             /* removing the selection */
-            var nodes = genoMapSvg.getElementsByClassName("handle");
+            const nodes = genoMapSvg.getElementsByClassName("handle");
 
             while (nodes[0]) {
                 nodes[0].parentNode.removeChild(nodes[0]);
@@ -171,14 +171,14 @@ function switchGenoMap(callback) {
 
 function initSvgListeners() {
 
-    var individuals = document.getElementsByClassName("individual-active-area");
-    for (var i = 0; i < individuals.length; i++) {
+    const individuals = document.getElementsByClassName("individual-active-area");
+    for (let i = 0; i < individuals.length; i++) {
         individuals[i].addEventListener("touchend", select);
         individuals[i].addEventListener("mousedown", select);
     }
 
-    var hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
-    for (var i = 0; i < hyperlinks.length; i++) {
+    const hyperlinks = document.getElementsByClassName("individual-label-hyperlink");
+    for (let i = 0; i < hyperlinks.length; i++) {
         hyperlinks[i].addEventListener("touchend", scrollIntoView);
         hyperlinks[i].addEventListener("mousedown", scrollIntoView);
     }
@@ -192,13 +192,19 @@ function initSvgPanZoom() {
         maxZoom: 100,
         dblClickZoomEnabled: false,
         customEventsHandler: {
-            haltEventListeners: ["touchstart", "touchend", "touchmove", "touchleave", "touchcancel"],
+            haltEventListeners: [
+                "touchstart",
+                "touchend",
+                "touchmove",
+                "touchleave",
+                "touchcancel"
+            ],
             init: function(options) {
 
-                var instance = options.instance;
-                var initialScale = 1;
-                var pannedX = 0;
-                var pannedY = 0;
+                let instance = options.instance;
+                let initialScale = 1;
+                let pannedX = 0;
+                let pannedY = 0;
 
                 /* Listen only for pointer and touch events */
                 this.hammer = Hammer(options.svgElement, {
@@ -209,20 +215,25 @@ function initSvgPanZoom() {
                 this.hammer.get("pinch").set({enable: true});
 
                 /* Handle pan */
-                this.hammer.on("panstart panmove", function(e){
+                this.hammer.on("panstart panmove", function(e) {
 
                     if (e.type === "panstart") {
                         pannedX = 0;
                         pannedY = 0;
                     }
 
-                    instance.panBy({x: e.deltaX - pannedX, y: e.deltaY - pannedY});
+                    instance.panBy(
+                            {
+                                x: e.deltaX - pannedX,
+                                y: e.deltaY - pannedY
+                            });
+
                     pannedX = e.deltaX;
                     pannedY = e.deltaY;
                 });
 
                 /* Handle pinch */
-                this.hammer.on("pinchstart pinchmove", function(e){
+                this.hammer.on("pinchstart pinchmove", function(e) {
 
                     if (e.type === "pinchstart") {
                         initialScale = instance.getZoom();
@@ -243,10 +254,10 @@ function initSvgPanZoom() {
 
 function triggerSearch(e) {
 
-    var rawKeywords = document.getElementById("keywords").value.trim();
+    const rawKeywords = document.getElementById("keywords").value.trim();
 
     if (rawKeywords.length > 0) {
-        var newKeywords = rawKeywords.toLowerCase().split(/\s+/);
+        const newKeywords = rawKeywords.toLowerCase().split(/\s+/);
         if (!isSame(keywords, newKeywords)) {
             keywords = newKeywords;
             rowsProcessed = 0;
@@ -264,7 +275,7 @@ function scrollIntoView(e) {
 
     e.preventDefault();
 
-    var id = e.target.parentElement.getAttribute("data-target-id");
+    const id = e.target.parentElement.getAttribute("data-target-id");
     scrollIntoViewById(id);
 }
 
@@ -277,21 +288,31 @@ function scrollIntoViewById(id) {
 
         switchGenoMap(function() {
 
-            var currentPosition = getCurrentPosition(id);
-            var targetPosition = getTargetPosition();
+            const currentPosition = getCurrentPosition(id);
+            const targetPosition = getTargetPosition();
+            const reverseZoom = 1 / svgPanZoomInstance.getSizes().realZoom;
 
-            svgPanZoomInstance.panBy({ x: targetPosition.x - currentPosition.x, y: targetPosition.y - currentPosition.y });
-            svgPanZoomInstance.zoomAtPointBy(1 / svgPanZoomInstance.getSizes().realZoom, targetPosition);
+            svgPanZoomInstance.panBy(
+                    {
+                        x: targetPosition.x - currentPosition.x,
+                        y: targetPosition.y - currentPosition.y
+                    });
+
+            svgPanZoomInstance.zoomAtPointBy(reverseZoom, targetPosition);
 
             selectById(id);
         });
 
     } else {
 
-        var currentPosition = getCurrentPosition(id);
-        var targetPosition = getTargetPosition();
+        const currentPosition = getCurrentPosition(id);
+        const targetPosition = getTargetPosition();
 
-        svgPanZoomInstance.panBy({ x: targetPosition.x - currentPosition.x, y: targetPosition.y - currentPosition.y });
+        svgPanZoomInstance.panBy(
+                {
+                    x: targetPosition.x - currentPosition.x,
+                    y: targetPosition.y - currentPosition.y
+                });
 
         selectById(id);
     }
@@ -309,21 +330,21 @@ function selectById(id) {
     genoMapSelectedIndividualId = id;
 
     /* remove previous handles */
-    var nodes = genoMapSvg.getElementsByClassName("handle");
+    const nodes = genoMapSvg.getElementsByClassName("handle");
 
     while (nodes[0]) {
         nodes[0].parentNode.removeChild(nodes[0]);
     }
 
     /* get bounding box */
-    var boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
-    var x = Number(boundingBoxElement.getAttribute("x"));
-    var y = Number(boundingBoxElement.getAttribute("y"));
-    var width = Number(boundingBoxElement.getAttribute("width"));
-    var height = Number(boundingBoxElement.getAttribute("height"));
+    const boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
+    const x = Number(boundingBoxElement.getAttribute("x"));
+    const y = Number(boundingBoxElement.getAttribute("y"));
+    const width = Number(boundingBoxElement.getAttribute("width"));
+    const height = Number(boundingBoxElement.getAttribute("height"));
 
     /* create handles */
-    var parent = genoMapSvg.getElementById(id);
+    const parent = genoMapSvg.getElementById(id);
     createHandle(parent, x - 8, y - 8);
     createHandle(parent, x + width / 2 - 4, y - 8);
     createHandle(parent, x + width, y - 8);
@@ -352,7 +373,7 @@ function showDetail(e) {
 
         document.getElementById("keywords").blur();
 
-        var entry = e.target.closest(".entry");
+        const entry = e.target.closest(".entry");
 
         if (entry.id !== searchResultsSelectedIndividualId) {
             searchResultsSelectedIndividualId = entry.id;
@@ -367,24 +388,24 @@ function showDetail(e) {
 
 function getCurrentPosition(id) {
 
-    var boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
-    var boundingRect = boundingBoxElement.getBoundingClientRect();
-    var x = boundingRect.left + boundingRect.width / 2;
-    var y = boundingRect.top + boundingRect.height / 2;
+    const boundingBoxElement = genoMapSvg.getElementById(id + '-bb');
+    const boundingRect = boundingBoxElement.getBoundingClientRect();
+    let x = boundingRect.left + boundingRect.width / 2;
+    let y = boundingRect.top + boundingRect.height / 2;
 
-    var parentBoundingRect = genoMapSvg.getBoundingClientRect();
-    var parentX = parentBoundingRect.left;
-    var parentY = parentBoundingRect.top;
+    const parentBoundingRect = genoMapSvg.getBoundingClientRect();
+    const parentX = parentBoundingRect.left;
+    const parentY = parentBoundingRect.top;
 
     x -= parentX;
     y -= parentY;
 
-    return { x: x, y: y };
+    return {x: x, y: y};
 }
 
 function getTargetPosition() {
 
-    var results = document.getElementById("results");
+    const results = document.getElementById("results");
 
     return {
         x: (document.documentElement.offsetWidth + results.offsetWidth) / 2,
@@ -394,9 +415,9 @@ function getTargetPosition() {
 
 function getFullName(individualInfo) {
 
-    var nameArray = new Array();
+    const nameArray = new Array();
 
-    for (var i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 3; i++) {
         if (individualInfo[i].length > 0) {
             nameArray.push(individualInfo[i]);
         }
@@ -407,7 +428,7 @@ function getFullName(individualInfo) {
 
 function showResults() {
 
-    var results = document.getElementById("results");
+    const results = document.getElementById("results");
     results.style.display = "block";
 
     results.addEventListener("scroll", function() {
@@ -429,9 +450,9 @@ function showResults() {
         }
     }
 
-    var clearSearchInputButton = document.getElementById("clearSearchInputButton");
+    const clearSearchInputButton = document.getElementById("clearSearchInputButton");
     if (clearSearchInputButton.style.display === "none") {
-        var searchButton = document.getElementById("searchButton");
+        const searchButton = document.getElementById("searchButton");
         searchButton.style.display = "none";
         clearSearchInputButton.style.display = "block";
     }
@@ -441,13 +462,12 @@ function showResults() {
 
 function addMoreSearchResultEntries(resultsElement) {
 
-    var row = 0;
-    var addedEntries = 0;
+    let row = 0;
+    let addedEntries = 0;
 
     for (let [key, value] of iMap) {
 
         row++;
-
         if (row > rowsProcessed) {
 
             if (matches(value, keywords)) {
@@ -468,12 +488,12 @@ function addMoreSearchResultEntries(resultsElement) {
 
 function createSearchResultEntry(resultsElement, id, value) {
 
-    var entry = document.createElement('div');
+    const entry = document.createElement('div');
     entry.classList.add("entry");
     entry.id = "s" + id;
     resultsElement.appendChild(entry);
 
-    var hitArea = document.createElement('div');
+    const hitArea = document.createElement('div');
     hitArea.classList.add("hitarea");
 
     hitArea.addEventListener("touchstart", resetDragging);
@@ -483,7 +503,7 @@ function createSearchResultEntry(resultsElement, id, value) {
 
     entry.appendChild(hitArea);
 
-    var info = document.createElement('div');
+    const info = document.createElement('div');
     info.classList.add("info");
 
     info.addEventListener("touchstart", resetDragging);
@@ -493,12 +513,12 @@ function createSearchResultEntry(resultsElement, id, value) {
 
     entry.appendChild(info);
 
-    var topRow = document.createElement('div');
+    const topRow = document.createElement('div');
     topRow.classList.add("top");
     info.appendChild(topRow);
 
-    var name = document.createElement('div');
-    var names = [];
+    const name = document.createElement('div');
+    const names = [];
     if (value[1].length > 0) {
         names.push(value[1]);
     }
@@ -509,53 +529,53 @@ function createSearchResultEntry(resultsElement, id, value) {
     name.classList.add("name");
     topRow.appendChild(name);
 
-    var lastname = document.createElement('div');
+    const lastname = document.createElement('div');
     lastname.textContent = value[3];
     lastname.classList.add("lastname");
     topRow.appendChild(lastname);
 
-    var birthDate = document.createElement('div');
+    const birthDate = document.createElement('div');
     birthDate.textContent = value[4];
     birthDate.classList.add("birthdate");
     topRow.appendChild(birthDate);
 
-    var detail = document.createElement('div');
+    const detail = document.createElement('div');
     detail.classList.add("detail");
     if ((value[6] + value[7] + value[8]).length > 0) {
 
-        var fatherId = value[7];
+        const fatherId = value[7];
         if (fatherId.length > 0) {
-            var fatherName = getFullName(iMap.get(fatherId));
+            const fatherName = getFullName(iMap.get(fatherId));
             if (fatherName.length > 0) {
-                var father = document.createElement("div");
+                const father = document.createElement("div");
                 father.classList.add("father");
                 father.textContent = fatherName;
                 detail.appendChild(father);
             }
         }
 
-        var motherId = value[8];
+        const motherId = value[8];
         if (motherId.length > 0) {
-            var mother = document.createElement("div");
+            const mother = document.createElement("div");
             mother.classList.add("mother");
             mother.textContent = getFullName(iMap.get(motherId));
             detail.appendChild(mother);
         }
 
-        var delimitedMateIds = value[6];
+        const delimitedMateIds = value[6];
         if (delimitedMateIds.length > 0) {
-            var matesArray = new Array();
-            var mateIds = delimitedMateIds.split(",");
+            const matesArray = new Array();
+            const mateIds = delimitedMateIds.split(",");
 
-            for (var m = 0; m < mateIds.length; m++) {
-                var individualInfo = iMap.get(mateIds[m]);
-                var fullName = getFullName(individualInfo);
+            for (let m = 0; m < mateIds.length; m++) {
+                const individualInfo = iMap.get(mateIds[m]);
+                const fullName = getFullName(individualInfo);
                 if (fullName.length > 0) {
                     matesArray.push(fullName);
                 }
             }
 
-            var mate = document.createElement("div");
+            const mate = document.createElement("div");
             mate.classList.add("mate");
             mate.textContent = matesArray.join(", ");
             detail.appendChild(mate);
@@ -564,11 +584,11 @@ function createSearchResultEntry(resultsElement, id, value) {
 
     info.appendChild(detail);
 
-    var bottomRow = document.createElement('div');
+    const bottomRow = document.createElement('div');
     bottomRow.classList.add("bottom");
     info.appendChild(bottomRow);
 
-    var genoMapName = document.createElement('div');
+    const genoMapName = document.createElement('div');
     genoMapName.classList.add("genomapname");
     genoMapName.textContent = genoMapMap.get(value[0]);
     bottomRow.appendChild(genoMapName);
@@ -576,8 +596,8 @@ function createSearchResultEntry(resultsElement, id, value) {
 
 function hideResults() {
 
-    var searchButton = document.getElementById("searchButton");
-    var clearSearchInputButton = document.getElementById("clearSearchInputButton");
+    const searchButton = document.getElementById("searchButton");
+    const clearSearchInputButton = document.getElementById("clearSearchInputButton");
 
     searchButton.style.display = "block";
     clearSearchInputButton.style.display = "none";
@@ -608,18 +628,18 @@ function pinEntry(e) {
         document.getElementById("results").style.display = "none";
         document.getElementById("genomap-list").style.display = "none";
 
-        var entry = e.target.closest(".entry");
+        const entry = e.target.closest(".entry");
 
         pinnedEntry = entry.cloneNode(true);
 
         pinnedEntry.classList.add("pinned");
         document.getElementById("container").appendChild(pinnedEntry);
 
-        var hitArea = pinnedEntry.getElementsByClassName("hitarea")[0];
+        const hitArea = pinnedEntry.getElementsByClassName("hitarea")[0];
         hitArea.addEventListener("touchend", unpinEntry);
         hitArea.addEventListener("mousedown", unpinEntry);
 
-        var info = pinnedEntry.getElementsByClassName("info")[0];
+        const info = pinnedEntry.getElementsByClassName("info")[0];
         info.addEventListener("touchend", showDetail);
         info.addEventListener("mousedown", showDetail);
 
@@ -656,18 +676,18 @@ function setRealSize(e) {
     pan = svgPanZoomInstance.getPan();
     zoom = svgPanZoomInstance.getZoom();
     svgPanZoomInstance.zoomBy(1.0);
-    svgPanZoomInstance.panBy({x:0, y:0});
+    svgPanZoomInstance.panBy({x: 0, y: 0});
 
-    var sizes = svgPanZoomInstance.getSizes();
+    const sizes = svgPanZoomInstance.getSizes();
 
-    var content = document.getElementById("content");
+    const content = document.getElementById("content");
     content.style.width = sizes.viewBox.width + "px";
     content.style.height = sizes.viewBox.height + "px";
 }
 
 function restoreSize(e) {
 
-    var content = document.getElementById("content");
+    const content = document.getElementById("content");
     content.style.width = "100vw";
     content.style.height = "100vh";
 
@@ -677,12 +697,12 @@ function restoreSize(e) {
 
 function matches(value, keywords) {
 
-    var result = true;
+    let result = true;
 
-    for (var k = 0; k < keywords.length; k++) {
-        var found = false;
-        for (var i = 1; i < 5; i++) {
-            var normalizedValue = value[i].toLowerCase();
+    for (let k = 0; k < keywords.length; k++) {
+        let found = false;
+        for (let i = 1; i < 5; i++) {
+            const normalizedValue = value[i].toLowerCase();
             if (normalizedValue.indexOf(keywords[k]) !== -1) {
                 found = true;
                 break;
@@ -701,7 +721,7 @@ function isSame(array1, array2) {
 }
 
 function getGenoMapId() {
-    var result = location.hash.match("#/sheet/([a-z0-9-]*)");
+    const result = location.hash.match("#/sheet/([a-z0-9-]*)");
     return result && genoMapMap.has(result[1]) ? result[1] : null;
 }
 
@@ -713,8 +733,7 @@ function switchTheme() {
 function setTheme() {
     if (theme === "dark") {
         document.documentElement.setAttribute('data-theme', 'dark');
-    }
-    else {
+    } else {
         document.documentElement.setAttribute('data-theme', 'light');
     }
     localStorage.setItem("theme", theme);

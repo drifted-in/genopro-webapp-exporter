@@ -1,5 +1,5 @@
-var relativeAppUrl = "${relativeAppUrl}";
-var currentCacheId = "${currentCacheId}";
+const relativeAppUrl = "${relativeAppUrl}";
+const currentCacheId = "${currentCacheId}";
 
 self.addEventListener("install", function(event) {
     self.skipWaiting();
