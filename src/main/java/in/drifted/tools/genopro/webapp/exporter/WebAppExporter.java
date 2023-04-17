@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
 
 public class WebAppExporter {
 
@@ -44,7 +43,8 @@ public class WebAppExporter {
     private static final String CSS_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/style.css";
     private static final String SERVICE_WORKER_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/service-worker.js";
     private static final String MANIFEST_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/manifest.json";
-    private static final String GTAG_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/gtag.js";
+    private static final String GOOGLE_ANALYTICS_REGISTRATION_SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/google-analytics-registration.js";
+    private static final String SERVICE_WORKER_REGISTRATION_SCRIPT_TEMPLATE_RESOURCE_PATH = RESOURCE_PATH + "/service-worker-registration.js";
 
     private static final String[] MAIN_HTML_TEMPLATE_LOCALIZED_PLACEHOLDERS = {
         "keywords", "search", "clearSearchInput", "selectGenoMap", "switchTheme"
@@ -60,6 +60,9 @@ public class WebAppExporter {
         String relativeAppUrl = generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", "");
 
         generateGenoMaps(reportPath.getParent(), genoMapDataList, generatingOptions);
+        generateGoogleAnalyticsRegistrationScript(reportPath.getParent().resolve("google-analytics-registration.js"), generatingOptions);
+        generateServiceWorkerRegistrationScript(reportPath.getParent().resolve("service-worker-registration.js"), generatingOptions);
+        generateMainScript(reportPath.getParent().resolve("main.js"), generatingOptions, true);
         generateMainHtml(reportPath, documentInfo, genoMapDataList, generatingOptions, true);
         generateCss(reportPath.getParent().resolve("style.css"), generatingOptions);
         generateServiceWorker(reportPath.getParent().resolve("service-worker.js"), genoMapDataList, relativeAppUrl);
@@ -68,6 +71,7 @@ public class WebAppExporter {
 
     public static void exportAsStaticPage(Path reportPath, DocumentInfo documentInfo, List<GenoMapData> genoMapDataList, GeneratingOptions generatingOptions) throws IOException {
 
+        generateMainScript(reportPath.getParent().resolve("main.js"), generatingOptions, false);
         generateMainHtml(reportPath, documentInfo, genoMapDataList, generatingOptions, false);
         generateCss(reportPath.getParent().resolve("style.css"), generatingOptions);
         generateManifest(reportPath.getParent().resolve("manifest.json"), documentInfo, "");
@@ -84,6 +88,43 @@ public class WebAppExporter {
                     SvgExporter.export(genoMapData, outputStream, generatingOptions);
                 }
             }
+        }
+    }
+
+    private static void generateGoogleAnalyticsRegistrationScript(Path outputPath, GeneratingOptions generatingOptions) throws IOException {
+
+        String gaTrackingId = generatingOptions.getAdditionalOptionsMap().get("gaTrackingId");
+
+        if (gaTrackingId != null) {
+            try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+                String script = getResourceAsString(GOOGLE_ANALYTICS_REGISTRATION_SCRIPT_TEMPLATE_RESOURCE_PATH);
+                script = script.replace("${gaTrackingId}", gaTrackingId);
+                writer.write(script);
+            }
+        }
+    }
+
+    private static void generateServiceWorkerRegistrationScript(Path outputPath, GeneratingOptions generatingOptions) throws IOException {
+
+        String relativeAppUrl = generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", "");
+
+        try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+            String script = getResourceAsString(SERVICE_WORKER_REGISTRATION_SCRIPT_TEMPLATE_RESOURCE_PATH);
+            script = script.replace("${relativeAppUrl}", relativeAppUrl);
+            writer.write(script);
+        }
+    }
+
+    private static void generateMainScript(Path outputPath, GeneratingOptions generatingOptions, boolean dynamic) throws IOException {
+
+        try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
+            String script = getResourceAsString(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH);
+            for (String placeholder : MAIN_SCRIPT_TEMPLATE_LOCALIZED_PLACEHOLDERS) {
+                script = script.replace("${" + placeholder + "}", generatingOptions.getResourceBundle().getString(placeholder));
+            }
+            script = script.replace("\"${dynamic}\"", dynamic ? "true" : "false");
+
+            writer.write(script.replaceAll("\\s+", " "));
         }
     }
 
@@ -116,19 +157,15 @@ public class WebAppExporter {
             content = svgContentBuilder.toString();
         }
 
-        String mainScript = getMainScript(MAIN_SCRIPT_TEMPLATE_RESOURCE_PATH, generatingOptions.getResourceBundle(), dynamic);
-        String gtag = getGtag(GTAG_TEMPLATE_RESOURCE_PATH, generatingOptions);
-
         Map<String, String> placeholderMap = new HashMap<>();
 
         placeholderMap.put("language", generatingOptions.getLocale().getLanguage());
         placeholderMap.put("title", documentInfo.getTitle());
         placeholderMap.put("description", documentInfo.getDescription());
         placeholderMap.put("content", content);
-        placeholderMap.put("script", mainScript.replaceAll("\\s+", " "));
-        placeholderMap.put("dynamic", dynamic ? "true" : "false");
-        placeholderMap.put("relativeAppUrl", generatingOptions.getAdditionalOptionsMap().getOrDefault("relativeAppUrl", ""));
-        placeholderMap.put("gtag", gtag);
+        placeholderMap.put("googleAnalyticsRegistration", getGoogleAnalyticsRegistration(generatingOptions));
+        placeholderMap.put("webApplicationManifest", dynamic ? getWebApplicationManifest() : "");
+        placeholderMap.put("serviceWorkerRegistration", dynamic ? getServiceWorkerRegistration() : "");
         placeholderMap.put("timestamp", "<!-- " + LocalDateTime.now().toString() + " -->");
 
         String mainHtml = getResourceAsString(MAIN_HTML_TEMPLATE_RESOURCE_PATH);
@@ -192,30 +229,25 @@ public class WebAppExporter {
         }
     }
 
-    private static String getMainScript(String resourcePath, ResourceBundle resourceBundle, boolean dynamic) throws IOException {
+    private static String getGoogleAnalyticsRegistration(GeneratingOptions generatingOptions) throws IOException {
 
-        String mainScript = getResourceAsString(resourcePath);
-
-        for (String placeholder : MAIN_SCRIPT_TEMPLATE_LOCALIZED_PLACEHOLDERS) {
-            mainScript = mainScript.replace("${" + placeholder + "}", resourceBundle.getString(placeholder));
-        }
-
-        mainScript = mainScript.replace("\"${dynamic}\"", dynamic ? "true" : "false");
-
-        return mainScript;
-    }
-
-    private static String getGtag(String resourcePath, GeneratingOptions generatingOptions) throws IOException {
-
-        String gtag = "";
-
+        String googleAnalyticsRegistration = "";
         String gaTrackingId = generatingOptions.getAdditionalOptionsMap().get("gaTrackingId");
 
         if (gaTrackingId != null) {
-            gtag = getResourceAsString(resourcePath).replace("${gaTrackingId}", gaTrackingId);
+            googleAnalyticsRegistration += "<script async src=\"https://www.googletagmanager.com/gtag/js?id=" + gaTrackingId + "\"></script>";
+            googleAnalyticsRegistration += "<script src=\"google-analytics-registration.js\"></script>";
         }
 
-        return gtag;
+        return googleAnalyticsRegistration;
+    }
+
+    private static String getWebApplicationManifest() {
+        return "<link rel=\"manifest\" href=\"manifest.json\">";
+    }
+
+    private static String getServiceWorkerRegistration() {
+        return "<script src=\"service-worker-registration.js\"></script>";
     }
 
     private static String getResourceAsString(String resourcePath) throws IOException {

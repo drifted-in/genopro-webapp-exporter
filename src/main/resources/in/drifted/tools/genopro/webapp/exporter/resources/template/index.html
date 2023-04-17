@@ -2,7 +2,7 @@
 <html lang="${language}">
 
 <head>
-    ${gtag}
+    ${googleAnalyticsRegistration}
     <meta charset="UTF-8">
     <meta name="generator" content="GenoPro® WebApp exporter">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-    <link rel="manifest" href="manifest.json">
+    ${webApplicationManifest}
     <script src="res/hammer.min.js"></script>
     <script src="res/svg-pan-zoom.min.js"></script>
     <script src="genomaps.js"></script>
@@ -41,17 +41,8 @@
             <div id="attribution"></div>
         </div>
     </div>
-
-    <script>
-        ${script}
-    </script>
-    <script>
-        if (dynamic && (location.protocol.indexOf("http") !== -1)) {
-            if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("${relativeAppUrl}/service-worker.js");
-            }
-        }
-    </script>
+    <script src="main.js"></script>
+    ${serviceWorkerRegistration}
 </body>
 
 </html>
