@@ -525,6 +525,9 @@ public class SvgExporter {
         }
 
         String className = "pedigree-link";
+        StringBuilder pedigreePathBuilder = new StringBuilder();
+        StringBuilder parentsPathBuilder = new StringBuilder();
+        StringBuilder adoptedPathBuilder = new StringBuilder();
 
         for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
 
@@ -624,27 +627,47 @@ public class SvgExporter {
                     }
 
                 } else {
-                    writer.writeStartElement("path");
-                    writer.writeAttribute("d", pathData.toString());
 
                     switch (pedigreeLink.getPedigreeLinkType()) {
-
                         case PARENT:
-                            writer.writeAttribute("class", className + " parent " + familyId);
+                            if(parentsPathBuilder.length() > 0)
+                                parentsPathBuilder.append(" ");
+                            parentsPathBuilder.append(pathData.toString());
                             break;
 
                         case ADOPTED:
-                            writer.writeAttribute("class", className + " adopted " + familyId);
+                            if(adoptedPathBuilder.length() > 0)
+                                adoptedPathBuilder.append(" ");
+                            adoptedPathBuilder.append(pathData.toString());
                             break;
 
                         default:
-                            writer.writeAttribute("class", className + " biological " + familyId);
+                            if(pedigreePathBuilder.length() > 0)
+                                pedigreePathBuilder.append(" ");
+                            pedigreePathBuilder.append(pathData.toString());
                             break;
                     }
-
-                    writer.writeEndElement();
                 }
             }
+        }
+
+        if (parentsPathBuilder.length() > 0) {
+            writer.writeStartElement("path");
+            writer.writeAttribute("d", parentsPathBuilder.toString());
+            writer.writeAttribute("class", className + " parent " + familyId);
+            writer.writeEndElement();
+        }
+        if (pedigreePathBuilder.length() > 0) {
+            writer.writeStartElement("path");
+            writer.writeAttribute("d", pedigreePathBuilder.toString());
+            writer.writeAttribute("class", className + " biological " + familyId);
+            writer.writeEndElement();
+        }
+        if (adoptedPathBuilder.length() > 0) {
+            writer.writeStartElement("path");
+            writer.writeAttribute("d", adoptedPathBuilder.toString());
+            writer.writeAttribute("class", className + " adopted " + familyId);
+            writer.writeEndElement();
         }
     }
 
