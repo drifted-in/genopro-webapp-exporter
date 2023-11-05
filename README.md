@@ -176,6 +176,7 @@ It is recommended to use Open Sans font as it is preconfigured so minimal additi
     - `monochromeLabels` - If the label color system has no benefit for end-user, it is better to set this attribute to 1. It means colors will be ignored in favor of default styles and switched accordingly when activating the light/dark theme.  
     - `gaTrackingId` - For analyzing the web app traffic via Google Analytics just specify your tracking ID.
     - `highlightMode` - If set to 1 (for paternal line) or 2 (for maternal line), the color of terminal individuals is propagated upstream and combined with colors of connected trees. Intended for reduced family tree containing just tested individuals and their common ancestors.
+    - `selectableFamilyLines` - If set to 1, the family lines can be selected and highlighted. That is especially helpful with very large trees.
 
     Example: `java -jar C:\genopro-webapp-exporter.jar -in:"C:\family-tree.gno" -out:"C:\family-tree" -mode:static -locale:cs -anonymizedYears:120 -datePattern:dd.MM.yyyy -fontFamily:Muli -relativeFontPath:res/Muli-Regular-webfont.woff -gaTrackingId:UA-00000000-1`
 

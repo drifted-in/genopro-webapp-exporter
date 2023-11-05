@@ -56,6 +56,7 @@ public class App {
     private static final String PARAM_MONOCHROME_LABELS = "-monochromeLabels";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
+    private static final String PARAM_SELECTABLE_FAMILY_LINES = "-selectableFamilyLines";
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final int DEFAULT_ANONYMIZED_YEARS = 100;
@@ -169,9 +170,16 @@ public class App {
                 dateFormatter = new DateFormatter("yyyy", locale, dateFormatter.getPrefixReplacementMap());
             }
 
+            boolean selectableFamilyLines = false;
+            if (passedValuesMap.containsKey(PARAM_SELECTABLE_FAMILY_LINES)) {
+                if(Integer.parseInt(passedValuesMap.get(PARAM_SELECTABLE_FAMILY_LINES)) > 0) {
+                    selectableFamilyLines = true;
+                }
+            }
+
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
                     displayStyle, dateFormatter, ageFormatter, unsupportedLabelColorSet, monochromeLabels,
-                    additionalOptionMap);
+                    additionalOptionMap, selectableFamilyLines);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
@@ -200,6 +208,7 @@ public class App {
                     + "        [-monochromeLabels:0]\n"
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
+                    + "        [-selectableFamilyLines:0]\n"
             );
         }
     }
