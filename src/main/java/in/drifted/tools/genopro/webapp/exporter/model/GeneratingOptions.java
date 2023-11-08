@@ -53,7 +53,7 @@ public class GeneratingOptions {
     public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily,
             DisplayStyle displayStyle, DateFormatter dateFormatter, AgeFormatter ageFormatter,
             Set<Color> unsupportedLabelColorSet, boolean monochromeLabels,
-            Map<String, String> additionalOptionsMap, boolean selectableFamilyLines) {
+            boolean selectableFamilyLines, Map<String, String> additionalOptionsMap) {
 
         Canvas canvas = new Canvas();
 

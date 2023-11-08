@@ -54,9 +54,9 @@ public class App {
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
     private static final String PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET = "-unsupportedLabelHexColorSet";
     private static final String PARAM_MONOCHROME_LABELS = "-monochromeLabels";
+    private static final String PARAM_SELECTABLE_FAMILY_LINES = "-selectableFamilyLines";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
-    private static final String PARAM_SELECTABLE_FAMILY_LINES = "-selectableFamilyLines";
 
     private static final String DEFAULT_MODE = "dynamic";
     private static final int DEFAULT_ANONYMIZED_YEARS = 100;
@@ -179,7 +179,7 @@ public class App {
 
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
                     displayStyle, dateFormatter, ageFormatter, unsupportedLabelColorSet, monochromeLabels,
-                    additionalOptionMap, selectableFamilyLines);
+                    selectableFamilyLines, additionalOptionMap);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
@@ -206,9 +206,9 @@ public class App {
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
                     + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
                     + "        [-monochromeLabels:0]\n"
+                    + "        [-selectableFamilyLines:0]\n"
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
-                    + "        [-selectableFamilyLines:0]\n"
             );
         }
     }
