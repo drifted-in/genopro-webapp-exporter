@@ -167,6 +167,19 @@ function switchGenoMap(callback) {
 }
 
 function initSvgListeners() {
+    if ("${selectableFamilyLines}" === "true") {
+        const familyLines = document.getElementsByClassName("family-line");
+        for (let i = 0; i < familyLines.length; i++) {
+            familyLines[i].addEventListener("touchend", selectPath);
+            familyLines[i].addEventListener("mousedown", selectPath);
+        }
+
+        const pedigreeLinks = document.getElementsByClassName("pedigree-link");
+        for (let i = 0; i < pedigreeLinks.length; i++) {
+            pedigreeLinks[i].addEventListener("touchend", selectPath);
+            pedigreeLinks[i].addEventListener("mousedown", selectPath);
+        }
+    }
 
     const individuals = document.getElementsByClassName("individual-active-area");
     for (let i = 0; i < individuals.length; i++) {
@@ -320,6 +333,33 @@ function select(e) {
     e.preventDefault();
 
     selectById(e.target.parentElement.id);
+}
+
+function selectPath(e) {
+    e.preventDefault();
+
+    /* remove previous link highlights */
+    const highlightedLinks = document.getElementsByClassName("link-highlight");
+    while (highlightedLinks.length > 0) {
+       highlightedLinks[0].classList.remove("link-highlight");
+    }
+
+    /* find family ID of the selected element */
+    const classes = e.target.classList;
+    let familyClass;
+    for (let i = 0; i < classes.length; i++) {
+        if ( /^fam[0-9]+/.test(classes[i]) ) {
+            familyClass = classes[i];
+            break;
+        }
+    }
+
+    /* add highlight class to all elements with the same family ID */
+    const paths = document.getElementsByClassName(familyClass);
+    for (let i = 0; i < paths.length; i++) {
+        paths[i].classList.add("link-highlight");
+    }
+
 }
 
 function selectById(id) {

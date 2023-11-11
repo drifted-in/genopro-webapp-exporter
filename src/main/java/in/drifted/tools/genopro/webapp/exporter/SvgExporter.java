@@ -270,6 +270,7 @@ public class SvgExporter {
             Map<String, Individual> individualMap, int shiftX, int shiftY, GeneratingOptions generatingOptions)
             throws XMLStreamException {
 
+        String familyId = family.getId();
         Position position = family.getPosition();
         BoundaryRect topBoundaryRect = family.getTopBoundaryRect();
         BoundaryRect bottomBoundaryRect = family.getBottomBoundaryRect();
@@ -346,10 +347,10 @@ public class SvgExporter {
                             writer.writeAttribute("d", linePathDataArray[0]);
 
                             if (highlightMode == HighlightMode.PATERNAL) {
-                                writer.writeAttribute("class", className + " highlighted");
+                                writer.writeAttribute("class", className + " highlighted " + familyId);
                                 writer.writeAttribute("style", style.toString());
                             } else {
-                                writer.writeAttribute("class", className + " unhighlighted");
+                                writer.writeAttribute("class", className + " unhighlighted " + familyId);
                             }
 
                             writer.writeEndElement();
@@ -358,10 +359,10 @@ public class SvgExporter {
                             writer.writeAttribute("d", linePathDataArray[1]);
 
                             if (highlightMode == HighlightMode.MATERNAL) {
-                                writer.writeAttribute("class", className + " highlighted");
+                                writer.writeAttribute("class", className + " highlighted " + familyId);
                                 writer.writeAttribute("style", style.toString());
                             } else {
-                                writer.writeAttribute("class", className + " unhighlighted");
+                                writer.writeAttribute("class", className + " unhighlighted " + familyId);
                             }
 
                             writer.writeEndElement();
@@ -369,7 +370,7 @@ public class SvgExporter {
                         } else {
                             writer.writeStartElement("path");
                             writer.writeAttribute("d", linePathData);
-                            writer.writeAttribute("class", className + " highlighted");
+                            writer.writeAttribute("class", className + " highlighted " + familyId);
                             writer.writeAttribute("style", style.toString());
                             writer.writeEndElement();
                         }
@@ -380,14 +381,14 @@ public class SvgExporter {
                 } else {
                     writer.writeStartElement("path");
                     writer.writeAttribute("d", linePathData);
-                    writer.writeAttribute("class", className + " unhighlighted");
+                    writer.writeAttribute("class", className + " unhighlighted " + familyId);
                     writer.writeEndElement();
                 }
 
             } else {
                 writer.writeStartElement("path");
                 writer.writeAttribute("d", linePathData);
-                writer.writeAttribute("class", className);
+                writer.writeAttribute("class", className + " " + familyId);
                 writer.writeEndElement();
             }
 
@@ -496,13 +497,13 @@ public class SvgExporter {
 
                         writer.writeStartElement("path");
                         writer.writeAttribute("d", verticalPathData.toString());
-                        writer.writeAttribute("class", className + " highlighted");
+                        writer.writeAttribute("class", className + " highlighted " + familyId);
                         writer.writeAttribute("style", style.toString());
                         writer.writeEndElement();
 
                         writer.writeStartElement("path");
                         writer.writeAttribute("d", horizontalPathData.toString());
-                        writer.writeAttribute("class", className + " highlighted");
+                        writer.writeAttribute("class", className + " highlighted " + familyId);
                         writer.writeAttribute("style", style.toString());
                         writer.writeEndElement();
 
@@ -512,12 +513,12 @@ public class SvgExporter {
                 } else {
                     writer.writeStartElement("path");
                     writer.writeAttribute("d", verticalPathData.toString());
-                    writer.writeAttribute("class", className);
+                    writer.writeAttribute("class", className + " " + familyId);
                     writer.writeEndElement();
 
                     writer.writeStartElement("path");
                     writer.writeAttribute("d", horizontalPathData.toString());
-                    writer.writeAttribute("class", className);
+                    writer.writeAttribute("class", className + " " + familyId);
                     writer.writeEndElement();
                 }
             }
@@ -608,7 +609,7 @@ public class SvgExporter {
 
                             writer.writeStartElement("path");
                             writer.writeAttribute("d", pathData.toString());
-                            writer.writeAttribute("class", className + " highlighted");
+                            writer.writeAttribute("class", className + " highlighted " + familyId);
                             writer.writeAttribute("style", style.toString());
                             writer.writeEndElement();
 
@@ -618,7 +619,7 @@ public class SvgExporter {
                     } else {
                         writer.writeStartElement("path");
                         writer.writeAttribute("d", pathData.toString());
-                        writer.writeAttribute("class", className + " unhighlighted");
+                        writer.writeAttribute("class", className + " unhighlighted " + familyId);
                         writer.writeEndElement();
                     }
 
@@ -629,15 +630,15 @@ public class SvgExporter {
                     switch (pedigreeLink.getPedigreeLinkType()) {
 
                         case PARENT:
-                            writer.writeAttribute("class", className + " parent");
+                            writer.writeAttribute("class", className + " parent " + familyId);
                             break;
 
                         case ADOPTED:
-                            writer.writeAttribute("class", className + " adopted");
+                            writer.writeAttribute("class", className + " adopted " + familyId);
                             break;
 
                         default:
-                            writer.writeAttribute("class", className + " biological");
+                            writer.writeAttribute("class", className + " biological " + familyId);
                             break;
                     }
 

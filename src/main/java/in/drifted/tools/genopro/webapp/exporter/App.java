@@ -54,6 +54,7 @@ public class App {
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
     private static final String PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET = "-unsupportedLabelHexColorSet";
     private static final String PARAM_MONOCHROME_LABELS = "-monochromeLabels";
+    private static final String PARAM_SELECTABLE_FAMILY_LINES = "-selectableFamilyLines";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
 
@@ -169,9 +170,16 @@ public class App {
                 dateFormatter = new DateFormatter("yyyy", locale, dateFormatter.getPrefixReplacementMap());
             }
 
+            boolean selectableFamilyLines = false;
+            if (passedValuesMap.containsKey(PARAM_SELECTABLE_FAMILY_LINES)) {
+                if(Integer.parseInt(passedValuesMap.get(PARAM_SELECTABLE_FAMILY_LINES)) > 0) {
+                    selectableFamilyLines = true;
+                }
+            }
+
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
                     displayStyle, dateFormatter, ageFormatter, unsupportedLabelColorSet, monochromeLabels,
-                    additionalOptionMap);
+                    selectableFamilyLines, additionalOptionMap);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
@@ -198,6 +206,7 @@ public class App {
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
                     + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
                     + "        [-monochromeLabels:0]\n"
+                    + "        [-selectableFamilyLines:0]\n"
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
             );
