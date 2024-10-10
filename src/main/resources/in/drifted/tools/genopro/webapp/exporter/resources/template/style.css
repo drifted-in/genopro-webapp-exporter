@@ -159,6 +159,13 @@ path.pedigree-link.adopted {
     stroke-width: 3px;
 }
 
+path.family-line.link-highlight,
+path.pedigree-link.link-highlight {
+    fill: none;
+    stroke: var(--individual-highlight-color);
+    stroke-width: 3px;
+}
+
 .monochrome-label {
     fill: var(--monochrome-label-background-color);
     stroke: var(--monochrome-label-border-color);

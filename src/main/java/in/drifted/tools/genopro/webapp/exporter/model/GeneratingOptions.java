@@ -48,11 +48,12 @@ public class GeneratingOptions {
     private final Set<Color> unsupportedLabelColorSet;
     private final boolean monochromeLabels;
     private final Map<String, String> additionalOptionsMap;
+    private final boolean selectableFamilyLines;
 
     public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily,
             DisplayStyle displayStyle, DateFormatter dateFormatter, AgeFormatter ageFormatter,
             Set<Color> unsupportedLabelColorSet, boolean monochromeLabels,
-            Map<String, String> additionalOptionsMap) {
+            boolean selectableFamilyLines, Map<String, String> additionalOptionsMap) {
 
         Canvas canvas = new Canvas();
 
@@ -74,6 +75,7 @@ public class GeneratingOptions {
         this.unsupportedLabelColorSet = unsupportedLabelColorSet;
         this.monochromeLabels = monochromeLabels;
         this.additionalOptionsMap = additionalOptionsMap;
+        this.selectableFamilyLines = selectableFamilyLines;
     }
 
     public FontMetrics getFontMetrics(double sizeInPixels) {
@@ -122,6 +124,10 @@ public class GeneratingOptions {
 
     public Map<String, String> getAdditionalOptionsMap() {
         return additionalOptionsMap;
+    }
+
+    public boolean getSelectableFamilyLines() {
+        return selectableFamilyLines;
     }
 
 }
