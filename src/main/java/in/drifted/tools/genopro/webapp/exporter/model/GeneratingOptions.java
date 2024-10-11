@@ -48,12 +48,12 @@ public class GeneratingOptions {
     private final Set<Color> unsupportedLabelColorSet;
     private final boolean monochromeLabels;
     private final Map<String, String> additionalOptionsMap;
-    private final boolean selectableFamilyLines;
+    private final PedigreeLinksSelectionMode pedigreeLinksSelectionMode;
 
     public GeneratingOptions(Locale locale, ResourceBundle resourceBundle, String fontFamily,
             DisplayStyle displayStyle, DateFormatter dateFormatter, AgeFormatter ageFormatter,
             Set<Color> unsupportedLabelColorSet, boolean monochromeLabels,
-            boolean selectableFamilyLines, Map<String, String> additionalOptionsMap) {
+            PedigreeLinksSelectionMode pedigreeLinksSelectionMode, Map<String, String> additionalOptionsMap) {
 
         Canvas canvas = new Canvas();
 
@@ -75,7 +75,7 @@ public class GeneratingOptions {
         this.unsupportedLabelColorSet = unsupportedLabelColorSet;
         this.monochromeLabels = monochromeLabels;
         this.additionalOptionsMap = additionalOptionsMap;
-        this.selectableFamilyLines = selectableFamilyLines;
+        this.pedigreeLinksSelectionMode = pedigreeLinksSelectionMode;
     }
 
     public FontMetrics getFontMetrics(double sizeInPixels) {
@@ -126,8 +126,8 @@ public class GeneratingOptions {
         return additionalOptionsMap;
     }
 
-    public boolean getSelectableFamilyLines() {
-        return selectableFamilyLines;
+    public PedigreeLinksSelectionMode getPedigreeLinksSelectionMode() {
+        return pedigreeLinksSelectionMode;
     }
 
 }

@@ -27,6 +27,7 @@ import in.drifted.tools.genopro.model.GenoMapData;
 import in.drifted.tools.genopro.model.HighlightMode;
 import in.drifted.tools.genopro.model.ParserOptions;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
+import in.drifted.tools.genopro.webapp.exporter.model.PedigreeLinksSelectionMode;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,7 +55,7 @@ public class App {
     private static final String PARAM_RELATIVE_FONT_PATH = "-relativeFontPath";
     private static final String PARAM_UNSUPPORTED_LABEL_HEX_COLOR_SET = "-unsupportedLabelHexColorSet";
     private static final String PARAM_MONOCHROME_LABELS = "-monochromeLabels";
-    private static final String PARAM_SELECTABLE_FAMILY_LINES = "-selectableFamilyLines";
+    private static final String PARAM_PEDIGREE_LINKS_SELECTION_MODE = "-pedigreeLinksSelectionMode";
     private static final String PARAM_GA_TRACKING_ID = "-gaTrackingId";
     private static final String PARAM_HIGHLIGHT_MODE = "-highlightMode";
 
@@ -170,16 +171,16 @@ public class App {
                 dateFormatter = new DateFormatter("yyyy", locale, dateFormatter.getPrefixReplacementMap());
             }
 
-            boolean selectableFamilyLines = false;
-            if (passedValuesMap.containsKey(PARAM_SELECTABLE_FAMILY_LINES)) {
-                if(Integer.parseInt(passedValuesMap.get(PARAM_SELECTABLE_FAMILY_LINES)) > 0) {
-                    selectableFamilyLines = true;
+            PedigreeLinksSelectionMode pedigreeLinksSelectionMode = PedigreeLinksSelectionMode.NONE;
+            if (passedValuesMap.containsKey(PARAM_PEDIGREE_LINKS_SELECTION_MODE)) {
+                if (passedValuesMap.get(PARAM_PEDIGREE_LINKS_SELECTION_MODE).equals("manual")) {
+                    pedigreeLinksSelectionMode = PedigreeLinksSelectionMode.MANUAL;
                 }
             }
 
             GeneratingOptions generatingOptions = new GeneratingOptions(locale, resourceBundle, fontFamily,
                     displayStyle, dateFormatter, ageFormatter, unsupportedLabelColorSet, monochromeLabels,
-                    selectableFamilyLines, additionalOptionMap);
+                    pedigreeLinksSelectionMode, additionalOptionMap);
 
             if (dynamic) {
                 WebAppExporter.export(reportPath, documentInfo, genoMapDataList, generatingOptions);
@@ -206,7 +207,7 @@ public class App {
                     + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
                     + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
                     + "        [-monochromeLabels:0]\n"
-                    + "        [-selectableFamilyLines:0]\n"
+                    + "        [-pedigreeLinksSelectionMode:none|manual]\n"
                     + "        [-gaTrackingId:<empty>]\n"
                     + "        [-highlightMode:0]\n"
             );

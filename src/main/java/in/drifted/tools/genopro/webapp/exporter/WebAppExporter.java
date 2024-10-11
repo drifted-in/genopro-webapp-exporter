@@ -123,7 +123,7 @@ public class WebAppExporter {
                 script = script.replace("${" + placeholder + "}", generatingOptions.getResourceBundle().getString(placeholder));
             }
             script = script.replace("\"${dynamic}\"", dynamic ? "true" : "false");
-            script = script.replace("${selectableFamilyLines}", generatingOptions.getSelectableFamilyLines() ? "true" : "false");
+            script = script.replace("${pedigreeLinksSelectionMode}", generatingOptions.getPedigreeLinksSelectionMode().toString());
 
             writer.write(script.replaceAll("\\s+", " "));
         }

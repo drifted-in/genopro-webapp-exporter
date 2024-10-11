@@ -167,17 +167,19 @@ function switchGenoMap(callback) {
 }
 
 function initSvgListeners() {
-    if ("${selectableFamilyLines}" === "true") {
+    if ("${pedigreeLinksSelectionMode}" === "MANUAL") {
         const familyLines = document.getElementsByClassName("family-line");
         for (let i = 0; i < familyLines.length; i++) {
             familyLines[i].addEventListener("touchend", selectPath);
             familyLines[i].addEventListener("mousedown", selectPath);
+            familyLines[i].style.cursor = "default";
         }
 
         const pedigreeLinks = document.getElementsByClassName("pedigree-link");
         for (let i = 0; i < pedigreeLinks.length; i++) {
             pedigreeLinks[i].addEventListener("touchend", selectPath);
             pedigreeLinks[i].addEventListener("mousedown", selectPath);
+            pedigreeLinks[i].style.cursor = "default";
         }
     }
 
