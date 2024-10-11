@@ -15,8 +15,8 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
-import in.drifted.tools.genopro.model.GenoMap;
-import in.drifted.tools.genopro.model.GenoMapData;
+import in.drifted.tools.genopro.core.model.GenoMap;
+import in.drifted.tools.genopro.core.model.GenoMapData;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,9 +32,9 @@ public class GenoMapsExporter {
             writer.write("const genoMapMap = new Map()\n");
 
             for (GenoMapData genoMapData : genoMapDataList) {
-                GenoMap genoMap = genoMapData.getGenoMap();
-                if (genoMap.getTitle() != null) {
-                    writer.write("genoMapMap.set(\"" + genoMap.getId() + "\",\"" + genoMap.getTitle() + "\")\n");
+                GenoMap genoMap = genoMapData.genoMap();
+                if (genoMap.title() != null) {
+                    writer.write("genoMapMap.set(\"" + genoMap.id() + "\",\"" + genoMap.title() + "\")\n");
                 }
             }
         }

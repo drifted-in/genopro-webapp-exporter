@@ -15,10 +15,10 @@
  */
 package in.drifted.tools.genopro.webapp.exporter.model;
 
-import in.drifted.tools.genopro.model.AgeFormatter;
-import in.drifted.tools.genopro.model.Color;
-import in.drifted.tools.genopro.model.DateFormatter;
-import in.drifted.tools.genopro.model.DisplayStyle;
+import in.drifted.tools.genopro.core.model.Color;
+import in.drifted.tools.genopro.core.model.DisplayStyle;
+import in.drifted.tools.genopro.core.util.formatter.AgeFormatter;
+import in.drifted.tools.genopro.core.util.formatter.DateFormatter;
 import java.awt.Canvas;
 import java.awt.Font;
 import java.awt.FontMetrics;

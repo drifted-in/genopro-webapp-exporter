@@ -15,29 +15,29 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
-import in.drifted.tools.genopro.model.Alignment;
-import in.drifted.tools.genopro.model.Birth;
-import in.drifted.tools.genopro.model.BoundaryRect;
-import in.drifted.tools.genopro.model.DateFormatter;
-import in.drifted.tools.genopro.model.Death;
-import in.drifted.tools.genopro.model.DisplayStyle;
-import in.drifted.tools.genopro.model.Family;
-import in.drifted.tools.genopro.model.FamilyLineType;
-import in.drifted.tools.genopro.model.Gender;
-import in.drifted.tools.genopro.model.GenoMap;
-import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.model.HighlightMode;
-import in.drifted.tools.genopro.model.Hyperlink;
-import in.drifted.tools.genopro.model.Individual;
-import in.drifted.tools.genopro.model.Label;
-import in.drifted.tools.genopro.model.LabelStyle;
-import in.drifted.tools.genopro.model.Name;
-import in.drifted.tools.genopro.model.PedigreeLink;
-import in.drifted.tools.genopro.model.Position;
-import in.drifted.tools.genopro.model.Rect;
-import in.drifted.tools.genopro.model.Size;
+import in.drifted.tools.genopro.core.model.Alignment;
+import in.drifted.tools.genopro.core.model.Birth;
+import in.drifted.tools.genopro.core.model.BoundaryRect;
+import in.drifted.tools.genopro.core.model.Death;
+import in.drifted.tools.genopro.core.model.DisplayStyle;
+import in.drifted.tools.genopro.core.model.Family;
+import in.drifted.tools.genopro.core.model.FamilyLineType;
+import in.drifted.tools.genopro.core.model.Gender;
+import in.drifted.tools.genopro.core.model.GenoMap;
+import in.drifted.tools.genopro.core.model.GenoMapData;
+import in.drifted.tools.genopro.core.model.Hyperlink;
+import in.drifted.tools.genopro.core.model.Individual;
+import in.drifted.tools.genopro.core.model.Label;
+import in.drifted.tools.genopro.core.model.LabelStyle;
+import in.drifted.tools.genopro.core.model.Name;
+import in.drifted.tools.genopro.core.model.PedigreeLink;
+import in.drifted.tools.genopro.core.model.Position;
+import in.drifted.tools.genopro.core.model.Rect;
+import in.drifted.tools.genopro.core.model.Size;
+import in.drifted.tools.genopro.core.util.TextWrapUtil;
+import in.drifted.tools.genopro.core.util.formatter.DateFormatter;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
-import in.drifted.tools.genopro.util.StringUtil;
+import in.drifted.tools.genopro.webapp.exporter.util.HighlightMode;
 import java.awt.FontMetrics;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -80,9 +80,9 @@ public class SvgExporter {
 
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
-        GenoMap genoMap = genoMapData.getGenoMap();
+        GenoMap genoMap = genoMapData.genoMap();
 
-        String id = genoMap.getId();
+        String id = genoMap.id();
 
         try {
 
@@ -92,30 +92,30 @@ public class SvgExporter {
             writer.writeAttribute("id", id);
             writer.writeAttribute("xmlns", "http://www.w3.org/2000/svg");
             writer.writeAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
-            Position topLeft = genoMap.getBoundaryRect().getTopLeft();
-            Position bottomRight = genoMap.getBoundaryRect().getBottomRight();
-            int shiftX = topLeft.getX();
-            int shiftY = topLeft.getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
-            int width = bottomRight.getX() - topLeft.getX();
-            int height = topLeft.getY() - bottomRight.getY();
+            Position topLeft = genoMap.boundaryRect().topLeft();
+            Position bottomRight = genoMap.boundaryRect().bottomRight();
+            int shiftX = topLeft.x();
+            int shiftY = topLeft.y() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
+            int width = bottomRight.x() - topLeft.x();
+            int height = topLeft.y() - bottomRight.y();
             writer.writeAttribute("viewBox", "0 0 " + width + " " + height);
 
-            for (Label label : genoMapData.getLabelCollection()) {
-                if (!generatingOptions.getUnsupportedLabelColorSet().contains(label.getLabelStyle().getFillColor())) {
+            for (Label label : genoMapData.labelSet()) {
+                if (!generatingOptions.getUnsupportedLabelColorSet().contains(label.labelStyle().fillColor())) {
                     renderLabel(writer, label, shiftX, shiftY, generatingOptions);
                 }
             }
 
             Map<String, Individual> individualMap = new HashMap<>();
-            for (Individual individual : genoMapData.getIndividualCollection()) {
-                individualMap.put(individual.getId(), individual);
+            for (Individual individual : genoMapData.individualSet()) {
+                individualMap.put(individual.id(), individual);
             }
 
-            for (Family family : genoMapData.getFamilyCollection()) {
+            for (Family family : genoMapData.familySet()) {
                 renderFamilyRelations(writer, family, individualMap, shiftX, shiftY, generatingOptions);
             }
 
-            for (Individual individual : genoMapData.getIndividualCollection()) {
+            for (Individual individual : genoMapData.individualSet()) {
                 if (!individual.isAnonymized()) {
                     renderIndividual(writer, individual, shiftX, shiftY, generatingOptions);
                 }
@@ -133,12 +133,12 @@ public class SvgExporter {
     private static void renderLabel(XMLStreamWriter writer, Label label, int shiftX, int shiftY,
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        int width = label.getRect().getWidth();
-        int height = label.getRect().getHeight();
-        int rectX = label.getRect().getX() - shiftX;
-        int rectY = shiftY - label.getRect().getY();
+        int width = label.rect().width();
+        int height = label.rect().height();
+        int rectX = label.rect().x() - shiftX;
+        int rectY = shiftY - label.rect().y();
 
-        LabelStyle labelStyle = label.getLabelStyle();
+        LabelStyle labelStyle = label.labelStyle();
 
         writer.writeStartElement("rect");
         writer.writeAttribute("x", String.valueOf(rectX));
@@ -148,14 +148,14 @@ public class SvgExporter {
         if (generatingOptions.hasMonochromeLabels()) {
             writer.writeAttribute("class", "monochrome-label");
             writer.writeAttribute("style", "stroke-width: "
-                    + getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
+                    + getStrokeWidth(labelStyle.border().size(), 3.0));
         } else {
             writer.writeAttribute("style", getLabelStyleAttribute(labelStyle));
         }
         writer.writeEndElement();
 
-        int padding = labelStyle.getPadding();
-        String id = "idx-" + label.getRect().hashCode();
+        int padding = labelStyle.padding();
+        String id = "idx-" + label.rect().hashCode();
 
         writer.writeStartElement("clipPath");
         writer.writeAttribute("id", id);
@@ -167,10 +167,10 @@ public class SvgExporter {
         writer.writeEndElement();
         writer.writeEndElement();
 
-        double scaleFactor = FONT_SIZE_SCALE_FACTOR_MAP.get(label.getLabelStyle().getSize());
+        double scaleFactor = FONT_SIZE_SCALE_FACTOR_MAP.get(label.labelStyle().size());
         double fontSize = scaleFactor * generatingOptions.getMainFontMetrics().getFont().getSize();
 
-        String text = label.getText();
+        String text = label.text();
 
         if (text != null) {
 
@@ -183,8 +183,8 @@ public class SvgExporter {
             List<String> wrappedLineList = new ArrayList<>();
 
             for (String line : lineList) {
-                wrappedLineList.addAll(StringUtil.getWrappedLineList(line,
-                        10 * (width - (2 * labelStyle.getPadding())),
+                wrappedLineList.addAll(TextWrapUtil.getWrappedLineList(line,
+                        10 * (width - (2 * labelStyle.padding())),
                         scaledFontMetrics));
             }
 
@@ -194,8 +194,8 @@ public class SvgExporter {
             int availableHeight = (height - 2 * padding);
             int textBlockHeight = ascent + (int) ((wrappedLineList.size() - 1) * 1.36 * fontSize) + descent;
 
-            if (textBlockHeight < availableHeight && (labelStyle.getVerticalAlignment() != Alignment.TOP)) {
-                if (labelStyle.getVerticalAlignment() == Alignment.BOTTOM) {
+            if (textBlockHeight < availableHeight && (labelStyle.verticalAlignment() != Alignment.TOP)) {
+                if (labelStyle.verticalAlignment() == Alignment.BOTTOM) {
                     baseY = rectY + height - padding - textBlockHeight + ascent;
                 } else {
                     baseY = rectY + padding + (availableHeight - textBlockHeight) / 2 + ascent;
@@ -270,10 +270,10 @@ public class SvgExporter {
             Map<String, Individual> individualMap, int shiftX, int shiftY, GeneratingOptions generatingOptions)
             throws XMLStreamException {
 
-        String familyId = family.getId();
-        Position position = family.getPosition();
-        BoundaryRect topBoundaryRect = family.getTopBoundaryRect();
-        BoundaryRect bottomBoundaryRect = family.getBottomBoundaryRect();
+        String familyId = family.id();
+        Position position = family.position();
+        BoundaryRect topBoundaryRect = family.topBoundaryRect();
+        BoundaryRect bottomBoundaryRect = family.bottomBoundaryRect();
 
         Rect topRect = null;
         Rect bottomRect = null;
@@ -283,7 +283,7 @@ public class SvgExporter {
 
         boolean hasChildren = false;
 
-        for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
+        for (PedigreeLink pedigreeLink : family.pedigreeLinkList()) {
             if (!pedigreeLink.isParent()) {
                 hasChildren = true;
                 break;
@@ -296,37 +296,37 @@ public class SvgExporter {
         if (highlightMode != HighlightMode.NONE) {
 
             if (highlightMode == HighlightMode.MATERNAL) {
-                individual = individualMap.get(family.getMotherId());
+                individual = individualMap.get(family.motherId());
 
             } else {
-                individual = individualMap.get(family.getFatherId());
+                individual = individualMap.get(family.fatherId());
             }
 
-            highlightKeysCount = individual.getHighlightKeySet().size();
+            highlightKeysCount = individual.highlightKeySet().size();
         }
 
         if (topBoundaryRect != null) {
 
-            topRect = new Rect(topBoundaryRect);
+            topRect = Rect.fromBoundaryRect(topBoundaryRect);
 
-            int y = shiftY - topRect.getY();
+            int y = shiftY - topRect.y();
 
             String className = "family-line";
 
-            String linePathData = "M" + (topRect.getX() - shiftX) + " " + y + "h" + topRect.getWidth();
+            String linePathData = "M" + (topRect.x() - shiftX) + " " + y + "h" + topRect.width();
 
             if (highlightMode != HighlightMode.NONE) {
 
                 String[] linePathDataArray = new String[]{
-                    "M" + (topRect.getX() - shiftX) + " " + y + "H" + (position.getX() - shiftX),
-                    "M" + (position.getX() - shiftX) + " " + y + "H" + (topRect.getX() + topRect.getWidth() - shiftX)
+                    "M" + (topRect.x() - shiftX) + " " + y + "H" + (position.x() - shiftX),
+                    "M" + (position.x() - shiftX) + " " + y + "H" + (topRect.x() + topRect.width() - shiftX)
                 };
 
                 if (hasChildren) {
 
                     int i = 0;
 
-                    for (String highlightKey : individual.getHighlightKeySet()) {
+                    for (String highlightKey : individual.highlightKeySet()) {
 
                         StringBuilder style = new StringBuilder();
                         style.append("stroke:");
@@ -392,12 +392,12 @@ public class SvgExporter {
                 writer.writeEndElement();
             }
 
-            if (family.getLabel() != null) {
+            if (family.label() != null) {
 
-                String label = family.getLabel();
+                String label = family.label();
 
                 int labelWidthInPixels = generatingOptions.getMainFontMetrics().stringWidth(label);
-                double centerX = topRect.getX() - shiftX + topRect.getWidth() / 2.0;
+                double centerX = topRect.x() - shiftX + topRect.width() / 2.0;
                 int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
                 double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
@@ -418,13 +418,13 @@ public class SvgExporter {
                 writer.writeEndElement();
             }
 
-            if (family.getFamilyLineType() != FamilyLineType.UNSPECIFIED) {
+            if (family.familyLineType() != FamilyLineType.UNSPECIFIED) {
 
                 String familyLineTypeSymbolPathData = null;
                 String familyLineTypeSymbolClassName = className;
-                double topRight = topRect.getX() + topRect.getWidth() - shiftX;
+                double topRight = topRect.x() + topRect.width() - shiftX;
 
-                switch (family.getFamilyLineType()) {
+                switch (family.familyLineType()) {
                     case NO_MORE_CHILDREN:
                         familyLineTypeSymbolPathData = "M" + (topRight - 6.5) + " " + (y + 3) + "h5v5h-5z";
                         familyLineTypeSymbolClassName += "-no-more-children";
@@ -456,31 +456,31 @@ public class SvgExporter {
             // if children are anonymized, the bottom rect can be skipped
             if (hasChildren) {
 
-                bottomRect = new Rect(bottomBoundaryRect);
+                bottomRect = Rect.fromBoundaryRect(bottomBoundaryRect);
 
                 String className = "family-line";
 
                 StringBuilder verticalPathData = new StringBuilder();
                 verticalPathData.append("M");
-                verticalPathData.append(position.getX() - shiftX);
+                verticalPathData.append(position.x() - shiftX);
                 verticalPathData.append(" ");
-                verticalPathData.append(shiftY - position.getY());
+                verticalPathData.append(shiftY - position.y());
                 verticalPathData.append("v");
-                verticalPathData.append(position.getY() - bottomRect.getY());
+                verticalPathData.append(position.y() - bottomRect.y());
 
                 StringBuilder horizontalPathData = new StringBuilder();
                 horizontalPathData.append("M");
-                horizontalPathData.append(bottomRect.getX() - shiftX);
+                horizontalPathData.append(bottomRect.x() - shiftX);
                 horizontalPathData.append(" ");
-                horizontalPathData.append(shiftY - bottomRect.getY());
+                horizontalPathData.append(shiftY - bottomRect.y());
                 horizontalPathData.append("h");
-                horizontalPathData.append(bottomRect.getWidth());
+                horizontalPathData.append(bottomRect.width());
 
                 if (highlightMode != HighlightMode.NONE) {
 
                     int i = 0;
 
-                    for (String highlightKey : individual.getHighlightKeySet()) {
+                    for (String highlightKey : individual.highlightKeySet()) {
 
                         StringBuilder style = new StringBuilder();
                         style.append("stroke:");
@@ -526,9 +526,9 @@ public class SvgExporter {
 
         String className = "pedigree-link";
 
-        for (PedigreeLink pedigreeLink : family.getPedigreeLinkList()) {
+        for (PedigreeLink pedigreeLink : family.pedigreeLinkList()) {
 
-            Position individualPosition = pedigreeLink.getPosition();
+            Position individualPosition = pedigreeLink.position();
 
             if (individualPosition == null) {
                 continue;
@@ -539,41 +539,41 @@ public class SvgExporter {
             boolean isEmpty = true;
 
             pathData.append("M");
-            pathData.append(individualPosition.getX() - shiftX);
+            pathData.append(individualPosition.x() - shiftX);
             pathData.append(" ");
-            pathData.append(shiftY - individualPosition.getY());
+            pathData.append(shiftY - individualPosition.y());
 
             if (pedigreeLink.isParent()) {
                 if (topRect != null) {
                     pathData.append("v");
-                    pathData.append(individualPosition.getY() - topRect.getY());
+                    pathData.append(individualPosition.y() - topRect.y());
                     isEmpty = false;
                 }
 
             } else {
                 if (bottomRect != null) {
-                    if (pedigreeLink.getTwinPosition() != null) {
+                    if (pedigreeLink.twinPosition() != null) {
                         pathData.append("L");
-                        pathData.append(pedigreeLink.getTwinPosition().getX() - shiftX);
+                        pathData.append(pedigreeLink.twinPosition().x() - shiftX);
                         pathData.append(" ");
-                        pathData.append(shiftY - bottomRect.getY());
+                        pathData.append(shiftY - bottomRect.y());
 
                     } else {
                         pathData.append("v");
-                        pathData.append(individualPosition.getY() - bottomRect.getY());
+                        pathData.append(individualPosition.y() - bottomRect.y());
                     }
                     isEmpty = false;
 
                 } else if (topRect != null) {
-                    if (pedigreeLink.getTwinPosition() != null) {
+                    if (pedigreeLink.twinPosition() != null) {
                         pathData.append("L");
-                        pathData.append(pedigreeLink.getTwinPosition().getX() - shiftX);
+                        pathData.append(pedigreeLink.twinPosition().x() - shiftX);
                         pathData.append(" ");
-                        pathData.append(shiftY - topRect.getY());
+                        pathData.append(shiftY - topRect.y());
 
                     } else {
                         pathData.append("v");
-                        pathData.append(individualPosition.getY() - topRect.getY());
+                        pathData.append(individualPosition.y() - topRect.y());
                     }
                     isEmpty = false;
                 }
@@ -583,16 +583,16 @@ public class SvgExporter {
 
                 if (highlightMode != HighlightMode.NONE) {
 
-                    Individual child = individualMap.get(pedigreeLink.getIndividualId());
+                    Individual child = individualMap.get(pedigreeLink.individualId());
 
                     if ((highlightMode == HighlightMode.PATERNAL && child.isMale())
                             || (highlightMode == HighlightMode.MATERNAL && child.isFemale())) {
 
-                        int childHighlightKeysCount = child.getHighlightKeySet().size();
+                        int childHighlightKeysCount = child.highlightKeySet().size();
 
                         int i = 0;
 
-                        for (String highlightKey : child.getHighlightKeySet()) {
+                        for (String highlightKey : child.highlightKeySet()) {
 
                             StringBuilder style = new StringBuilder();
                             style.append("stroke:");
@@ -627,7 +627,7 @@ public class SvgExporter {
                     writer.writeStartElement("path");
                     writer.writeAttribute("d", pathData.toString());
 
-                    switch (pedigreeLink.getPedigreeLinkType()) {
+                    switch (pedigreeLink.pedigreeLinkType()) {
 
                         case PARENT:
                             writer.writeAttribute("class", className + " parent " + familyId);
@@ -652,12 +652,12 @@ public class SvgExporter {
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
         writer.writeStartElement("g");
-        writer.writeAttribute("id", individual.getId());
+        writer.writeAttribute("id", individual.id());
 
-        Hyperlink hyperlink = individual.getHyperlink();
+        Hyperlink hyperlink = individual.hyperlink();
 
         if (hyperlink != null) {
-            writer.writeAttribute("data-target-id", hyperlink.getId());
+            writer.writeAttribute("data-target-id", hyperlink.id());
         }
 
         renderIndividualDates(writer, individual, shiftX, shiftY, generatingOptions);
@@ -690,7 +690,7 @@ public class SvgExporter {
                 || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID
                 || displayStyle == DisplayStyle.DATE_OF_BIRTH_AND_DATE_OF_DEATH_ID) {
 
-            labelList.add(individual.getId());
+            labelList.add(individual.id());
         }
 
         if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
@@ -701,20 +701,20 @@ public class SvgExporter {
 
             DateFormatter dateFormatter = generatingOptions.getDateFormatter();
 
-            Birth birth = individual.getBirth();
-            Death death = individual.getDeath();
+            Birth birth = individual.birth();
+            Death death = individual.death();
             boolean hasBirth = false;
 
             List<String> dateList = new ArrayList<>();
 
-            if (birth != null && birth.getDate() != null) {
-                String birthLabel = birth.getDate().getDate(dateFormatter);
+            if (birth != null && birth.hasDate()) {
+                String birthLabel = birth.date().format(dateFormatter);
                 dateList.add(birthLabel);
                 hasBirth = true;
             }
 
-            if (death != null && death.getDate() != null) {
-                String deathLabel = death.getDate().getDate(dateFormatter);
+            if (death != null && death.hasDate()) {
+                String deathLabel = death.date().format(dateFormatter);
                 if (!hasBirth) {
                     deathLabel = generatingOptions.getResourceBundle().getString("deathAbbrev") + " " + deathLabel;
                 }
@@ -731,12 +731,12 @@ public class SvgExporter {
             }
         }
 
-        Rect rect = new Rect(individual.getBoundaryRect());
+        Rect rect = Rect.fromBoundaryRect(individual.boundaryRect());
 
         int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
         double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
-        int baseTopY = shiftY - rect.getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
+        int baseTopY = shiftY - rect.y() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS / 2;
 
         for (int i = 0; i < labelList.size(); i++) {
 
@@ -746,7 +746,7 @@ public class SvgExporter {
             int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
             writer.writeStartElement("rect");
-            writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - labelWidth / 2 - shiftX));
+            writer.writeAttribute("x", String.valueOf(individual.position().x() - labelWidth / 2 - shiftX));
             writer.writeAttribute("y", String.valueOf(topY));
             writer.writeAttribute("width", String.valueOf(labelWidth));
             writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
@@ -754,7 +754,7 @@ public class SvgExporter {
             writer.writeEndElement();
 
             writer.writeStartElement("text");
-            writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
+            writer.writeAttribute("x", String.valueOf(individual.position().x() - shiftX));
             writer.writeAttribute("y",
                     String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
             writer.writeAttribute("class", "individual-label");
@@ -767,26 +767,26 @@ public class SvgExporter {
     private static void renderIndividualSymbol(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        Position position = individual.getPosition();
+        Position position = individual.position();
 
         HighlightMode highlightMode = HighlightMode.of(Integer.parseInt(
                 generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0")));
 
-        switch (individual.getGender()) {
+        switch (individual.gender()) {
 
             case MALE: {
 
                 if (highlightMode == HighlightMode.PATERNAL) {
-                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int highlightKeysCount = individual.highlightKeySet().size();
                     int i = 0;
 
-                    for (String highlightKey : individual.getHighlightKeySet()) {
+                    for (String highlightKey : individual.highlightKeySet()) {
 
                         StringBuilder data = new StringBuilder();
                         data.append("M");
-                        data.append(String.valueOf(position.getX() - shiftX - 9));
+                        data.append(String.valueOf(position.x() - shiftX - 9));
                         data.append(" ");
-                        data.append(String.valueOf(shiftY - position.getY() - 9));
+                        data.append(String.valueOf(shiftY - position.y() - 9));
                         data.append("h18v18h-18z");
 
                         StringBuilder style = new StringBuilder();
@@ -812,8 +812,8 @@ public class SvgExporter {
 
                 } else {
                     writer.writeStartElement("rect");
-                    writer.writeAttribute("x", String.valueOf(position.getX() - shiftX - 9));
-                    writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
+                    writer.writeAttribute("x", String.valueOf(position.x() - shiftX - 9));
+                    writer.writeAttribute("y", String.valueOf(shiftY - position.y() - 9));
                     writer.writeAttribute("width", "18");
                     writer.writeAttribute("height", "18");
                     writer.writeAttribute("class", "individual-symbol" + (highlightMode == HighlightMode.MATERNAL ? " unhighlighted" : ""));
@@ -827,16 +827,16 @@ public class SvgExporter {
 
                 if (highlightMode == HighlightMode.MATERNAL) {
 
-                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int highlightKeysCount = individual.highlightKeySet().size();
                     int i = 0;
 
-                    for (String highlightKey : individual.getHighlightKeySet()) {
+                    for (String highlightKey : individual.highlightKeySet()) {
 
                         StringBuilder data = new StringBuilder();
                         data.append("M");
-                        data.append(String.valueOf(position.getX() - shiftX));
+                        data.append(String.valueOf(position.x() - shiftX));
                         data.append(" ");
-                        data.append(String.valueOf(shiftY - position.getY()));
+                        data.append(String.valueOf(shiftY - position.y()));
                         data.append("m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0");
 
                         StringBuilder style = new StringBuilder();
@@ -862,8 +862,8 @@ public class SvgExporter {
 
                 } else {
                     writer.writeStartElement("circle");
-                    writer.writeAttribute("cx", String.valueOf(position.getX() - shiftX));
-                    writer.writeAttribute("cy", String.valueOf(shiftY - position.getY()));
+                    writer.writeAttribute("cx", String.valueOf(position.x() - shiftX));
+                    writer.writeAttribute("cy", String.valueOf(shiftY - position.y()));
                     writer.writeAttribute("r", "9");
                     writer.writeAttribute("class", "individual-symbol" + (highlightMode == HighlightMode.PATERNAL ? " unhighlighted" : ""));
                     writer.writeEndElement();
@@ -874,16 +874,16 @@ public class SvgExporter {
 
             case UNKNOWN: {
                 writer.writeStartElement("rect");
-                writer.writeAttribute("x", String.valueOf(position.getX() - shiftX - 9));
-                writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - 9));
+                writer.writeAttribute("x", String.valueOf(position.x() - shiftX - 9));
+                writer.writeAttribute("y", String.valueOf(shiftY - position.y() - 9));
                 writer.writeAttribute("width", "18");
                 writer.writeAttribute("height", "18");
                 writer.writeAttribute("class", "individual-symbol-background");
                 writer.writeEndElement();
 
                 writer.writeStartElement("text");
-                writer.writeAttribute("x", String.valueOf(position.getX() - shiftX));
-                writer.writeAttribute("y", String.valueOf(shiftY - position.getY() + 4));
+                writer.writeAttribute("x", String.valueOf(position.x() - shiftX));
+                writer.writeAttribute("y", String.valueOf(shiftY - position.y() + 4));
                 writer.writeAttribute("class", "individual-symbol");
                 writer.writeCharacters("?");
                 writer.writeEndElement();
@@ -896,46 +896,46 @@ public class SvgExporter {
     private static void renderIndividualAge(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        Position position = individual.getPosition();
+        Position position = individual.position();
 
-        if (individual.isDead()) {
+        if (individual.isDeceased()) {
 
             HighlightMode highlightMode = HighlightMode.of(Integer.parseInt(
                     generatingOptions.getAdditionalOptionsMap().getOrDefault("highlightMode", "0")));
 
-            float delta = (individual.getGender() == Gender.MALE) ? 9 : 6.4f;
+            float delta = (individual.gender() == Gender.MALE) ? 9 : 6.4f;
 
             StringBuilder dataBuilder = new StringBuilder();
             dataBuilder.append("M");
-            dataBuilder.append(position.getX() - shiftX - delta);
+            dataBuilder.append(position.x() - shiftX - delta);
             dataBuilder.append(" ");
-            dataBuilder.append(shiftY - position.getY() - delta);
+            dataBuilder.append(shiftY - position.y() - delta);
             dataBuilder.append("L");
-            dataBuilder.append(position.getX() - shiftX + delta);
+            dataBuilder.append(position.x() - shiftX + delta);
             dataBuilder.append(" ");
-            dataBuilder.append(shiftY - position.getY() + delta);
+            dataBuilder.append(shiftY - position.y() + delta);
             dataBuilder.append("M");
-            dataBuilder.append(position.getX() - shiftX - delta);
+            dataBuilder.append(position.x() - shiftX - delta);
             dataBuilder.append(" ");
-            dataBuilder.append(shiftY - position.getY() + delta);
+            dataBuilder.append(shiftY - position.y() + delta);
             dataBuilder.append("L");
-            dataBuilder.append(position.getX() - shiftX + delta);
+            dataBuilder.append(position.x() - shiftX + delta);
             dataBuilder.append(" ");
-            dataBuilder.append(shiftY - position.getY() - delta);
+            dataBuilder.append(shiftY - position.y() - delta);
 
             String className = "individual-deceased";
 
             if (highlightMode != HighlightMode.NONE) {
 
-                boolean isHighlighted = highlightMode == HighlightMode.PATERNAL && individual.getGender() == Gender.MALE
-                        || highlightMode == HighlightMode.MATERNAL && individual.getGender() == Gender.FEMALE;
+                boolean isHighlighted = highlightMode == HighlightMode.PATERNAL && individual.gender() == Gender.MALE
+                        || highlightMode == HighlightMode.MATERNAL && individual.gender() == Gender.FEMALE;
 
                 if (isHighlighted) {
 
-                    int highlightKeysCount = individual.getHighlightKeySet().size();
+                    int highlightKeysCount = individual.highlightKeySet().size();
                     int i = 0;
 
-                    for (String highlightKey : individual.getHighlightKeySet()) {
+                    for (String highlightKey : individual.highlightKeySet()) {
 
                         StringBuilder style = new StringBuilder();
                         style.append("stroke:");
@@ -974,12 +974,12 @@ public class SvgExporter {
             }
         }
 
-        Birth birth = individual.getBirth();
-        Death death = individual.getDeath();
+        Birth birth = individual.birth();
+        Death death = individual.death();
 
         String age = generatingOptions.getAgeFormatter().format(birth, death);
 
-        if ((death == null || !death.hasDate()) && individual.isDead()) {
+        if ((death == null || !death.hasDate()) && individual.isDeceased()) {
             age = null;
         }
 
@@ -990,16 +990,16 @@ public class SvgExporter {
             int fontSize = generatingOptions.getAgeFontMetrics().getFont().getSize();
 
             writer.writeStartElement("rect");
-            writer.writeAttribute("x", String.valueOf(position.getX() - ageWidth / 2.0 - shiftX));
-            writer.writeAttribute("y", String.valueOf(shiftY - position.getY() - fontSize / 2.0));
+            writer.writeAttribute("x", String.valueOf(position.x() - ageWidth / 2.0 - shiftX));
+            writer.writeAttribute("y", String.valueOf(shiftY - position.y() - fontSize / 2.0));
             writer.writeAttribute("width", String.valueOf(ageWidth));
             writer.writeAttribute("height", String.valueOf(fontSize));
             writer.writeAttribute("class", "individual-age");
             writer.writeEndElement();
 
             writer.writeStartElement("text");
-            writer.writeAttribute("x", String.valueOf(position.getX() - shiftX));
-            writer.writeAttribute("y", String.valueOf(shiftY - position.getY() + (0.7 * fontSize / 2.0)));
+            writer.writeAttribute("x", String.valueOf(position.x() - shiftX));
+            writer.writeAttribute("y", String.valueOf(shiftY - position.y() + (0.7 * fontSize / 2.0)));
             writer.writeAttribute("class", "individual-age");
             writer.writeCharacters(age);
             writer.writeEndElement();
@@ -1009,18 +1009,18 @@ public class SvgExporter {
     private static void renderIndividualLabel(XMLStreamWriter writer, Individual individual, int shiftX, int shiftY,
             GeneratingOptions generatingOptions) throws XMLStreamException {
 
-        Name name = individual.getName();
+        Name name = individual.name();
 
         if (name != null) {
 
-            Rect rect = new Rect(individual.getBoundaryRect());
+            Rect rect = Rect.fromBoundaryRect(individual.boundaryRect());
             int fontSize = generatingOptions.getMainFontMetrics().getFont().getSize();
             double textPadding = (GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS - fontSize) / 2.0;
 
-            String firstName = name.getFirst();
-            String middleName = name.getMiddle();
-            String lastName = name.getLast();
-            String lastName2 = name.getLast2();
+            String firstName = name.first();
+            String middleName = name.middle();
+            String lastName = name.last();
+            String lastName2 = name.last2();
 
             List<String> nameList = new ArrayList<>();
 
@@ -1037,12 +1037,12 @@ public class SvgExporter {
                 nameList.add("(" + lastName2 + ")");
             }
 
-            List<String> wrappedLineList = StringUtil.getWrappedLineList(String.join(" ", nameList),
-                    rect.getWidth() - 2 * 8, generatingOptions.getMainFontMetrics());
+            List<String> wrappedLineList = TextWrapUtil.getWrappedLineList(String.join(" ", nameList),
+                    rect.width() - 2 * 8, generatingOptions.getMainFontMetrics());
 
-            int baseTopY = shiftY - individual.getPosition().getY() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
+            int baseTopY = shiftY - individual.position().y() + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
-            boolean isHyperlink = individual.getHyperlink() != null;
+            boolean isHyperlink = individual.hyperlink() != null;
 
             for (int i = 0; i < wrappedLineList.size(); i++) {
 
@@ -1052,7 +1052,7 @@ public class SvgExporter {
                 int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
                 writer.writeStartElement("rect");
-                writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - lineWidth / 2 - shiftX));
+                writer.writeAttribute("x", String.valueOf(individual.position().x() - lineWidth / 2 - shiftX));
                 writer.writeAttribute("y", String.valueOf(topY));
                 writer.writeAttribute("width", String.valueOf(lineWidth));
                 writer.writeAttribute("height", String.valueOf(GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
@@ -1065,7 +1065,7 @@ public class SvgExporter {
                 int topY = baseTopY + i * GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS;
 
                 writer.writeStartElement("text");
-                writer.writeAttribute("x", String.valueOf(individual.getPosition().getX() - shiftX));
+                writer.writeAttribute("x", String.valueOf(individual.position().x() - shiftX));
                 writer.writeAttribute("y",
                         String.valueOf(topY - textPadding + GeneratingOptions.MAIN_LINE_HEIGHT_IN_PIXELS));
                 writer.writeAttribute("class", isHyperlink ? "individual-label-hyperlink" : "individual-label");
@@ -1081,14 +1081,14 @@ public class SvgExporter {
 
         int boxSize = 8;
 
-        Rect rect = new Rect(individual.getBoundaryRect());
+        Rect rect = Rect.fromBoundaryRect(individual.boundaryRect());
 
         writer.writeStartElement("rect");
-        writer.writeAttribute("id", individual.getId() + "-bb");
-        writer.writeAttribute("x", String.valueOf(rect.getX() - shiftX + boxSize));
-        writer.writeAttribute("y", String.valueOf(shiftY - rect.getY() + boxSize));
-        writer.writeAttribute("width", String.valueOf(rect.getWidth() - 2 * boxSize));
-        writer.writeAttribute("height", String.valueOf(rect.getHeight() - 2 * boxSize));
+        writer.writeAttribute("id", individual.id() + "-bb");
+        writer.writeAttribute("x", String.valueOf(rect.x() - shiftX + boxSize));
+        writer.writeAttribute("y", String.valueOf(shiftY - rect.y() + boxSize));
+        writer.writeAttribute("width", String.valueOf(rect.width() - 2 * boxSize));
+        writer.writeAttribute("height", String.valueOf(rect.height() - 2 * boxSize));
         writer.writeAttribute("class", "individual-active-area");
         writer.writeEndElement();
     }
@@ -1098,11 +1098,11 @@ public class SvgExporter {
         StringBuilder style = new StringBuilder();
 
         style.append("fill: ");
-        style.append(labelStyle.getFillColor().getHex());
+        style.append(labelStyle.fillColor().toHex());
         style.append(";stroke: ");
-        style.append(labelStyle.getBorder().getColor().getHex());
+        style.append(labelStyle.border().color().toHex());
         style.append(";stroke-width: ");
-        style.append(getStrokeWidth(labelStyle.getBorder().getSize(), 3.0));
+        style.append(getStrokeWidth(labelStyle.border().size(), 3.0));
 
         return style.toString();
     }
@@ -1114,9 +1114,9 @@ public class SvgExporter {
 
     private static int getLabelBaseX(int rectX, int width, LabelStyle labelStyle) {
 
-        int padding = labelStyle.getPadding();
+        int padding = labelStyle.padding();
 
-        switch (labelStyle.getHorizontalAlignment()) {
+        switch (labelStyle.horizontalAlignment()) {
             case CENTER:
                 return (int) (rectX + width / 2.0);
             case RIGHT:
@@ -1127,7 +1127,7 @@ public class SvgExporter {
     }
 
     private static String getLabelTextAnchor(LabelStyle labelStyle) {
-        switch (labelStyle.getHorizontalAlignment()) {
+        switch (labelStyle.horizontalAlignment()) {
             case CENTER:
                 return "middle";
             case RIGHT:

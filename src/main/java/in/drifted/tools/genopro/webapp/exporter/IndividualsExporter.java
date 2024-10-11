@@ -15,14 +15,14 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
-import in.drifted.tools.genopro.DataUtil;
-import in.drifted.tools.genopro.model.DateFormatter;
-import in.drifted.tools.genopro.model.FamilyRelation;
-import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.model.Individual;
-import in.drifted.tools.genopro.model.IndividualBirthDateComparator;
-import in.drifted.tools.genopro.model.Name;
-import in.drifted.tools.genopro.util.MapUtil;
+import in.drifted.tools.genopro.core.model.FamilyRelation;
+import in.drifted.tools.genopro.core.model.GenoMapData;
+import in.drifted.tools.genopro.core.model.Individual;
+import in.drifted.tools.genopro.core.model.Name;
+import in.drifted.tools.genopro.core.util.DocumentDataUtil;
+import in.drifted.tools.genopro.core.util.MapUtil;
+import in.drifted.tools.genopro.core.util.comparator.IndividualBirthDateComparator;
+import in.drifted.tools.genopro.core.util.formatter.DateFormatter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +40,7 @@ public class IndividualsExporter {
         Map<String, Individual> individualMap = getValidIndividualMap(genoMapDataList);
         individualMap = MapUtil.sortByValue(individualMap, new IndividualBirthDateComparator(true));
 
-        Map<String, FamilyRelation> familyRelationMap = DataUtil.getFamilyRelationMap(genoMapDataList, individualMap);
+        Map<String, FamilyRelation> familyRelationMap = DocumentDataUtil.getFamilyRelationMap(genoMapDataList, individualMap);
 
         try (BufferedWriter writer = Files.newBufferedWriter(individualsPath)) {
 
@@ -50,39 +50,39 @@ public class IndividualsExporter {
 
                 Collection<String> data = new ArrayList<>();
 
-                String individualId = individual.getId();
-                Name name = individual.getName();
+                String individualId = individual.id();
+                Name name = individual.name();
 
                 if (name != null) {
 
                     FamilyRelation familyRelation = familyRelationMap.get(individualId);
 
                     // genomap
-                    data.add(individual.getGenoMap().getId());
+                    data.add(individual.genoMap().id());
 
                     // names
-                    String firstName = name.getFirst();
-                    String middleName = name.getMiddle();
-                    String lastName = name.getLast();
+                    String firstName = name.first();
+                    String middleName = name.middle();
+                    String lastName = name.last();
 
                     data.add(firstName != null ? firstName : "");
                     data.add(middleName != null ? middleName : "");
                     data.add(lastName != null ? lastName : "");
 
                     // birth
-                    data.add(DataUtil.getFormattedDate(individual.getBirth(), dateFormatter));
+                    data.add(DocumentDataUtil.getFormattedDate(individual.birth(), dateFormatter));
 
                     // death
-                    data.add(DataUtil.getFormattedDate(individual.getDeath(), dateFormatter));
+                    data.add(DocumentDataUtil.getFormattedDate(individual.death(), dateFormatter));
 
                     // mates
-                    data.add((familyRelation.getMateIdList() != null) ? String.join(",", familyRelation.getMateIdList()) : "");
+                    data.add((familyRelation.mateIdList() != null) ? String.join(",", familyRelation.mateIdList()) : "");
 
                     // father
-                    data.add(familyRelation.getFatherId() != null ? familyRelation.getFatherId() : "");
+                    data.add(familyRelation.fatherId() != null ? familyRelation.fatherId() : "");
 
                     // mother
-                    data.add(familyRelation.getMotherId() != null ? familyRelation.getMotherId() : "");
+                    data.add(familyRelation.motherId() != null ? familyRelation.motherId() : "");
 
                     writer.write("iMap.set(\"" + individualId + "\",[\"" + String.join("\",\"", data) + "\"])\n");
                 }
@@ -95,9 +95,9 @@ public class IndividualsExporter {
         Map<String, Individual> individualMap = new HashMap<>();
 
         for (GenoMapData genoMapData : genoMapDataList) {
-            for (Individual individual : genoMapData.getIndividualCollection()) {
-                if (individual.getName() != null) {
-                    individualMap.put(individual.getId(), individual);
+            for (Individual individual : genoMapData.individualSet()) {
+                if (individual.name() != null) {
+                    individualMap.put(individual.id(), individual);
                 }
             }
         }

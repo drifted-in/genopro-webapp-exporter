@@ -15,9 +15,9 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
-import in.drifted.tools.genopro.model.DocumentInfo;
-import in.drifted.tools.genopro.model.GenoMap;
-import in.drifted.tools.genopro.model.GenoMapData;
+import in.drifted.tools.genopro.core.model.DocumentInfo;
+import in.drifted.tools.genopro.core.model.GenoMap;
+import in.drifted.tools.genopro.core.model.GenoMapData;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -81,10 +81,10 @@ public class WebAppExporter {
 
         for (GenoMapData genoMapData : genoMapDataList) {
 
-            GenoMap genoMap = genoMapData.getGenoMap();
+            GenoMap genoMap = genoMapData.genoMap();
 
-            if (genoMap.getTitle() != null) {
-                try (OutputStream outputStream = Files.newOutputStream(folderPath.resolve(genoMap.getId() + ".svg"))) {
+            if (genoMap.title() != null) {
+                try (OutputStream outputStream = Files.newOutputStream(folderPath.resolve(genoMap.id() + ".svg"))) {
                     SvgExporter.export(genoMapData, outputStream, generatingOptions);
                 }
             }
@@ -145,9 +145,9 @@ public class WebAppExporter {
 
             for (GenoMapData genoMapData : genoMapDataList) {
 
-                GenoMap genoMap = genoMapData.getGenoMap();
+                GenoMap genoMap = genoMapData.genoMap();
 
-                if (genoMap.getTitle() != null) {
+                if (genoMap.title() != null) {
 
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     SvgExporter.export(genoMapData, outputStream, generatingOptions);
@@ -161,8 +161,8 @@ public class WebAppExporter {
         Map<String, String> placeholderMap = new HashMap<>();
 
         placeholderMap.put("language", generatingOptions.getLocale().getLanguage());
-        placeholderMap.put("title", documentInfo.getTitle());
-        placeholderMap.put("description", documentInfo.getDescription());
+        placeholderMap.put("title", documentInfo.title());
+        placeholderMap.put("description", documentInfo.description());
         placeholderMap.put("content", content);
         placeholderMap.put("googleAnalyticsRegistration", getGoogleAnalyticsRegistration(generatingOptions));
         placeholderMap.put("webApplicationManifest", dynamic ? getWebApplicationManifest() : "");
@@ -209,7 +209,7 @@ public class WebAppExporter {
             List<String> genoMapPathList = new ArrayList<>();
 
             for (GenoMapData genoMapData : genoMapDataList) {
-                genoMapPathList.add("relativeAppUrl + \"/" + genoMapData.getGenoMap().getId() + ".svg\"");
+                genoMapPathList.add("relativeAppUrl + \"/" + genoMapData.genoMap().id() + ".svg\"");
             }
 
             serviceWorker = serviceWorker.replace("\"${genoMapPathList}\"", String.join(",\n", genoMapPathList));
@@ -223,7 +223,7 @@ public class WebAppExporter {
         try (BufferedWriter writer = Files.newBufferedWriter(manifestPath)) {
 
             String manifest = getResourceAsString(MANIFEST_TEMPLATE_RESOURCE_PATH);
-            manifest = manifest.replace("${title}", documentInfo.getTitle());
+            manifest = manifest.replace("${title}", documentInfo.title());
             manifest = manifest.replace("${relativeAppUrl}", relativeAppUrl);
 
             writer.write(manifest);

@@ -15,17 +15,16 @@
  */
 package in.drifted.tools.genopro.webapp.exporter;
 
-import in.drifted.tools.genopro.DataParser;
-import in.drifted.tools.genopro.DataUtil;
-import in.drifted.tools.genopro.model.AgeFormatter;
-import in.drifted.tools.genopro.model.BasicAgeFormatter;
-import in.drifted.tools.genopro.model.Color;
-import in.drifted.tools.genopro.model.DateFormatter;
-import in.drifted.tools.genopro.model.DisplayStyle;
-import in.drifted.tools.genopro.model.DocumentInfo;
-import in.drifted.tools.genopro.model.GenoMapData;
-import in.drifted.tools.genopro.model.HighlightMode;
-import in.drifted.tools.genopro.model.ParserOptions;
+import in.drifted.tools.genopro.core.model.Color;
+import in.drifted.tools.genopro.core.model.DisplayStyle;
+import in.drifted.tools.genopro.core.model.DocumentInfo;
+import in.drifted.tools.genopro.core.model.GenoMapData;
+import in.drifted.tools.genopro.core.parser.DocumentParser;
+import in.drifted.tools.genopro.core.parser.DocumentParserOptions;
+import in.drifted.tools.genopro.core.util.DocumentDataUtil;
+import in.drifted.tools.genopro.core.util.formatter.AgeFormatter;
+import in.drifted.tools.genopro.core.util.formatter.BasicAgeFormatter;
+import in.drifted.tools.genopro.core.util.formatter.DateFormatter;
 import in.drifted.tools.genopro.webapp.exporter.model.GeneratingOptions;
 import in.drifted.tools.genopro.webapp.exporter.model.PedigreeLinksSelectionMode;
 import java.io.IOException;
@@ -64,7 +63,6 @@ public class App {
     private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
     private static final String DEFAULT_FONT_FAMILY = "Open Sans";
     private static final String DEFAULT_RELATIVE_FONT_PATH = "res/OpenSans-Regular-webfont.woff";
-    private static final int DEFAULT_HIGHLIGHT_MODE = 0;
 
     private static final String RESOURCE_BUNDLE_PATH = "in/drifted/tools/genopro/webapp/exporter/resources/l10n/messages";
 
@@ -92,7 +90,7 @@ public class App {
             Locale locale = Locale.getDefault();
 
             if (passedValuesMap.containsKey(PARAM_LOCALE)) {
-                locale = new Locale(passedValuesMap.get(PARAM_LOCALE));
+                locale = Locale.of(passedValuesMap.get(PARAM_LOCALE));
             }
 
             // changing default Locale which is then used for ResourceBundle retrieval as a fallback Locale
@@ -116,7 +114,7 @@ public class App {
                 if (unsupportedLabelHexColors.length() > 2) {
                     unsupportedLabelHexColors = unsupportedLabelHexColors.substring(0, unsupportedLabelHexColors.length() - 2);
                     for (String unsupportedLabelHexColor : unsupportedLabelHexColors.split(",")) {
-                        unsupportedLabelColorSet.add(new Color(unsupportedLabelHexColor));
+                        unsupportedLabelColorSet.add(Color.fromHex(unsupportedLabelHexColor));
                     }
                 }
             }
@@ -132,10 +130,8 @@ public class App {
                 additionalOptionMap.put("gaTrackingId", passedValuesMap.get(PARAM_GA_TRACKING_ID));
             }
 
-            int highlightMode = DEFAULT_HIGHLIGHT_MODE;
-
             if (passedValuesMap.containsKey(PARAM_HIGHLIGHT_MODE)) {
-                highlightMode = Integer.parseInt(passedValuesMap.get(PARAM_HIGHLIGHT_MODE));
+                int highlightMode = Integer.parseInt(passedValuesMap.get(PARAM_HIGHLIGHT_MODE));
                 additionalOptionMap.put("highlightMode", String.valueOf(highlightMode));
             }
 
@@ -143,18 +139,17 @@ public class App {
             Path genomapsPath = outputFolderFolder.resolve("genomaps.js");
             Path reportPath = outputFolderFolder.resolve("index.html");
 
-            Document document = DataParser.getDocument(inputPath);
-            DocumentInfo documentInfo = DataParser.getDocumentInfo(document);
+            Document document = DocumentParser.getDocument(inputPath);
+            DocumentInfo documentInfo = DocumentParser.getDocumentInfo(document);
 
-            ParserOptions parserOptions = new ParserOptions();
+            DocumentParserOptions parserOptions = new DocumentParserOptions();
             parserOptions.setUntitledGenoMapsExcluded(true);
             parserOptions.setHyperlinkedIndividualInstancesDeduplicated(true);
             LocalDate anonymizedSinceLocalDate = (anonymizedYears < 0) ? null
                     : (anonymizedYears == 0) ? LocalDate.now() : LocalDate.now().minus(Period.ofYears(anonymizedYears));
             parserOptions.setAnonymizedSinceDate(anonymizedSinceLocalDate);
-            parserOptions.setHighlightMode(HighlightMode.of(highlightMode));
 
-            List<GenoMapData> genoMapDataList = DataUtil.getGenoMapDataList(document, parserOptions);
+            List<GenoMapData> genoMapDataList = DocumentDataUtil.getGenoMapDataList(document, parserOptions);
 
             GenoMapsExporter.export(genomapsPath, genoMapDataList);
             IndividualsExporter.export(individualsPath, genoMapDataList, dateFormatter);
@@ -163,7 +158,7 @@ public class App {
                 additionalOptionMap.put("relativeAppUrl", passedValuesMap.get(PARAM_RELATIVE_APP_URL));
             }
 
-            DisplayStyle displayStyle = documentInfo.getDisplayStyle();
+            DisplayStyle displayStyle = documentInfo.displayStyle();
 
             if (displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH
                     || displayStyle == DisplayStyle.YEAR_OF_BIRTH_AND_YEAR_OF_DEATH_ID) {
@@ -191,26 +186,27 @@ public class App {
 
         } else {
 
-            System.out.println("Specify at least: \n"
-                    + "         - input GenoPro file path (-in:) \n"
-                    + "         - output folder (-out:) \n"
-                    + "         - relative app URL (-relativeAppUrl:) \n\n"
-                    + "Usage: java -jar genopro-webapp-exporter.jar \n"
-                    + "         -in:C:\\family-tree.gno \n"
-                    + "         -out:C:\\family-tree \n"
-                    + "         -relativeAppUrl:/family-tree \n"
-                    + "        [-mode:dynamic] \n"
-                    + "        [-locale:en] \n"
-                    + "        [-anonymizedYears:100] \n"
-                    + "        [-datePattern:yyyy-MM-dd] \n"
-                    + "        [-fontFamily:\"Open Sans\"] \n"
-                    + "        [-relativeFontPath:\"res/OpenSans-Regular-webfont.woff\"] \n"
-                    + "        [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}\n"
-                    + "        [-monochromeLabels:0]\n"
-                    + "        [-pedigreeLinksSelectionMode:none|manual]\n"
-                    + "        [-gaTrackingId:<empty>]\n"
-                    + "        [-highlightMode:0]\n"
-            );
+            System.out.println("""
+                               Specify at least:
+                                        - input GenoPro file path (-in:)
+                                        - output folder (-out:)
+                                        - relative app URL (-relativeAppUrl:)\n
+                               Usage: java -jar genopro-webapp-exporter.jar
+                                        -in:C:\\family-tree.gno
+                                        -out:C:\\family-tree
+                                        -relativeAppUrl:/family-tree
+                                       [-mode:dynamic]
+                                       [-locale:en]
+                                       [-anonymizedYears:100]
+                                       [-datePattern:yyyy-MM-dd]
+                                       [-fontFamily:"Open Sans"]
+                                       [-relativeFontPath:"res/OpenSans-Regular-webfont.woff"]
+                                       [-unsupportedLabelHexColorSet:{<empty>}], example: {#FF0000,#C8C8FF}
+                                       [-monochromeLabels:0]
+                                       [-pedigreeLinksSelectionMode:none|manual]
+                                       [-gaTrackingId:<empty>]
+                                       [-highlightMode:0]
+                               """);
         }
     }
 }
